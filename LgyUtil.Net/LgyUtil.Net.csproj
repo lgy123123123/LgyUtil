@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>post get请求帮助类(NetUtil)</Description>
+    <Authors>lgy</Authors>
+    <Company>lgy</Company>
+    <Product>LgyUtil</Product>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>1.0.2</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LgyUtil" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>

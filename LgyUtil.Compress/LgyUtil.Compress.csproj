@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>压缩解压帮助类(CompressUtil)</Description>
+    <Authors>lgy</Authors>
+    <Company>lgy</Company>
+    <Product>LgyUtil</Product>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LgyUtil" Version="1.0.1" />
+    <PackageReference Include="SharpCompress" Version="0.30.1" />
+  </ItemGroup>
+
+</Project>

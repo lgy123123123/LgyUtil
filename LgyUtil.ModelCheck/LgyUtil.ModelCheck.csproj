@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>模型验证帮助类(ModelCheckUtil)</Description>
+    <Authors>lgy</Authors>
+    <Company>lgy</Company>
+    <Product>LgyUtil</Product>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

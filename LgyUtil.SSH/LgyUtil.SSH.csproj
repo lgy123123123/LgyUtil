@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>ssh,sftp帮助类(SshUtil、SftpUtil)</Description>
+    <Authors>lgy</Authors>
+    <Product>LgyUtil</Product>
+    <Company>lgy</Company>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SSH.NET" Version="2020.0.1" />
+  </ItemGroup>
+
+</Project>
