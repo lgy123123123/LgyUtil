@@ -1,4 +1,6 @@
-﻿namespace System
+﻿using System;
+
+namespace LgyUtil
 {
     /// <summary>
     /// 日期扩展方法

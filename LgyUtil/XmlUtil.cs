@@ -35,7 +35,7 @@ namespace LgyUtil
             }
             catch (Exception e)
             {
-                throw new BaseException("xml反序列化错误:" + e.Message);
+                throw new LgyUtilException("xml反序列化错误:" + e.Message);
             }
         }
 
@@ -54,7 +54,7 @@ namespace LgyUtil
             }
             catch (Exception e)
             {
-                throw new BaseException("xml反序列化错误:" + e.Message);
+                throw new LgyUtilException("xml反序列化错误:" + e.Message);
             }
         }
 
@@ -81,7 +81,7 @@ namespace LgyUtil
             }
             catch (Exception e)
             {
-                throw new BaseException(e.Message);
+                throw new LgyUtilException(e.Message);
             }
         }
 
@@ -112,9 +112,9 @@ namespace LgyUtil
         /// <returns></returns>
         public static XmlDocument LoadByPath(string path)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(path);
-            return doc;
+            XmlDocument document = new XmlDocument();
+            document.Load(path);
+            return document;
         }
 
         /// <summary>
@@ -124,9 +124,9 @@ namespace LgyUtil
         /// <returns></returns>
         public static XmlDocument LoadByString(string xml)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(xml);
-            return doc;
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xml);
+            return document;
         }
         /// <summary>
         /// 保存xml
@@ -136,9 +136,9 @@ namespace LgyUtil
         /// <param name="xmlModel">保存的类</param>
         public static void SaveXml<T>(string path, T xmlModel) where T : class
         {
-            XmlDocument doc = new XmlDocument();
-            doc.LoadXml(ModelToXml(xmlModel).OuterXml);
-            doc.Save(path);
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(ModelToXml(xmlModel).OuterXml);
+            document.Save(path);
         }
         /// <summary>
         /// 设置节点属性
@@ -193,13 +193,8 @@ namespace LgyUtil
         /// <summary>
         /// 
         /// </summary>
-        public string Value
-        {
-            get
-            {
-                return _Value;
-            }
-        }
+        public string Value => _Value;
+
         /// <summary>
         /// 
         /// </summary>

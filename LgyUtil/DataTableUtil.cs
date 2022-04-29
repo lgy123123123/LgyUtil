@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using LgyUtil.CustomException;
 
-namespace System
+namespace LgyUtil
 {
     /// <summary>
     /// DataTable帮助类
@@ -92,14 +93,15 @@ namespace System
         /// <param name="dt"></param>
         /// <param name="colKeyName">主键列名</param>
         /// <param name="ignoreCase">是否忽略列名大小写</param>
+        /// <param name="ignoreRepeateKey">忽略重复的key</param>
         /// <returns></returns>
-        public static Dictionary<string,T> ToDictionary<T>(this DataTable dt,string colKeyName, bool ignoreCase = false) where T : new()
+        public static Dictionary<string,T> ToDictionary<T>(this DataTable dt,string colKeyName, bool ignoreCase = false, bool ignoreRepeateKey = false) where T : new()
         {
             Dictionary<string,T> dicRet = new Dictionary<string, T>();
             if (dt != null && dt.Rows.Count > 0)
             {
                 if (!dt.Columns.Contains(colKeyName))
-                    throw new BaseException("ToDictionary时未找到主键列");
+                    throw new LgyUtilException("ToDictionary时未找到主键列");
 
                 Type modelType = typeof(T);
                 //模型属性
@@ -140,7 +142,9 @@ namespace System
                             propModel.SetValue(model, row[strRowColumn]);
                     }
 
-                    dicRet.Add(row[colKeyName].ToString(),model);
+                    string keyName = row[colKeyName].ToString();
+                    if (!ignoreRepeateKey || !dicRet.ContainsKey(keyName))
+                        dicRet.Add(keyName, model);
                 }
             }
             return dicRet;

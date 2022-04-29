@@ -24,9 +24,9 @@ namespace LgyUtil
             file.Close();
 
             StringBuilder sc = new StringBuilder();
-            for (int i = 0; i < retval.Length; i++)
+            foreach (var r in retval)
             {
-                sc.Append(retval[i].ToString("x2"));
+                sc.Append(r.ToString("x2"));
             }
             return sc.ToString();
         }
@@ -92,22 +92,22 @@ namespace LgyUtil
                 SourcePath += "/";
             if (!DestinationPath.EndsWith(@"\") && !DestinationPath.EndsWith("/"))
                 DestinationPath += "/";
-            //复制文件夹
-            if (Directory.Exists(SourcePath))
-            {
-                if (Directory.Exists(DestinationPath) == false)
-                    Directory.CreateDirectory(DestinationPath);
 
-                foreach (string fls in Directory.GetFiles(SourcePath))
-                {
-                    FileInfo flinfo = new FileInfo(fls);
-                    flinfo.CopyTo(DestinationPath + flinfo.Name, overwriteexisting);
-                }
-                foreach (string drs in Directory.GetDirectories(SourcePath))
-                {
-                    DirectoryInfo drinfo = new DirectoryInfo(drs);
-                    Copy(drs, DestinationPath + drinfo.Name, overwriteexisting);
-                }
+            if (!Directory.Exists(SourcePath)) return;
+
+            //复制文件夹
+            if (Directory.Exists(DestinationPath) == false)
+                Directory.CreateDirectory(DestinationPath);
+
+            foreach (string fls in Directory.GetFiles(SourcePath))
+            {
+                FileInfo flinfo = new FileInfo(fls);
+                flinfo.CopyTo(DestinationPath + flinfo.Name, overwriteexisting);
+            }
+            foreach (string drs in Directory.GetDirectories(SourcePath))
+            {
+                DirectoryInfo drinfo = new DirectoryInfo(drs);
+                Copy(drs, DestinationPath + drinfo.Name, overwriteexisting);
             }
         }
         /// <summary>
@@ -119,16 +119,14 @@ namespace LgyUtil
         public static string ReadFileShare(string path, Encoding encoding = null)
         {
             string ret = "";
-            if (File.Exists(path))
+            if (!File.Exists(path)) return ret;
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                if (encoding is null)
+                    encoding = Encoding.UTF8;
+                using (StreamReader sr = new StreamReader(fs, encoding))
                 {
-                    if (encoding is null)
-                        encoding = Encoding.UTF8;
-                    using (StreamReader sr = new StreamReader(fs, encoding))
-                    {
-                        ret = sr.ReadToEnd();
-                    }
+                    ret = sr.ReadToEnd();
                 }
             }
             return ret;

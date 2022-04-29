@@ -1,7 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace System
+namespace LgyUtil
 {
     /// <summary>
     /// task线程帮助类

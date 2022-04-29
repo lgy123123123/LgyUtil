@@ -17,7 +17,7 @@ namespace LgyUtil
         public static Assembly GetAssembly(string dll)
         {
             Assembly ass;
-            if (dll.IndexOf(".dll", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (dll.EndsWith(".dll"))
                 ass = Assembly.LoadFrom(dll);
             else
                 ass = Assembly.Load(dll);
@@ -48,10 +48,10 @@ namespace LgyUtil
         {
             Type t = assembly.GetType(className);
             if (t is null)
-                throw new BaseException($"反射错误：未找到名为{className}的类型");
+                throw new LgyUtilException($"反射错误：未找到名为{className}的类型");
             MethodInfo method = t.GetMethod(funcName);
             if (method is null)
-                throw new BaseException($"反射错误：未找到名为{funcName}的方法名");
+                throw new LgyUtilException($"反射错误：未找到名为{funcName}的方法名");
             object ret;
             if (method.IsStatic)
             {
@@ -77,7 +77,9 @@ namespace LgyUtil
         {
             Type t = ass.GetType(className, false, ignoreCase);
             if (t == null)
-                throw new BaseException($"反射错误：未找到名为{className}的类型");
+                throw new LgyUtilException($"反射错误：未找到名为{className}的类型");
+            if (param == null || param.Length == 0)
+                return Activator.CreateInstance<T>();
             return (T)Activator.CreateInstance(t, param);
         }
         /// <summary>
@@ -93,7 +95,7 @@ namespace LgyUtil
         {
             Assembly ass = GetAssembly(dllName);
             if (ass is null)
-                throw new BaseException($"反射错误：未找到名为{dllName}的程序集");
+                throw new LgyUtilException($"反射错误：未找到名为{dllName}的程序集");
             return GetInstance<T>(ass, className, param, ignoreCase);
         }
         /// <summary>

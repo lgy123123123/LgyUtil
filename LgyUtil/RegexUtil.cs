@@ -49,7 +49,7 @@ namespace LgyUtil
         /// <summary>
         /// 域名
         /// </summary>
-        public const string DomainName = "[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(/.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+/.?";
+        public const string DomainName = @"^((http://)|(https://))?([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}(/)";
         /// <summary>
         /// 是否是域名
         /// </summary>

@@ -66,7 +66,7 @@ namespace LgyUtil
             //验证cron表达式是否正确
             var cronList = TriggerUtils.ComputeFireTimes(tri.WithCronSchedule(cron).Build() as IOperableTrigger, null, 1);
             if (cronList.Count == 0)
-                throw new BaseException($"添加job出现错误：{name}的cron表达式不正确");
+                throw new LgyUtilException($"添加job出现错误：{name}的cron表达式不正确");
             //立即运行，先运行一次，然后再添加到cron定时
             if (runNow)
             {
@@ -173,10 +173,10 @@ namespace LgyUtil
                 }
             }
             if (listTri.Count == 0)
-                throw new BaseException($"添加job出现错误：{name}，未填写触发器");
+                throw new LgyUtilException($"添加job出现错误：{name}，未填写触发器");
             //验证重复job
             if(dicAllJob.ContainsKey(name))
-                throw new BaseException($"添加job出现错误：{name}重复");
+                throw new LgyUtilException($"添加job出现错误：{name}重复");
             //创建job
             IJobDetail job = new JobDetailImpl(name, isContinue ? typeof(ExecuteJobContinue) : typeof(ExecuteJob));
             job.JobDataMap.Add("doing", doing);
@@ -188,7 +188,7 @@ namespace LgyUtil
                 await sche.ScheduleJob(listTri[i].ForJob(job).Build());
             }
             if(!dicAllJob.TryAdd(name,job.Key))
-                throw new BaseException($"job加入集合失败：{name}");
+                throw new LgyUtilException($"job加入集合失败：{name}");
         }
         /// <summary>
         /// 停止job
@@ -198,16 +198,14 @@ namespace LgyUtil
         {
             try
             {
-                if (dicAllJob.ContainsKey(name))
-                {
-                    JobKey key = dicAllJob[name];
-                    await sche.Interrupt(key);
-                    await sche.DeleteJob(key);
-                    if(!dicAllJob.TryRemove(name,out _))
-                        throw new Exception($"停止job失败：{name}");
-                    else
-                        LogUtil.AddLog($"停止了job：{name}", LogFileName, LogDirName);
-                }
+                if (!dicAllJob.ContainsKey(name)) return;
+                JobKey key = dicAllJob[name];
+                await sche.Interrupt(key);
+                await sche.DeleteJob(key);
+                if(!dicAllJob.TryRemove(name,out _))
+                    throw new Exception($"停止job失败：{name}");
+                else
+                    LogUtil.AddLog($"停止了job：{name}", LogFileName, LogDirName);
             }
             catch (Exception e)
             {

@@ -128,7 +128,7 @@ namespace LgyUtil
             {
                 StopAll();
                 if (autoThrowException)
-                    throw new BaseException("执行超时");
+                    throw new LgyUtilException("执行超时");
             }
             if (autoThrowException && ExceptionFirst != null)
                 throw ExceptionFirst;

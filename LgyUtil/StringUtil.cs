@@ -1,10 +1,10 @@
-﻿using System.Globalization;
+﻿using Newtonsoft.Json;
+using System;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-using LgyUtil;
-using Newtonsoft.Json;
 
-namespace System
+namespace LgyUtil
 {
     /// <summary>
     /// 字符串工具
@@ -231,6 +231,15 @@ namespace System
         public static string GetStringByRegex(this string s, string pattern)
         {
             return Regex.Match(s, pattern).Value;
+        }
+        /// <summary>
+        /// 默认使用逗号分隔
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public static string[] Split(this string s)
+        {
+            return s.Split(',');
         }
     }
 }

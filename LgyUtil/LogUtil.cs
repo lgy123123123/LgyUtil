@@ -213,7 +213,7 @@ namespace LgyUtil
         public static void DelLog(string LogPath, DateTime dtDelBefore)
         {
             if (LogPath.IsNullOrEmpty() || File.Exists(LogPath))
-                throw new BaseException("日志路径不正确");
+                throw new LgyUtilException("日志路径不正确");
             void DelLog(string path)
             {
                 if (Directory.Exists(path))
