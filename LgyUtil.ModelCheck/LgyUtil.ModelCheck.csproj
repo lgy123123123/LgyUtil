@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>模型验证帮助类(ModelCheckUtil)</Description>
+    <Description>
+	    源码：https://github.com/lgy123123123/LgyUtil
+		模型验证帮助类(ModelCheckUtil)
+	</Description>
     <Authors>lgy</Authors>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
