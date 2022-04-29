@@ -3,7 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>ssh,sftp帮助类(SshUtil、SftpUtil)</Description>
+    <Description>
+	    源码：https://github.com/lgy123123123/LgyUtil
+		ssh,sftp帮助类(SshUtil、SftpUtil)
+	</Description>
     <Authors>lgy</Authors>
     <Product>LgyUtil</Product>
     <Company>lgy</Company>
