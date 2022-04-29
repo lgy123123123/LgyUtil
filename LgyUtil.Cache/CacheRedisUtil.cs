@@ -1,8 +1,7 @@
-﻿using System;
-using CSRedis;
-using LgyUtil.CustomException;
+﻿using CSRedis;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
+using System;
 
 namespace LgyUtil.Cache
 {
@@ -25,13 +24,32 @@ namespace LgyUtil.Cache
         /// <param name="password">密码</param>
         public CacheRedisUtil(string ip = "127.0.0.1", int port = 6379, int database = 0, string password = null)
         {
-            if (ip.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(ip))
                 ip = "127.0.0.1";
             if (port == 0)
                 port = 6379;
             string connectString = $"{ip}:{port},defaultDatabase={database}";
-            if (password.IsNotNullOrEmpty())
+            if (string.IsNullOrEmpty(password))
                 connectString += $",password={password}";
+            Client = new CSRedis.CSRedisClient(connectString);
+            Cache = new CSRedisCache(Client);
+        }
+        /// <summary>
+        /// 构造Redis缓存对象，哨兵模式
+        /// </summary>
+        /// <param name="master">哨兵主节点名称</param>
+        /// <param name="connectString">连接字符串,多个用分号分隔</param>
+        public CacheRedisUtil(string master, string connectString)
+        {
+            Client = new CSRedis.CSRedisClient(master, connectString.Split(';'));
+            Cache = new CSRedisCache(Client);
+        }
+        /// <summary>
+        /// 构造Redis缓存对象，只通过连接字符串
+        /// </summary>
+        /// <param name="connectString"></param>
+        public CacheRedisUtil(string connectString)
+        {
             Client = new CSRedis.CSRedisClient(connectString);
             Cache = new CSRedisCache(Client);
         }
@@ -68,7 +86,6 @@ namespace LgyUtil.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        /// <exception cref="BaseException">缓存不存在</exception>
         public T Get<T>(string key)
         {
             return Cache.GetObject<T>(key);
@@ -78,7 +95,6 @@ namespace LgyUtil.Cache
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        /// <exception cref="BaseException">缓存不存在</exception>
         public object Get(string key)
         {
             return Cache.GetObject(key);

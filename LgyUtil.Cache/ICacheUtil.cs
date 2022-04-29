@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using LgyUtil.CustomException;
 
 namespace LgyUtil.Cache
 {
@@ -34,7 +31,6 @@ namespace LgyUtil.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        /// <exception cref="BaseException">缓存不存在</exception>
         T Get<T>(string key);
 
         /// <summary>
@@ -42,7 +38,6 @@ namespace LgyUtil.Cache
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        /// <exception cref="BaseException">缓存不存在</exception>
         object Get(string key);
 
         /// <summary>

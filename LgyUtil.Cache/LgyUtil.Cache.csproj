@@ -3,17 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>缓存帮助类(CacheMemoryUtil、CacheRedisUtil)</Description>
+    <Description>
+	    源码：https://github.com/lgy123123123/LgyUtil
+		缓存帮助类(CacheMemoryUtil、CacheRedisUtil)
+	</Description>
     <Authors>lgy</Authors>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Caching.CSRedis" Version="3.6.80" />
-    <PackageReference Include="LgyUtil" Version="1.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.0" />
   </ItemGroup>
 

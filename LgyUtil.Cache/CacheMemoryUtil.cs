@@ -1,13 +1,12 @@
-﻿using System;
-using LgyUtil.CustomException;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
+using System;
 
 namespace LgyUtil.Cache
 {
     /// <summary>
     /// 内存缓存帮助类
     /// </summary>
-    public class CacheMemoryUtil:ICacheUtil
+    public class CacheMemoryUtil : ICacheUtil
     {
         /// <summary>
         /// 缓存对象
@@ -21,10 +20,10 @@ namespace LgyUtil.Cache
         /// 构造内存缓存对象
         /// </summary>
         /// <param name="_option">参数</param>
-        public CacheMemoryUtil(MemoryCacheOptions _option=null)
+        public CacheMemoryUtil(MemoryCacheOptions _option = null)
         {
-            if(_option is null)
-                _option=new MemoryCacheOptions();
+            if (_option is null)
+                _option = new MemoryCacheOptions();
             option = _option;
             Cache = new MemoryCache(option);
         }
@@ -35,11 +34,7 @@ namespace LgyUtil.Cache
         /// <returns></returns>
         public bool Exists(string key)
         {
-            if (key.IsNotNullOrEmpty())
-            {
-                return Cache.TryGetValue(key, out _);
-            }
-            return false;
+            return string.IsNullOrEmpty(key) && Cache.TryGetValue(key, out _);
         }
         /// <summary>
         /// 添加缓存
@@ -49,7 +44,7 @@ namespace LgyUtil.Cache
         /// <param name="expiresSliding">滑动过期时间(一段内不访问，则清空缓存，访问后，按滑动时间重新计算)，null则不设置</param>
         /// <param name="expiressAbsoulte">绝对过期时间，null则不设置</param>
         /// <returns></returns>
-        public void Set(string key, object value, TimeSpan? expiresSliding=null, DateTime? expiressAbsoulte=null)
+        public void Set(string key, object value, TimeSpan? expiresSliding = null, DateTime? expiressAbsoulte = null)
         {
             MemoryCacheEntryOptions options = new MemoryCacheEntryOptions
             {
@@ -65,24 +60,18 @@ namespace LgyUtil.Cache
         /// <param name="key"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        /// <exception cref="BaseException">缓存不存在</exception>
         public T Get<T>(string key)
         {
-            if (!Exists(key))
-                return default;
-            return Cache.Get<T>(key);
+            return Exists(key) ? Cache.Get<T>(key) : default;
         }
         /// <summary>
         /// 获取缓存
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        /// <exception cref="BaseException">缓存不存在</exception>
         public object Get(string key)
         {
-            if (!Exists(key))
-                return null;
-            return Cache.Get(key);
+            return Exists(key) ? Cache.Get(key) : null;
         }
         /// <summary>
         /// 获取字符串缓存
