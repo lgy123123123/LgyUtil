@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
@@ -186,6 +187,43 @@ namespace LgyUtil
                 dtTemp.ImportRow(row);
             }
             return dtTemp;
+        }
+        /// <summary>
+        /// 类属性反射缓存
+        /// </summary>
+        private static ConcurrentDictionary<string, List<PropertyInfo>> dicProp =
+            new ConcurrentDictionary<string, List<PropertyInfo>>();
+        /// <summary>
+        /// 将DataRow转成Model
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="row">表中的行</param>
+        /// <returns></returns>
+        public static T ToModel<T>(this DataRow row) where T : class, new()
+        {
+            var t = typeof(T);
+            List<PropertyInfo> props = null;
+            if (dicProp.ContainsKey(t.FullName))
+            {
+                props = dicProp[t.FullName];
+            }
+            else
+            {
+                props = new List<PropertyInfo>();
+                foreach (PropertyInfo prop in t.GetProperties(BindingFlags.SetField | BindingFlags.SetProperty))
+                {
+                    if (row.Table.Columns.Contains(prop.Name))
+                        props.Add(prop);
+                }
+            }
+
+            T model = new T();
+            props.ForEach(p =>
+            {
+                if (row[p.Name] != DBNull.Value)
+                    p.SetValue(model, row[p.Name]);
+            });
+            return model;
         }
     }
 }
