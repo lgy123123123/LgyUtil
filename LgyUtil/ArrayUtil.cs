@@ -140,5 +140,20 @@ namespace LgyUtil
         {
             return array.Any(compareObj.Contains);
         }
+        /// <summary>
+        /// 将数组转换为其他对象的数组
+        /// </summary>
+        /// <typeparam name="TSource">源对象</typeparam>
+        /// <typeparam name="TDest">转换后目的对象</typeparam>
+        /// <param name="array"></param>
+        /// <param name="castFunc">自定义转换方法</param>
+        /// <returns></returns>
+        public static IEnumerable<TDest> Cast<TSource, TDest>(this IEnumerable<TSource> array, Func<TSource, TDest> castFunc)
+        {
+            foreach (TSource source in array)
+            {
+                yield return castFunc(source);
+            }
+        }
     }
 }
