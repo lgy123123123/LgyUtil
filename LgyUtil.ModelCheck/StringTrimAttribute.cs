@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LgyUtil.ModelCheck
+namespace LgyUtil
 {
     /// <summary>
     /// 将字符串进行Trim，放在class上，将class的所有字符串进行trim

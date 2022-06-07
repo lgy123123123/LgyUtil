@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LgyUtil.OtherUtil
+namespace LgyUtil
 {
     /// <summary>
     /// 雪花ID帮助类

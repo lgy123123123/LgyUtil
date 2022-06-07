@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LgyUtil.Cache
+namespace LgyUtil
 {
     /// <summary>
     /// 缓存接口，两种实现：CacheMemoryUtil和CacheReidsUtil

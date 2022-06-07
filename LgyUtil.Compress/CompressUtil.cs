@@ -4,7 +4,7 @@ using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
 
-namespace LgyUtil.Compress
+namespace LgyUtil
 {
     /// <summary>
     /// 压缩帮助类(压缩成zip，解压缩rar zip tar)

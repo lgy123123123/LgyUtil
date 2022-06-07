@@ -5,7 +5,7 @@ using System.Linq;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
 
-namespace LgyUtil.SSH
+namespace LgyUtil
 {
     /// <summary>
     /// sftp文件帮助类，使用完，需要调用dispose释放资源，或者using使用

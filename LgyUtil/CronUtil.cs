@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using LgyUtil.CustomException;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System;
 
-namespace LgyUtil.Cache
+namespace LgyUtil
 {
     /// <summary>
     /// 内存缓存帮助类

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LgyUtil.CustomException
+namespace LgyUtil
 {
     /// <summary>
     /// 自定义异常，用于过滤异常

@@ -5,7 +5,6 @@ using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
-using LgyUtil.CustomException;
 using Newtonsoft.Json;
 
 namespace LgyUtil

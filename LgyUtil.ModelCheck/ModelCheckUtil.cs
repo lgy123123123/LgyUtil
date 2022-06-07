@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 
-namespace LgyUtil.ModelCheck
+namespace LgyUtil
 {
     /// <summary>
     /// 模型验证帮助类

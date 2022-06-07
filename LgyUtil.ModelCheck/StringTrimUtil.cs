@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace LgyUtil.ModelCheck
+namespace LgyUtil
 {
     public static class StringTrimUtil
     {

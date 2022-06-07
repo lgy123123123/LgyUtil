@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using LgyUtil.CustomException;
 
 namespace LgyUtil
 {

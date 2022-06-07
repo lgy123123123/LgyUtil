@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using System;
 
-namespace LgyUtil.Cache
+namespace LgyUtil
 {
     /// <summary>
     /// 内存缓存帮助类

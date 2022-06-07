@@ -9,7 +9,7 @@ using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace LgyUtil.Net
+namespace LgyUtil
 {
     /// <summary>
     /// 网络请求帮助类
