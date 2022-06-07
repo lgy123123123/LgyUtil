@@ -46,7 +46,7 @@ namespace LgyUtil
         {
             if (decryptString == "")
                 return "";
-            byte[] rgbKey = Encoding.UTF8.GetBytes(decryptKey);
+            byte[] rgbKey = Encoding.UTF8.GetBytes(decryptKey.Substring(0, 8));
             byte[] rgbIV = iv.IsNullOrEmptyTrim() ? Keys : Encoding.UTF8.GetBytes(iv);
             byte[] inputByteArray = Convert.FromBase64String(decryptString);
             DESCryptoServiceProvider DCSP = new DESCryptoServiceProvider();
