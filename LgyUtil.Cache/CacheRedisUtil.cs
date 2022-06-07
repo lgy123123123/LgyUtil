@@ -16,7 +16,7 @@ namespace LgyUtil.Cache
         private CSRedisCache Cache { get; set; }
         private CSRedisClient Client { get; set; }
         /// <summary>
-        /// 构造Redis缓存对象
+        /// 构造Redis缓存对象，并同时初始化RedisHelper对象
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port">端口号</param>
@@ -32,6 +32,7 @@ namespace LgyUtil.Cache
             if (string.IsNullOrEmpty(password))
                 connectString += $",password={password}";
             Client = new CSRedis.CSRedisClient(connectString);
+            RedisHelper.Initialization(Client);
             Cache = new CSRedisCache(Client);
         }
         /// <summary>
