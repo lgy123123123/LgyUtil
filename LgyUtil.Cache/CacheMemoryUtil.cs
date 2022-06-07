@@ -34,7 +34,7 @@ namespace LgyUtil
         /// <returns></returns>
         public bool Exists(string key)
         {
-            return string.IsNullOrEmpty(key) && Cache.TryGetValue(key, out _);
+            return !string.IsNullOrEmpty(key) && Cache.TryGetValue(key, out _);
         }
         /// <summary>
         /// 添加缓存
