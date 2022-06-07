@@ -15,7 +15,7 @@ namespace LgyUtil
         /// <typeparam name="T"></typeparam>
         /// <param name="arr"></param>
         /// <param name="action"></param>
-        public static void ForEach<T>(this T[] arr,Action<T> action)
+        public static void ForEach<T>(this T[] arr, Action<T> action)
         {
             Array.ForEach(arr, action);
         }
@@ -154,6 +154,18 @@ namespace LgyUtil
             {
                 yield return castFunc(source);
             }
+        }
+        /// <summary>
+        /// 数组切片
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="start">切片起始位置</param>
+        /// <param name="end">切片结束位置</param>
+        /// <returns></returns>
+        public static IEnumerable<T> Slice<T>(this IEnumerable<T> array, int start, int end)
+        {
+            return array.Skip(start).Take(end - start + 1);
         }
     }
 }
