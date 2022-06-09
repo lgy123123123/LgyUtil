@@ -136,7 +136,7 @@ namespace LgyUtil
         /// <param name="array"></param>
         /// <param name="compareObj">包含的内容</param>
         /// <returns></returns>
-        public static bool Contains2<T>(this IEnumerable<T> array, params T[] compareObj)
+        public static bool ContainsAny<T>(this IEnumerable<T> array, params T[] compareObj)
         {
             return array.Any(compareObj.Contains);
         }
