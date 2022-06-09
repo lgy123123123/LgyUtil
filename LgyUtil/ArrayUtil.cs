@@ -141,6 +141,17 @@ namespace LgyUtil
             return array.Any(compareObj.Contains);
         }
         /// <summary>
+        /// 数组包含所有项目，所有都符合条件，才返回true
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="compareObj"></param>
+        /// <returns></returns>
+        public static bool ContainsAll<T>(this IEnumerable<T> array,params T[] compareObj)
+        {
+            return array.All(compareObj.Contains);
+        }
+        /// <summary>
         /// 将数组转换为其他对象的数组
         /// </summary>
         /// <typeparam name="TSource">源对象</typeparam>
