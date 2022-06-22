@@ -233,13 +233,15 @@ namespace LgyUtil
             return Regex.Match(s, pattern).Value;
         }
         /// <summary>
-        /// 默认使用逗号分隔
+        /// 分隔字符串，返回数组
         /// </summary>
         /// <param name="s"></param>
+        /// <param name="separator">字符串分隔符</param>
+        /// <param name="includeEmpty">空内容是否包含在返回数组中</param>
         /// <returns></returns>
-        public static string[] Split(this string s)
+        public static string[] Split(this string s, string separator, bool includeEmpty = true)
         {
-            return s.Split(',');
+            return s.Split(new string[] { separator }, includeEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }

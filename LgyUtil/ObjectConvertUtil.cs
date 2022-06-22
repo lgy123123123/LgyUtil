@@ -56,7 +56,7 @@ namespace LgyUtil
         }
 
         /// <summary>
-        /// 转成double类型(支持字符串科学计数法转换)
+        /// 转成double类型(支持字符串科学计数法转换，支持百分比转换)
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="ignoreError">忽略错误，转换错误时，返回0</param>
@@ -65,9 +65,12 @@ namespace LgyUtil
         {
             try
             {
-                if (obj is string s && s.IsNotNullOrEmpty() && (s.Contains("E") || s.Contains("e")))
+                if(obj is string s && s.IsNotNullOrEmpty())
                 {
-                    return double.Parse(s, System.Globalization.NumberStyles.Any);
+                    if (s.Contains("E") || s.Contains("e"))
+                        return double.Parse(s, System.Globalization.NumberStyles.Any);
+                    else if (s.EndsWith("%"))
+                        return Convert.ToDouble(s.TrimEnd('%')) / 100;
                 }
                 return Convert.ToDouble(obj);
             }
@@ -142,7 +145,7 @@ namespace LgyUtil
             return ret;
         }
         /// <summary>
-        /// 转成decimal类型(支持字符串科学计数法转换)
+        /// 转成decimal类型(支持字符串科学计数法转换，支持百分比转换)
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="ignoreError">忽略错误，转换错误时，返回0</param>
@@ -151,9 +154,12 @@ namespace LgyUtil
         {
             try
             {
-                if (obj is string s && s.IsNotNullOrEmpty() && (s.Contains("E") || s.Contains("e")))
+                if (obj is string s && s.IsNotNullOrEmpty())
                 {
-                    return decimal.Parse(s, System.Globalization.NumberStyles.Any);
+                    if (s.Contains("E") || s.Contains("e"))
+                        return decimal.Parse(s, System.Globalization.NumberStyles.Any);
+                    else if (s.EndsWith("%"))
+                        return Convert.ToDecimal(s.TrimEnd('%')) / 100;
                 }
                 return Convert.ToDecimal(obj);
             }
