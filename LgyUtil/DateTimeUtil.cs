@@ -62,5 +62,37 @@ namespace LgyUtil
             DateTime dtTimestamp = TimeZoneInfo.ConvertTimeFromUtc(new System.DateTime(1970, 1, 1), TimeZoneInfo.Local);
             return dtTimestamp.AddMilliseconds(timestamp.ToLong());
         }
+        /// <summary>
+        /// 添加季度
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="numQuarter">增加的季度数</param>
+        /// <returns></returns>
+        public static DateTime AddQuarter(this DateTime dt,int numQuarter)
+        {
+            return dt.AddMonths(numQuarter * 3);
+        }
+        /// <summary>
+        /// 获取季度
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static double GetQuarter(this DateTime dt)
+        {
+            return Math.Ceiling((double)dt.Month / 3);
+        }
+        /// <summary>
+        /// <para>获取月份差，返回正整数</para>
+        /// <para>例如：5月和3月的月份差为2</para>
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="dt2"></param>
+        /// <returns></returns>
+        public static int GetMonthBetween(this DateTime dt,DateTime dt2)
+        {
+            var dtBig = dt > dt2 ? dt : dt2;
+            var dtSmall = dt < dt2 ? dt : dt2;
+            return (dtBig.Year - dtSmall.Year) * 12 + dtBig.Month - dtSmall.Month;
+        }
     }
 }
