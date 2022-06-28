@@ -179,12 +179,12 @@ namespace LgyUtil
             return array.Skip(start).Take(end - start + 1);
         }
         /// <summary>
-        /// 判断数组是否有值，并且不为空
+        /// 判断数组是否有值，并且数组不为空(对于any方法的扩展)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
         /// <returns></returns>
-        public static bool AnyAllowNull<T>(this IEnumerable<T> array)
+        public static bool AnyAndNotNull<T>(this IEnumerable<T> array)
         {
             return array != null && array.Any();
         }
