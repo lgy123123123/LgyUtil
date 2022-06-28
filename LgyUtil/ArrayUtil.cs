@@ -147,7 +147,7 @@ namespace LgyUtil
         /// <param name="array"></param>
         /// <param name="compareObj"></param>
         /// <returns></returns>
-        public static bool ContainsAll<T>(this IEnumerable<T> array,params T[] compareObj)
+        public static bool ContainsAll<T>(this IEnumerable<T> array, params T[] compareObj)
         {
             return array.All(compareObj.Contains);
         }
@@ -177,6 +177,16 @@ namespace LgyUtil
         public static IEnumerable<T> Slice<T>(this IEnumerable<T> array, int start, int end)
         {
             return array.Skip(start).Take(end - start + 1);
+        }
+        /// <summary>
+        /// 判断数组是否有值，并且不为空
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static bool AnyAllowNull<T>(this IEnumerable<T> array)
+        {
+            return array != null && array.Any();
         }
     }
 }
