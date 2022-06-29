@@ -41,12 +41,17 @@ namespace LgyUtil
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public static HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        public static HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null,TimeSpan? timeout=null)
         {
             HttpResponseMessage ret = null;
             using (HttpClient client = new HttpClient())
             {
+                if(timeout != null)
+                {
+                    client.Timeout = timeout.Value;
+                }
                 var request = Post_BuildRequest(url, postData, dicHeader);
                 ret = client.SendAsync(request).GetAwaiter().GetResult();
             }
@@ -59,9 +64,9 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static string Post_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        public static string Post_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Post(url, postData, dicHeader);
+            var response = Post(url, postData, dicHeader,timeout);
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
@@ -73,9 +78,9 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static T Post_ReturnModel<T>(string url, string postData = "", Dictionary<string, string> dicHeader = null) where T : class, new()
+        public static T Post_ReturnModel<T>(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
         {
-            return (Post_ReturnString(url, postData, dicHeader)).DeserializeNewtonJson<T>();
+            return (Post_ReturnString(url, postData, dicHeader,timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
         /// post请求，返回请求结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
@@ -84,9 +89,9 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        public static Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Post(url, postData, dicHeader);
+            var response = Post(url, postData, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
         }
@@ -99,11 +104,15 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> PostAsync(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        public static async Task<HttpResponseMessage> PostAsync(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
             HttpResponseMessage ret = null;
             using (HttpClient client = new HttpClient())
             {
+                if (timeout != null)
+                {
+                    client.Timeout = timeout.Value;
+                }
                 var request = Post_BuildRequest(url, postData, dicHeader);
                 ret = await client.SendAsync(request);
             }
@@ -116,9 +125,9 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<string> PostAsync_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        public static async Task<string> PostAsync_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await PostAsync(url, postData, dicHeader);
+            var response = await PostAsync(url, postData, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -130,9 +139,9 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<T> PostAsync_ReturnModel<T>(string url, string postData = "", Dictionary<string, string> dicHeader = null) where T : class, new()
+        public static async Task<T> PostAsync_ReturnModel<T>(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
         {
-            return (await PostAsync_ReturnString(url, postData, dicHeader)).DeserializeNewtonJson<T>();
+            return (await PostAsync_ReturnString(url, postData, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
         /// post请求，返回请求结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
@@ -141,9 +150,9 @@ namespace LgyUtil
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<Stream> PostAsync_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        public static async Task<Stream> PostAsync_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await PostAsync(url, postData, dicHeader);
+            var response = await PostAsync(url, postData, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStreamAsync();
         }
@@ -158,7 +167,7 @@ namespace LgyUtil
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static HttpResponseMessage Get(string url, Dictionary<string, string> dicHeader = null)
+        public static HttpResponseMessage Get(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
             HttpResponseMessage ret = null;
             using (HttpClient client = new HttpClient())
@@ -169,6 +178,10 @@ namespace LgyUtil
                     {
                         client.DefaultRequestHeaders.Add(kvHeader.Key, kvHeader.Value);
                     }
+                }
+                if (timeout != null)
+                {
+                    client.Timeout = timeout.Value;
                 }
                 ret = client.GetAsync(new Uri(url)).GetAwaiter().GetResult();
             }
@@ -180,9 +193,9 @@ namespace LgyUtil
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static string Get_ReturnString(string url, Dictionary<string, string> dicHeader = null)
+        public static string Get_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Get(url, dicHeader);
+            var response = Get(url, dicHeader,timeout);
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
@@ -193,9 +206,9 @@ namespace LgyUtil
         /// <param name="url">请求路径</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static T Get_ReturnModel<T>(string url, Dictionary<string, string> dicHeader = null) where T : class, new()
+        public static T Get_ReturnModel<T>(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
         {
-            return (Get_ReturnString(url, dicHeader)).DeserializeNewtonJson<T>();
+            return (Get_ReturnString(url, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
         /// Get请求，返回结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
@@ -203,9 +216,9 @@ namespace LgyUtil
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static Stream Get_ReturnStream(string url, Dictionary<string, string> dicHeader = null)
+        public static Stream Get_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Get(url, dicHeader);
+            var response = Get(url, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
         }
@@ -217,7 +230,7 @@ namespace LgyUtil
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> dicHeader = null)
+        public static async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
             HttpResponseMessage ret = null;
             using (HttpClient client = new HttpClient())
@@ -229,6 +242,10 @@ namespace LgyUtil
                         client.DefaultRequestHeaders.Add(kvHeader.Key, kvHeader.Value);
                     }
                 }
+                if (timeout != null)
+                {
+                    client.Timeout = timeout.Value;
+                }
                 ret = await client.GetAsync(new Uri(url));
             }
             return ret;
@@ -239,9 +256,9 @@ namespace LgyUtil
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<string> GetAsync_ReturnString(string url, Dictionary<string, string> dicHeader = null)
+        public static async Task<string> GetAsync_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await GetAsync(url, dicHeader);
+            var response = await GetAsync(url, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStringAsync();
         }
@@ -252,9 +269,9 @@ namespace LgyUtil
         /// <param name="url">请求路径</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<T> GetAsync_ReturnModel<T>(string url, Dictionary<string, string> dicHeader = null) where T : class, new()
+        public static async Task<T> GetAsync_ReturnModel<T>(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
         {
-            return (await GetAsync_ReturnString(url, dicHeader)).DeserializeNewtonJson<T>();
+            return (await GetAsync_ReturnString(url, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
         /// Get请求，返回结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
@@ -262,9 +279,9 @@ namespace LgyUtil
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <returns></returns>
-        public static async Task<Stream> GetAsync_ReturnStream(string url, Dictionary<string, string> dicHeader = null)
+        public static async Task<Stream> GetAsync_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await GetAsync(url, dicHeader);
+            var response = await GetAsync(url, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStreamAsync();
         }

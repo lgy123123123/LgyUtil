@@ -11,7 +11,7 @@
     <Product>LgyUtil</Product>
     <Company>lgy</Company>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.0.2</Version>
+    <Version>1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -93,6 +93,8 @@ namespace LgyUtil
         /// <returns></returns>
         public static string JoinToString<T>(this T[] list, string separator = ",")
         {
+            if (list == null)
+                return "";
             return string.Join(separator, list);
         }
         /// <summary>
@@ -104,6 +106,8 @@ namespace LgyUtil
         /// <returns></returns>
         public static string JoinToString<T>(this T[] list, Func<T, object> selectField, string separator = ",")
         {
+            if (list == null)
+                return "";
             return list.Select(selectField).JoinToString(separator);
         }
         /// <summary>
@@ -114,6 +118,8 @@ namespace LgyUtil
         /// <returns></returns>
         public static string JoinToString<T>(this IEnumerable<T> list, string separator = ",")
         {
+            if (list == null)
+                return "";
             return string.Join(separator, list);
         }
 
@@ -126,6 +132,8 @@ namespace LgyUtil
         /// <returns></returns>
         public static string JoinToString<T>(this IEnumerable<T> list, Func<T, object> selectField, string separator = ",")
         {
+            if (list == null)
+                return "";
             return list.Select(selectField).JoinToString(separator);
         }
 
@@ -179,14 +187,24 @@ namespace LgyUtil
             return array.Skip(start).Take(end - start + 1);
         }
         /// <summary>
-        /// 判断数组是否有值，并且数组不为空(对于any方法的扩展)
+        /// 判断数组不为空，并且有值(对于any方法的扩展)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
         /// <returns></returns>
-        public static bool AnyAndNotNull<T>(this IEnumerable<T> array)
+        public static bool HaveContent<T>(this IEnumerable<T> array)
         {
             return array != null && array.Any();
+        }
+        /// <summary>
+        /// 数组是否为空，数组为null，不报错
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> array)
+        {
+            return array is null || array.Count()==0;
         }
     }
 }

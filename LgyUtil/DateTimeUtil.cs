@@ -68,7 +68,7 @@ namespace LgyUtil
         /// <param name="dt"></param>
         /// <param name="numQuarter">增加的季度数</param>
         /// <returns></returns>
-        public static DateTime AddQuarter(this DateTime dt,int numQuarter)
+        public static DateTime AddQuarter(this DateTime dt, int numQuarter)
         {
             return dt.AddMonths(numQuarter * 3);
         }
@@ -88,11 +88,137 @@ namespace LgyUtil
         /// <param name="dt"></param>
         /// <param name="dt2"></param>
         /// <returns></returns>
-        public static int GetMonthBetween(this DateTime dt,DateTime dt2)
+        public static int GetMonthBetween(this DateTime dt, DateTime dt2)
         {
             var dtBig = dt > dt2 ? dt : dt2;
             var dtSmall = dt < dt2 ? dt : dt2;
             return (dtBig.Year - dtSmall.Year) * 12 + dtBig.Month - dtSmall.Month;
+        }
+        /// <summary>
+        /// 获取当前年第一天
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="formatTime">是否格式化时间</param>
+        /// <returns></returns>
+        public static DateTime GetYearsStart(this DateTime dt, bool formatTime = true)
+        {
+            if (formatTime)
+                return new DateTime(dt.Year, 1, 1, 0, 0, 0);
+            else
+                return new DateTime(dt.Year, 1, 1, dt.Hour, dt.Minute, dt.Second);
+        }
+        /// <summary>
+        /// 获取当前年最后一天
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="formatTime">是否格式化时间</param>
+        /// <returns></returns>
+        public static DateTime GetYearsEnd(this DateTime dt, bool formatTime = true)
+        {
+            if (formatTime)
+                return new DateTime(dt.Year, 12, 31, 0, 0, 0);
+            else
+                return new DateTime(dt.Year, 12, 31, dt.Hour, dt.Minute, dt.Second); ;
+        }
+        /// <summary>
+        /// 获取当前季度第一天
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="formatTime">是否格式化时间</param>
+        /// <returns></returns>
+        public static DateTime GetQuarterStart(this DateTime dt, bool formatTime = true)
+        {
+            if (formatTime)
+                return new DateTime(dt.Year, ((dt.GetQuarter() - 1) * 3 + 1).ToInt(), 1, 0, 0, 0);
+            else
+                return new DateTime(dt.Year, ((dt.GetQuarter() - 1) * 3 + 1).ToInt(), 1, dt.Hour, dt.Minute, dt.Second);
+        }
+        /// <summary>
+        /// 获取当前季度最后一天
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="formatTime">是否格式化时间</param>
+        /// <returns></returns>
+        public static DateTime GetQuarterEnd(this DateTime dt, bool formatTime = true)
+        {
+            return dt.GetQuarterStart(formatTime).AddQuarter(1).AddDays(-1);
+        }
+        /// <summary>
+        /// 获取当前月第一天
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="formatTime">是否格式化时间</param>
+        /// <returns></returns>
+        public static DateTime GetMonthStart(this DateTime dt, bool formatTime = true)
+        {
+            if (formatTime)
+                return new DateTime(dt.Year, dt.Month, 1, 0, 0, 0);
+            else
+                return new DateTime(dt.Year, dt.Month, 1, dt.Hour, dt.Minute, dt.Second);
+        }
+        /// <summary>
+        /// 获取当前月最后一天
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="formatTime">是否格式化时间</param>
+        /// <returns></returns>
+        public static DateTime GetMonthEnd(this DateTime dt, bool formatTime = true)
+        {
+            return dt.GetMonthStart(formatTime).AddMonths(1).AddDays(-1);
+        }
+        /// <summary>
+        /// 获取当前日开始时间
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime GetDaysStart(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0);
+        }
+        /// <summary>
+        /// 获取当前日结束时间
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime GetDaysEnd(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, 23, 59, 59);
+        }
+        /// <summary>
+        /// 获取当前时开始时间
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime GetHourStart(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
+        }
+        /// <summary>
+        /// 获取当前时结束时间
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime GetHourEnd(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 59, 59);
+        }
+        /// <summary>
+        /// 获取当前分开始时间
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime GetMinuteStart(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0);
+        }
+        /// <summary>
+        /// 获取当前分结束时间
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static DateTime GetMinuteEnd(this DateTime dt)
+        {
+            return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 59);
         }
     }
 }
