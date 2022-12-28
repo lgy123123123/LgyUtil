@@ -8,7 +8,7 @@ namespace LgyUtil
     /// <summary>
     /// DES算法加密
     /// </summary>
-    public class EncryptUtil
+    public sealed class EncryptUtil
     {
         #region DES加密
         // 默认密钥向量

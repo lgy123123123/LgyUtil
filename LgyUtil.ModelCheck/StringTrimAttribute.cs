@@ -10,7 +10,7 @@ namespace LgyUtil
     [AttributeUsage(
         AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Class,
         AllowMultiple = false, Inherited = true)]
-    public class StringTrimAttribute : Attribute
+    public sealed class StringTrimAttribute : Attribute
     {
         /// <summary>
         /// 不用进行trim

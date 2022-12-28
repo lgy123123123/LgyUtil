@@ -9,7 +9,7 @@ namespace LgyUtil
     /// <summary>
     /// 压缩帮助类(压缩成zip，解压缩rar zip tar)
     /// </summary>
-    public class CompressUtil
+    public sealed class CompressUtil
     {
         /// <summary>
         /// 解压缩  rar  zip  tar

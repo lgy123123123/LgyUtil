@@ -12,7 +12,7 @@ namespace LgyUtil
     /// <summary>
     /// 定时帮助类，基于Quartz.net
     /// </summary>
-    public class CronUtil
+    public sealed class CronUtil
     {
         /// <summary>
         /// 调度

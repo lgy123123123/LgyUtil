@@ -6,7 +6,7 @@ namespace LgyUtil
     /// <summary>
     /// 随机数帮助类,直接调用Init方法实例化，之后链式调用即可
     /// </summary>
-    public class RandomUtil
+    public sealed class RandomUtil
     {
         #region 私有属性
         /// <summary>

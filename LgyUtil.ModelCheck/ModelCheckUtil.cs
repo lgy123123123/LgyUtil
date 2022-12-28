@@ -11,7 +11,7 @@ namespace LgyUtil
     /// 模型验证帮助类
     /// System.ComponentModel.DataAnnotations
     /// </summary>
-    public class ModelCheckUtil
+    public sealed class ModelCheckUtil
     {
         /// <summary>
         /// 验证模型，返回验证结果，自行处理

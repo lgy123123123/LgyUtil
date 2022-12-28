@@ -10,7 +10,7 @@ namespace LgyUtil
     /// <summary>
     /// sftp文件帮助类，使用完，需要调用dispose释放资源，或者using使用
     /// </summary>
-    public class SftpUtil : IDisposable
+    public sealed class SftpUtil : IDisposable
     {
         /// <summary>
         /// sftp客户端对象

@@ -8,7 +8,7 @@ namespace LgyUtil
     /// <summary>
     /// Thread类辅助使用，可立即停止其他无用线程
     /// </summary>
-    public class ThreadUtil
+    public sealed class ThreadUtil
     {
         #region 属性
         /// <summary>

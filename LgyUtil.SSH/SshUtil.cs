@@ -6,7 +6,7 @@ namespace LgyUtil
     /// <summary>
     /// ssh执行帮助类，使用完，需要调用dispose释放资源，或者using使用
     /// </summary>
-    public class SshUtil : IDisposable
+    public sealed class SshUtil : IDisposable
     {
         /// <summary>
         /// ssh客户端对象

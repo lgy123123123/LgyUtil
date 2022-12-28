@@ -14,7 +14,7 @@ namespace LgyUtil
     /// <summary>
     /// 网络请求帮助类
     /// </summary>
-    public class NetUtil
+    public sealed class NetUtil
     {
         #region Post请求
         private static HttpRequestMessage Post_BuildRequest(string url, string postData = "", Dictionary<string, string> dicHeader = null)

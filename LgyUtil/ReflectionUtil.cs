@@ -6,7 +6,7 @@ namespace LgyUtil
     /// <summary>
     /// 反射帮助类
     /// </summary>
-    public class ReflectionUtil
+    public sealed class ReflectionUtil
     {
         /// <summary>
         /// 加载程序集

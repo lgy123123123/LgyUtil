@@ -11,7 +11,7 @@ namespace LgyUtil
     /// <summary>
     /// 记录日志，输出到文件
     /// </summary>
-    public class LogUtil
+    public sealed class LogUtil
     {
         #region 公有方法和属性
         #region 是否输出到控制台

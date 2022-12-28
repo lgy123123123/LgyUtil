@@ -12,7 +12,7 @@ namespace LgyUtil
     /// <summary>
     /// xml序列化帮助类
     /// </summary>
-    public class XmlUtil
+    public sealed class XmlUtil
     {
         private static XmlDocument doc { get; set; } = new XmlDocument();
 

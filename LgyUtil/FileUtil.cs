@@ -9,7 +9,7 @@ namespace LgyUtil
     /// <summary>
     /// 文件工具
     /// </summary>
-    public class FileUtil
+    public sealed class FileUtil
     {
         /// <summary>
         /// 获取文件md5值

@@ -5,7 +5,7 @@ namespace LgyUtil
     /// <summary>
     /// 正则表达式帮助类
     /// </summary>
-    public class RegexUtil
+    public sealed class RegexUtil
     {
         /// <summary>
         /// 中国大陆手机号
