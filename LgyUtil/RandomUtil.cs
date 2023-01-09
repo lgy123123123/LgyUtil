@@ -124,7 +124,7 @@ namespace LgyUtil
                 ret = Letters[r.Next(0, 2)][r.Next(0, 26)];
             else
                 ret = r.Next(0, 10).ToString();
-            if (this.NotSame && this.RandomStr.Contains(ret))
+            if (this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
                 ret = GetRandomOne(isLetter);
             return ret;
         }
