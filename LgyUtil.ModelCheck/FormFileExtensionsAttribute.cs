@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace LgyUtil.ModelCheck
+namespace LgyUtil
 {
     /// <summary>
-    /// 验证FormFile类的扩展名
+    /// 验证FormFile类的扩展名，可以是数组，也可以是单个对象
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)] 
-    public class FormFileExtensionsAttribute : ValidationAttribute 
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    public class FormFileExtensionsAttribute : ValidationAttribute
     {
         /// <summary>
         /// 允许使用的扩展名，多个用英文逗号分隔
@@ -27,20 +27,26 @@ namespace LgyUtil.ModelCheck
         /// 验证FormFile类的扩展名
         /// </summary>
         /// <param name="extensions">允许的扩展名，多个用英文逗号分隔</param>
-        public FormFileExtensionsAttribute(string extensions) 
-        { 
-            Extensions = extensions;
-        } 
-        public override bool IsValid(object value) 
+        public FormFileExtensionsAttribute(string extensions)
         {
-            IFormFile file = value as IFormFile; 
-            if (file != null) 
-            { 
-                var fileName = file.FileName;
-                var AllowedExtensions = Extensions.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                return AllowedExtensions.Any(y => fileName.EndsWith(y)); 
-            } 
-            return true; 
-        } 
+            Extensions = extensions;
+        }
+        public override bool IsValid(object value)
+        {
+            var AllowedExtensions = Extensions.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            if (value is IEnumerable<IFormFile> files)
+            {
+                foreach (var f in files)
+                {
+                    if(!AllowedExtensions.Any(y=> f.FileName.EndsWith(y)))
+                        return false;
+                }
+            }
+            else if(value is IFormFile file)
+            {
+                return AllowedExtensions.Any(y => file.FileName.EndsWith(y));
+            }
+            return true;
+        }
     }
 }
