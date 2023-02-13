@@ -20,7 +20,7 @@
 		13、xml序列化帮助类(XmlUtil)
 	</Description>
     <Authors>lgy</Authors>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
