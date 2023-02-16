@@ -76,6 +76,7 @@ namespace LgyUtil
         /// <returns></returns>
         public string GetRandom()
         {
+            RandomStr = string.Empty;
             switch (RandomFormat)
             {
                 case Enum_RandomFormat.OnlyNumber:
@@ -99,6 +100,20 @@ namespace LgyUtil
             }
 
             return RandomStr;
+        }
+        /// <summary>
+        /// 批量获取随机码
+        /// </summary>
+        /// <param name="numCount">生成个数</param>
+        /// <returns></returns>
+        public string[] GetRandoms(int numCount)
+        {
+            string[] randoms = new string[numCount];
+            for (int i = 0; i < numCount; i++)
+            {
+                randoms[i] = GetRandom();
+            }
+            return randoms;
         }
         /// <summary>
         /// 设置本次生成的内容不会出现重复的数字或字母
