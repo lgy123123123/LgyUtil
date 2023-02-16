@@ -25,12 +25,23 @@ namespace LgyUtil
         /// <summary>
         /// 系统随机实例
         /// </summary>
-        private Random r { get; set; }
+        private Random randomInstance { get; set; }
         /// <summary>
         /// 生成的随机码
         /// </summary>
         private string RandomStr { get; set; }
-
+        /// <summary>
+        /// 随机码前缀
+        /// </summary>
+        private string Prefix { get; set; }
+        /// <summary>
+        /// 随机码后缀
+        /// </summary>
+        private string Suffix { get; set; }
+        /// <summary>
+        /// 当前是否是批量生成
+        /// </summary>
+        private bool IsBatchCreate { get; set; }
         /// <summary>
         /// 字母数组，0：小写字母   1：大写字母
         /// </summary>
@@ -58,7 +69,7 @@ namespace LgyUtil
         {
             this.RandomLength = length;
             this.RandomFormat = format;
-            r = new Random();
+            randomInstance = new Random();
         }
         /// <summary>
         /// 创建RandomUtil实例
@@ -71,10 +82,72 @@ namespace LgyUtil
             return new RandomUtil(length, format);
         }
         /// <summary>
-        /// 获取随机码
+        /// 获取一个随机码
         /// </summary>
         /// <returns></returns>
         public string GetRandom()
+        {
+            IsBatchCreate = false;
+            return GetRandomDoing();
+        }
+        /// <summary>
+        /// 批量获取随机码
+        /// </summary>
+        /// <param name="numCount">生成个数</param>
+        /// <returns></returns>
+        public string[] GetRandoms(int numCount)
+        {
+            IsBatchCreate = true;
+            string[] randoms = new string[numCount];
+            for (int i = 0; i < numCount; i++)
+            {
+                randoms[i] = GetRandom();
+            }
+            return randoms;
+        }
+        /// <summary>
+        /// 设置本次生成的内容不会出现重复的数字或字母，批量生成时此配置无效
+        /// </summary>
+        /// <returns></returns>
+        public RandomUtil SetNotSame()
+        {
+            if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 52)
+                throw new Exception("设置不重复后，且只生成字母的时候，随机数长度，不能超过52个");
+            if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 10)
+                throw new Exception("设置不重复后，且只生成数字的时候，随机数长度，不能超过10个");
+            if (RandomFormat == Enum_RandomFormat.NumberAndLetter && RandomLength > 10)
+                throw new Exception("设置不重复后，且生成数字和字母的时候，随机数长度，不能超过62个");
+            this.NotSame = true;
+            return this;
+        }
+        /// <summary>
+        /// 设置随机码前缀
+        /// </summary>
+        /// <param name="prefix">前缀字符串</param>
+        /// <returns></returns>
+        public RandomUtil SetPrefix(string prefix)
+        {
+            this.Prefix = prefix;
+            return this;
+        }
+        /// <summary>
+        /// 设置随机码后缀
+        /// </summary>
+        /// <param name="suffix">后缀字符串</param>
+        /// <returns></returns>
+        public RandomUtil SetSuffix(string suffix)
+        {
+            this.Suffix = suffix;
+            return this;
+        }
+        #endregion
+
+        #region 私有方法
+        /// <summary>
+        /// 获取随机码
+        /// </summary>
+        /// <returns></returns>
+        private string GetRandomDoing()
         {
             RandomStr = string.Empty;
             switch (RandomFormat)
@@ -94,39 +167,13 @@ namespace LgyUtil
                 case Enum_RandomFormat.NumberAndLetter:
                     for (int i = 0; i < RandomLength; i++)
                     {
-                        RandomStr += GetRandomOne(r.Next(0, 2).ToBool());
+                        RandomStr += GetRandomOne(randomInstance.Next(0, 2).ToBool());
                     }
                     break;
             }
 
-            return RandomStr;
+            return Prefix + RandomStr + Suffix;
         }
-        /// <summary>
-        /// 批量获取随机码
-        /// </summary>
-        /// <param name="numCount">生成个数</param>
-        /// <returns></returns>
-        public string[] GetRandoms(int numCount)
-        {
-            string[] randoms = new string[numCount];
-            for (int i = 0; i < numCount; i++)
-            {
-                randoms[i] = GetRandom();
-            }
-            return randoms;
-        }
-        /// <summary>
-        /// 设置本次生成的内容不会出现重复的数字或字母
-        /// </summary>
-        /// <returns></returns>
-        public RandomUtil SetNotSame()
-        {
-            this.NotSame = true;
-            return this;
-        }
-        #endregion
-
-        #region 私有方法
         /// <summary>
         /// 获取一个随机码
         /// </summary>
@@ -136,10 +183,12 @@ namespace LgyUtil
         {
             string ret;
             if (isLetter)
-                ret = Letters[r.Next(0, 2)][r.Next(0, 26)];
+                ret = Letters[randomInstance.Next(0, 2)][randomInstance.Next(0, 26)];
             else
-                ret = r.Next(0, 10).ToString();
-            if (this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
+                ret = randomInstance.Next(0, 10).ToString();
+            //验证是否重复数字或字母
+            //批量生成不验证
+            if (!this.IsBatchCreate && this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
                 ret = GetRandomOne(isLetter);
             return ret;
         }
