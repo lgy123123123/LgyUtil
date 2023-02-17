@@ -54,11 +54,10 @@ namespace LgyUtil
         }
         /// <summary>
         /// 获取枚举的所有Description属性描述和枚举名称
-        /// key:枚举名称  value:Description
         /// </summary>
         /// <param name="enumType">枚举类型</param>
         /// <param name="isDesc2">是否是Description2Attribute</param>
-        /// <returns></returns>
+        /// <returns>key:枚举名称  value:Description</returns>
         public static Dictionary<string, string> GetEnumDescriptionDic(Type enumType, bool isDesc2 = false)
         {
             Dictionary<string, string> dicDesc = new Dictionary<string, string>();
@@ -70,10 +69,9 @@ namespace LgyUtil
         }
         /// <summary>
         /// 获取枚举的所有Description属性描述和枚举名称
-        /// key:枚举名称  value:枚举数字
         /// </summary>
         /// <param name="enumType">枚举类型</param>
-        /// <returns></returns>
+        /// <returns>key:枚举名称  value:枚举数字</returns>
         public static Dictionary<string, int> GetEnumNameValueDic(Type enumType)
         {
             Dictionary<string, int> dicDesc = new Dictionary<string, int>();

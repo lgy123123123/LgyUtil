@@ -85,31 +85,7 @@ namespace LgyUtil
         {
             return Array.ConvertAll(array, converter);
         }
-        /// <summary>
-        /// 数组拼接成字符串，默认逗号拼接
-        /// </summary>
-        /// <param name="list"></param>
-        /// <param name="separator">字符串分隔符，默认逗号</param>
-        /// <returns></returns>
-        public static string JoinToString<T>(this T[] list, string separator = ",")
-        {
-            if (list == null)
-                return "";
-            return string.Join(separator, list);
-        }
-        /// <summary>
-        /// 数组拼接成字符串，默认逗号拼接
-        /// </summary>
-        /// <param name="list"></param>
-        /// <param name="selectField">筛选拼接的字段</param>
-        /// <param name="separator">字符串分隔符，默认逗号</param>
-        /// <returns></returns>
-        public static string JoinToString<T>(this T[] list, Func<T, object> selectField, string separator = ",")
-        {
-            if (list == null)
-                return "";
-            return list.Select(selectField).JoinToString(separator);
-        }
+
         /// <summary>
         /// 数组拼接成字符串，默认逗号拼接
         /// </summary>
@@ -138,7 +114,7 @@ namespace LgyUtil
         }
 
         /// <summary>
-        /// 数组包含某些项目，符合一个就返回true
+        /// 数组包含某些项目，符合一个就返回true（解决了数组的Contains方法只能输入一个参数匹配的问题）
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
@@ -149,38 +125,12 @@ namespace LgyUtil
             return array.Any(compareObj.Contains);
         }
         /// <summary>
-        /// 数组包含所有项目，所有都符合条件，才返回true
+        /// 数组切片，在.net6出现了新的语法糖[1..2]可以替代这个方法
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="array"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool ContainsAll<T>(this IEnumerable<T> array, params T[] compareObj)
-        {
-            return array.All(compareObj.Contains);
-        }
-        /// <summary>
-        /// 将数组转换为其他对象的数组
-        /// </summary>
-        /// <typeparam name="TSource">源对象</typeparam>
-        /// <typeparam name="TDest">转换后目的对象</typeparam>
-        /// <param name="array"></param>
-        /// <param name="castFunc">自定义转换方法</param>
-        /// <returns></returns>
-        public static IEnumerable<TDest> Cast<TSource, TDest>(this IEnumerable<TSource> array, Func<TSource, TDest> castFunc)
-        {
-            foreach (TSource source in array)
-            {
-                yield return castFunc(source);
-            }
-        }
-        /// <summary>
-        /// 数组切片
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="array"></param>
-        /// <param name="start">切片起始位置</param>
-        /// <param name="end">切片结束位置</param>
+        /// <param name="start">切片起始位置，从0开始</param>
+        /// <param name="end">切片结束位置，结果包含结束位置这个内容</param>
         /// <returns></returns>
         public static IEnumerable<T> Slice<T>(this IEnumerable<T> array, int start, int end)
         {
@@ -204,7 +154,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> array)
         {
-            return array is null || array.Count()==0;
+            return array is null || array.Count() == 0;
         }
     }
 }

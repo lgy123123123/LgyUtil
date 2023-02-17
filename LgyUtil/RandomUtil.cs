@@ -19,7 +19,7 @@ namespace LgyUtil
         private Enum_RandomFormat RandomFormat { get; set; }
 
         /// <summary>
-        /// 一次生成的随机码中，没有重复的数字或字母
+        /// 生成的一个随机码中，没有重复的数字或字母
         /// </summary>
         private bool NotSame { get; set; } = false;
         /// <summary>
@@ -38,10 +38,6 @@ namespace LgyUtil
         /// 随机码后缀
         /// </summary>
         private string Suffix { get; set; }
-        /// <summary>
-        /// 当前是否是批量生成
-        /// </summary>
-        private bool IsBatchCreate { get; set; }
         /// <summary>
         /// 字母数组，0：小写字母   1：大写字母
         /// </summary>
@@ -87,8 +83,30 @@ namespace LgyUtil
         /// <returns></returns>
         public string GetRandom()
         {
-            IsBatchCreate = false;
-            return GetRandomDoing();
+            RandomStr = string.Empty;
+            switch (RandomFormat)
+            {
+                case Enum_RandomFormat.OnlyNumber:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        RandomStr += GetRandomOne(false);
+                    }
+                    break;
+                case Enum_RandomFormat.OnlyLetter:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        RandomStr += GetRandomOne(true);
+                    }
+                    break;
+                case Enum_RandomFormat.NumberAndLetter:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        RandomStr += GetRandomOne(randomInstance.Next(0, 2).ToBool());
+                    }
+                    break;
+            }
+
+            return Prefix + RandomStr + Suffix;
         }
         /// <summary>
         /// 批量获取随机码
@@ -97,7 +115,6 @@ namespace LgyUtil
         /// <returns></returns>
         public string[] GetRandoms(int numCount)
         {
-            IsBatchCreate = true;
             string[] randoms = new string[numCount];
             for (int i = 0; i < numCount; i++)
             {
@@ -144,37 +161,6 @@ namespace LgyUtil
 
         #region 私有方法
         /// <summary>
-        /// 获取随机码
-        /// </summary>
-        /// <returns></returns>
-        private string GetRandomDoing()
-        {
-            RandomStr = string.Empty;
-            switch (RandomFormat)
-            {
-                case Enum_RandomFormat.OnlyNumber:
-                    for (int i = 0; i < RandomLength; i++)
-                    {
-                        RandomStr += GetRandomOne(false);
-                    }
-                    break;
-                case Enum_RandomFormat.OnlyLetter:
-                    for (int i = 0; i < RandomLength; i++)
-                    {
-                        RandomStr += GetRandomOne(true);
-                    }
-                    break;
-                case Enum_RandomFormat.NumberAndLetter:
-                    for (int i = 0; i < RandomLength; i++)
-                    {
-                        RandomStr += GetRandomOne(randomInstance.Next(0, 2).ToBool());
-                    }
-                    break;
-            }
-
-            return Prefix + RandomStr + Suffix;
-        }
-        /// <summary>
         /// 获取一个随机码
         /// </summary>
         /// <param name="isLetter">true:字母  false:数字</param>
@@ -187,8 +173,7 @@ namespace LgyUtil
             else
                 ret = randomInstance.Next(0, 10).ToString();
             //验证是否重复数字或字母
-            //批量生成不验证
-            if (!this.IsBatchCreate && this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
+            if (this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
                 ret = GetRandomOne(isLetter);
             return ret;
         }

@@ -55,7 +55,7 @@ namespace LgyUtil
         /// <summary>
         /// utc时间戳，转本地时间
         /// </summary>
-        /// <param name="timestamp"></param>
+        /// <param name="timestamp">13位时间戳(js生成的时间戳)</param>
         /// <returns></returns>
         public static DateTime GetDateTimeByTimestamp(string timestamp)
         {
@@ -98,7 +98,7 @@ namespace LgyUtil
         /// 获取当前年第一天
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="formatTime">是否格式化时间</param>
+        /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
         /// <returns></returns>
         public static DateTime GetYearsStart(this DateTime dt, bool formatTime = true)
         {
@@ -111,7 +111,7 @@ namespace LgyUtil
         /// 获取当前年最后一天
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="formatTime">是否格式化时间</param>
+        /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
         /// <returns></returns>
         public static DateTime GetYearsEnd(this DateTime dt, bool formatTime = true)
         {
@@ -124,7 +124,7 @@ namespace LgyUtil
         /// 获取当前季度第一天
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="formatTime">是否格式化时间</param>
+        /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
         /// <returns></returns>
         public static DateTime GetQuarterStart(this DateTime dt, bool formatTime = true)
         {
@@ -137,7 +137,7 @@ namespace LgyUtil
         /// 获取当前季度最后一天
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="formatTime">是否格式化时间</param>
+        /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
         /// <returns></returns>
         public static DateTime GetQuarterEnd(this DateTime dt, bool formatTime = true)
         {
@@ -147,7 +147,7 @@ namespace LgyUtil
         /// 获取当前月第一天
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="formatTime">是否格式化时间</param>
+        /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
         /// <returns></returns>
         public static DateTime GetMonthStart(this DateTime dt, bool formatTime = true)
         {
@@ -160,7 +160,7 @@ namespace LgyUtil
         /// 获取当前月最后一天
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="formatTime">是否格式化时间</param>
+        /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
         /// <returns></returns>
         public static DateTime GetMonthEnd(this DateTime dt, bool formatTime = true)
         {
