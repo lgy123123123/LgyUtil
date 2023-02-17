@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -287,6 +288,45 @@ namespace LgyUtil
         }
         #endregion
         #endregion
+
+        /// <summary>
+        /// <para>发送Server-Send-Events</para>
+        /// <para>前端使用EventSource接收</para>
+        /// </summary>
+        /// <param name="response">当前请求的Response对象</param>
+        /// <param name="id">当前事件id，用于前端断开重连时使用</param>
+        /// <param name="data">发送的数据</param>
+        /// <param name="eventName">前端接收的事件名称</param>
+        /// <param name="retry">多长时间前端再次发送消息</param>
+        public static void SendSseMessage(HttpResponse response,string id,string data,string eventName,TimeSpan retry)
+        {
+            //浏览器规定返回类型
+            response.ContentType = "text/event-stream";
+            string writeString = $"retry:{retry.Milliseconds}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
+            var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
+            response.Body.Write(writeBytes,0,writeBytes.Length);
+            response.Body.Flush();
+        }
+
+        /// <summary>
+        /// <para>发送Server-Send-Events</para>
+        /// <para>前端使用EventSource接收</para>
+        /// </summary>
+        /// <param name="response">当前请求的Response对象</param>
+        /// <param name="id">当前事件id，用于前端断开重连时使用</param>
+        /// <param name="data">发送的数据</param>
+        /// <param name="eventName">前端接收的事件名称</param>
+        /// <param name="retry">多长时间前端再次发送消息</param>
+        /// <returns></returns>
+        public static async Task SendSseMessageAsync(HttpResponse response, string id, string data, string eventName, TimeSpan retry)
+        {
+            //浏览器规定返回类型
+            response.ContentType = "text/event-stream";
+            string writeString = $"retry:{retry.Milliseconds}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
+            var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
+            await response.Body.WriteAsync(writeBytes, 0, writeBytes.Length);
+            await response.Body.FlushAsync();
+        }
 
         /// <summary>
         /// 检查服务器端口是否占用
