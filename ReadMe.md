@@ -1,7 +1,7 @@
 # C#通用工具类说明
-1、工具的每个部分，都发布了独立的包，可以按需引入(LgyUtil、LgyUtil.Cache、LgyUtil.Compress、LgyUtil.ModelCheck、LgyUtil.Net、LgyUtil.SSH)
-2、下面每个说明最后括号内标记的内容，为工具所在的包，如 (LgyUtil),说明在LgyUtil包下
-3、每个方法若写为EncryptUtil.EncryptDES，则是通过帮助类，静态调用。若只有方法名ContainsAny，则为对象直接点出方法来使用(new List<string>().ContainsAny("1"))。
+    1、工具的每个部分，都发布了独立的包，可以按需引入(LgyUtil、LgyUtil.Cache、LgyUtil.Compress、LgyUtil.ModelCheck、LgyUtil.Net、LgyUtil.SSH)
+    2、下面每个说明最后括号内标记的内容，为工具所在的包，如 (LgyUtil),说明在LgyUtil包下
+    3、每个方法若写为EncryptUtil.EncryptDES，则是通过帮助类，静态调用。若只有方法名ContainsAny，则为对象直接点出方法来使用(new List<string>().      ContainsAny("1"))。
 ## 一、ArrayUtil，数组扩展类(LgyUtil)
     1、ForEach，Exists，Find，FindAll，FindIndex，Sort，ConvertAll，普通数组[]增加扩展功能，都是List存在的功能
         用法：(以ForEach为例)
