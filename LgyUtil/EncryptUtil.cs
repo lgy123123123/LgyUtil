@@ -16,7 +16,7 @@ namespace LgyUtil
         /// <summary>
         /// DES默认密钥向量(8位)
         /// </summary>
-        const string VECTOR_DES = "tianjin*";
+        static byte[] Keys = { 0x22, 0x34, 0x56, 0x32, 0x90, 0xAF, 0xCD, 0xBE };
         /// <summary>
         /// DES加密字符串
         /// </summary>
@@ -24,12 +24,12 @@ namespace LgyUtil
         /// <param name="key">加密密钥(8位)</param>
         /// <param name="vector">向量字符串，可不填写(8位)</param>
         /// <returns>加密成功返回加密后的字符串，失败返回源串</returns>
-        public static string EncryptDES(string data, string key, string vector = VECTOR_DES)
+        public static string EncryptDES(string data, string key, string vector = "")
         {
-            if (key.Length != 8 || vector.Length != 8)
+            if (key.Length != 8 || (vector.IsNotNullOrEmpty() && vector.Length != 8))
                 throw new Exception("参数key和vector的长度，必须都为8");
             byte[] rgbKey = Encoding.UTF8.GetBytes(key.Substring(0, 8));
-            byte[] rgbIV = Encoding.UTF8.GetBytes(vector);
+            byte[] rgbIV = vector.IsNullOrEmpty() ? Keys : Encoding.UTF8.GetBytes(vector);
             byte[] inputByteArray = Encoding.UTF8.GetBytes(data);
             DESCryptoServiceProvider dCSP = new DESCryptoServiceProvider();
             MemoryStream mStream = new MemoryStream();
@@ -47,14 +47,14 @@ namespace LgyUtil
         /// <param name="key">解密密钥(8位)</param>
         /// <param name="vector">向量字符串(8位)</param>
         /// <returns>解密成功返回解密后的字符串，失败返源串</returns>
-        public static string DecryptDES(string data, string key, string vector = VECTOR_DES)
+        public static string DecryptDES(string data, string key, string vector = "")
         {
-            if (key.Length != 8 || vector.Length != 8)
+            if (key.Length != 8 || (vector.IsNotNullOrEmpty() && vector.Length != 8))
                 throw new Exception("参数key和vector的长度，必须都为8");
             if (data == "")
                 return "";
             byte[] rgbKey = Encoding.UTF8.GetBytes(key.Substring(0, 8));
-            byte[] rgbIV = Encoding.UTF8.GetBytes(vector);
+            byte[] rgbIV = vector.IsNullOrEmpty() ? Keys : Encoding.UTF8.GetBytes(vector);
             byte[] inputByteArray = Convert.FromBase64String(data);
             DESCryptoServiceProvider DCSP = new DESCryptoServiceProvider();
             MemoryStream mStream = new MemoryStream();
@@ -69,7 +69,7 @@ namespace LgyUtil
         /// <summary>
         /// AES默认密钥向量(16位)
         /// </summary>
-        const string VECTOR_AES = "tianjin*tianjin*";
+        static byte[] Keys2 = { 0x22, 0x34, 0x56, 0x32, 0x90, 0xAF, 0xCD, 0xBE, 0x22, 0x34, 0x56, 0x32, 0x90, 0xAF, 0xCD, 0xBE };
         /// <summary>
         /// AES加密
         /// </summary>
@@ -77,14 +77,14 @@ namespace LgyUtil
         /// <param name="key">密钥(16位)</param>
         /// <param name="vector">向量(16位)</param>
         /// <returns>密文</returns>
-        public static string AESEncrypt(string data, string key, string vector=VECTOR_AES)
+        public static string AESEncrypt(string data, string key, string vector = "")
         {
-            if (key.Length != 16 || vector.Length != 16)
+            if (key.Length != 16 || (vector.IsNotNullOrEmpty() && vector.Length != 16))
                 throw new Exception("参数key和vector的长度，必须都为16");
             Byte[] plainBytes = Encoding.UTF8.GetBytes(data);
 
-            byte[] bKey = Encoding.ASCII.GetBytes(key);
-            byte[] bVector = Encoding.ASCII.GetBytes(vector);
+            byte[] bKey = Encoding.UTF8.GetBytes(key);
+            byte[] bVector = vector.IsNullOrEmpty() ? Keys2 : Encoding.UTF8.GetBytes(vector);
 
             Byte[] Cryptograph = null; // 加密后的密文
 
@@ -96,7 +96,7 @@ namespace LgyUtil
                 {
                     // 把内存流对象包装成加密流对象
                     using (CryptoStream Encryptor = new CryptoStream(Memory,
-                    Aes.CreateEncryptor(bKey,bVector),
+                    Aes.CreateEncryptor(bKey, bVector),
                     CryptoStreamMode.Write))
                     {
                         // 明文数据写入加密流
@@ -122,17 +122,17 @@ namespace LgyUtil
         /// <param name="key">密钥(16位)</param>
         /// <param name="vector">向量(16位)</param>
         /// <returns>明文</returns>
-        public static string AESDecrypt(string data, string key, string vector=VECTOR_AES)
+        public static string AESDecrypt(string data, string key, string vector = "")
         {
             if (data.IsNullOrEmpty())
                 return "";
-            if (key.Length != 16 || vector.Length != 16)
+            if (key.Length != 16 || (vector.IsNotNullOrEmpty() && vector.Length != 16))
                 throw new Exception("参数key和vector的长度，必须都为16");
             data = data.Replace("_", "/").Replace("-", "+");
             Byte[] encryptedBytes = Convert.FromBase64String(data);
 
-            byte[] bKey = Encoding.ASCII.GetBytes(key);
-            byte[] bVector = Encoding.ASCII.GetBytes(vector);
+            byte[] bKey = Encoding.UTF8.GetBytes(key);
+            byte[] bVector = vector.IsNullOrEmpty() ? Keys2 : Encoding.UTF8.GetBytes(vector);
             Byte[] original = null; // 解密后的明文
 
             Rijndael Aes = Rijndael.Create();
@@ -174,7 +174,7 @@ namespace LgyUtil
         /// 获取RSA公钥和私钥
         /// </summary>
         /// <returns>公钥，私钥</returns>
-        public static (string,string) GetRSAKey()
+        public static (string, string) GetRSAKey()
         {
             (string publicKey, string privateKey) = ("", "");
             using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
@@ -190,7 +190,7 @@ namespace LgyUtil
         /// <param name="data">需要加密的字符串</param>
         /// <param name="xmlPublicKey">公钥</param>
         /// <returns>返回RSA加密后的密文</returns>
-        public static String RSAPublicEncrypt(string data,string xmlPublicKey)
+        public static String RSAPublicEncrypt(string data, string xmlPublicKey)
         {
             RSACryptoServiceProvider provider = new RSACryptoServiceProvider();
             provider.FromXmlString(xmlPublicKey);
@@ -227,7 +227,7 @@ namespace LgyUtil
         /// <param name="data">需要解密的长字符串</param>
         /// <param name="xmlPrivateKey">私钥</param>
         /// <returns>返回RSA分段解密的明文</returns>
-        public static String RSAPrivateDecrypt(string data,string xmlPrivateKey)
+        public static String RSAPrivateDecrypt(string data, string xmlPrivateKey)
         {
             RSACryptoServiceProvider provider = new RSACryptoServiceProvider();
             provider.FromXmlString(xmlPrivateKey);
