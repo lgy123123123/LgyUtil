@@ -197,7 +197,7 @@ namespace LgyUtil
         public static void StartDelLogTiming(int days, int startHour = 0, int startMinute = 0, int startSecond = 0)
         {
             if (days <= 0)
-                throw new Exception("定时删除日志的保留天数，必须大于0");
+                throw new LgyUtilException("定时删除日志的保留天数，必须大于0");
             CronUtil.AddCronJob("定时删日志", $"{startHour} {startMinute} {startSecond} * * ? *", () =>
             {
                 DateTime dtDelBefore = DateTime.Now.Date.AddDays(0 - days);

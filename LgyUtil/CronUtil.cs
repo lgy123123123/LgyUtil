@@ -202,7 +202,7 @@ namespace LgyUtil
                 await sche.Interrupt(key);
                 await sche.DeleteJob(key);
                 if(!dicAllJob.TryRemove(name,out _))
-                    throw new Exception($"停止job失败：{name}");
+                    throw new LgyUtilException($"停止job失败：{name}");
                 else
                     LogUtil.AddLog($"停止了job：{name}", LogFileName, LogDirName);
             }

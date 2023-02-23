@@ -249,7 +249,7 @@ namespace LgyUtil
             }
             if (charByteCounter > 1)
             {
-                throw new Exception("非预期的byte格式");
+                throw new LgyUtilException("非预期的byte格式");
             }
             return true;
         }

@@ -27,7 +27,7 @@ namespace LgyUtil
         public static string EncryptDES(string data, string key, string vector = "")
         {
             if (key.Length != 8 || (vector.IsNotNullOrEmpty() && vector.Length != 8))
-                throw new Exception("参数key和vector的长度，必须都为8");
+                throw new LgyUtilException("参数key和vector的长度，必须都为8");
             byte[] rgbKey = Encoding.UTF8.GetBytes(key.Substring(0, 8));
             byte[] rgbIV = vector.IsNullOrEmpty() ? Keys : Encoding.UTF8.GetBytes(vector);
             byte[] inputByteArray = Encoding.UTF8.GetBytes(data);
@@ -50,7 +50,7 @@ namespace LgyUtil
         public static string DecryptDES(string data, string key, string vector = "")
         {
             if (key.Length != 8 || (vector.IsNotNullOrEmpty() && vector.Length != 8))
-                throw new Exception("参数key和vector的长度，必须都为8");
+                throw new LgyUtilException("参数key和vector的长度，必须都为8");
             if (data == "")
                 return "";
             byte[] rgbKey = Encoding.UTF8.GetBytes(key.Substring(0, 8));
@@ -80,7 +80,7 @@ namespace LgyUtil
         public static string AESEncrypt(string data, string key, string vector = "")
         {
             if (key.Length != 16 || (vector.IsNotNullOrEmpty() && vector.Length != 16))
-                throw new Exception("参数key和vector的长度，必须都为16");
+                throw new LgyUtilException("参数key和vector的长度，必须都为16");
             Byte[] plainBytes = Encoding.UTF8.GetBytes(data);
 
             byte[] bKey = Encoding.UTF8.GetBytes(key);
@@ -127,7 +127,7 @@ namespace LgyUtil
             if (data.IsNullOrEmpty())
                 return "";
             if (key.Length != 16 || (vector.IsNotNullOrEmpty() && vector.Length != 16))
-                throw new Exception("参数key和vector的长度，必须都为16");
+                throw new LgyUtilException("参数key和vector的长度，必须都为16");
             data = data.Replace("_", "/").Replace("-", "+");
             Byte[] encryptedBytes = Convert.FromBase64String(data);
 

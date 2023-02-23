@@ -43,7 +43,7 @@ namespace LgyUtil
 
             if (ReferenceEquals(source, null))
             {
-                return default(T);
+                return default;
             }
 
             var formatter = new BinaryFormatter();

@@ -39,20 +39,35 @@ namespace LgyUtil
         /// </summary>
         private string Suffix { get; set; }
         /// <summary>
-        /// 字母数组，0：小写字母   1：大写字母
+        /// 小写字母
         /// </summary>
-
-        private readonly List<string[]> Letters = new List<string[]>
+        private readonly string[] lowerLetters = 
+            {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
+             "v", "w", "x", "y", "z"};
+        /// <summary>
+        /// 大写字母
+        /// </summary>
+        private readonly string[] upperLetters =
+            {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
+             "V", "W", "X", "Y", "Z"};
+        /// <summary>
+        /// 生成那种随机数
+        /// </summary>
+        enum Enum_RandomOneType
         {
-            new []{
-                "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-                "v", "w", "x", "y", "z"
-            },
-            new []{
-                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
-                "V", "W", "X", "Y", "Z"
-            }
-        };
+            /// <summary>
+            /// 数字
+            /// </summary>
+            Number = 0,
+            /// <summary>
+            /// 小写字母
+            /// </summary>
+            LowerLetter = 1,
+            /// <summary>
+            /// 大写字母
+            /// </summary>
+            UpperLetter = 2
+        }
         #endregion
 
         #region 公共方法
@@ -89,19 +104,47 @@ namespace LgyUtil
                 case Enum_RandomFormat.OnlyNumber:
                     for (int i = 0; i < RandomLength; i++)
                     {
-                        RandomStr += GetRandomOne(false);
+                        RandomStr += GetRandomOne(Enum_RandomOneType.Number);
                     }
                     break;
                 case Enum_RandomFormat.OnlyLetter:
                     for (int i = 0; i < RandomLength; i++)
                     {
-                        RandomStr += GetRandomOne(true);
+                        bool isBig = randomInstance.Next(0, 2).ToBool();
+                        RandomStr += GetRandomOne(isBig ? Enum_RandomOneType.UpperLetter : Enum_RandomOneType.LowerLetter);
+                    }
+                    break;
+                case Enum_RandomFormat.OnlyLowerLetter:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        RandomStr += GetRandomOne(Enum_RandomOneType.LowerLetter);
+                    }
+                    break;
+                case Enum_RandomFormat.OnlyUpperLetter:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        RandomStr += GetRandomOne(Enum_RandomOneType.UpperLetter);
                     }
                     break;
                 case Enum_RandomFormat.NumberAndLetter:
                     for (int i = 0; i < RandomLength; i++)
                     {
-                        RandomStr += GetRandomOne(randomInstance.Next(0, 2).ToBool());
+                        Enum_RandomOneType oneType = randomInstance.Next(0, 3).ToEnum<Enum_RandomOneType>();
+                        RandomStr += GetRandomOne(oneType);
+                    }
+                    break;
+                case Enum_RandomFormat.NumberAndLowerLetter:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        bool isNumber = randomInstance.Next(0, 2).ToBool();
+                        RandomStr += GetRandomOne(isNumber ? Enum_RandomOneType.Number : Enum_RandomOneType.LowerLetter);
+                    }
+                    break;
+                case Enum_RandomFormat.NumberAndUpperLetter:
+                    for (int i = 0; i < RandomLength; i++)
+                    {
+                        bool isNumber = randomInstance.Next(0, 2).ToBool();
+                        RandomStr += GetRandomOne(isNumber ? Enum_RandomOneType.Number : Enum_RandomOneType.UpperLetter);
                     }
                     break;
             }
@@ -129,11 +172,19 @@ namespace LgyUtil
         public RandomUtil SetNotSame()
         {
             if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 52)
-                throw new Exception("设置不重复后，且只生成字母的时候，随机数长度，不能超过52个");
+                throw new LgyUtilException("设置不重复后，且只生成字母的时候，随机数长度，不能超过52个");
             if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 10)
-                throw new Exception("设置不重复后，且只生成数字的时候，随机数长度，不能超过10个");
+                throw new LgyUtilException("设置不重复后，且只生成数字的时候，随机数长度，不能超过10个");
+            if (RandomFormat == Enum_RandomFormat.OnlyLowerLetter && RandomLength > 26)
+                throw new LgyUtilException("设置不重复后，且只生成小写字母的时候，随机数长度，不能超过26个");
+            if (RandomFormat == Enum_RandomFormat.OnlyUpperLetter && RandomLength > 26)
+                throw new LgyUtilException("设置不重复后，且只生成大写字母的时候，随机数长度，不能超过26个");
             if (RandomFormat == Enum_RandomFormat.NumberAndLetter && RandomLength > 10)
-                throw new Exception("设置不重复后，且生成数字和字母的时候，随机数长度，不能超过62个");
+                throw new LgyUtilException("设置不重复后，且生成数字和字母的时候，随机数长度，不能超过62个");
+            if (RandomFormat == Enum_RandomFormat.NumberAndLowerLetter && RandomLength > 36)
+                throw new LgyUtilException("设置不重复后，且生成数字和小写字母的时候，随机数长度，不能超过36个");
+            if (RandomFormat == Enum_RandomFormat.NumberAndUpperLetter && RandomLength > 36)
+                throw new LgyUtilException("设置不重复后，且生成数字和大写字母的时候，随机数长度，不能超过36个");
             this.NotSame = true;
             return this;
         }
@@ -163,18 +214,26 @@ namespace LgyUtil
         /// <summary>
         /// 获取一个随机码
         /// </summary>
-        /// <param name="isLetter">true:字母  false:数字</param>
+        /// <param name="oneType">生成类型</param>
         /// <returns></returns>
-        private string GetRandomOne(bool isLetter)
+        private string GetRandomOne(Enum_RandomOneType oneType)
         {
-            string ret;
-            if (isLetter)
-                ret = Letters[randomInstance.Next(0, 2)][randomInstance.Next(0, 26)];
-            else
-                ret = randomInstance.Next(0, 10).ToString();
+            string ret = "";
+            switch (oneType)
+            {
+                case Enum_RandomOneType.Number:
+                    ret = randomInstance.Next(0, 10).ToString();
+                    break;
+                case Enum_RandomOneType.LowerLetter:
+                    ret = lowerLetters[randomInstance.Next(0, 26)];
+                    break;
+                case Enum_RandomOneType.UpperLetter:
+                    ret = upperLetters[randomInstance.Next(0, 26)];
+                    break;
+            }
             //验证是否重复数字或字母
             if (this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
-                ret = GetRandomOne(isLetter);
+                ret = GetRandomOne(oneType);
             return ret;
         }
         #endregion
@@ -185,15 +244,31 @@ namespace LgyUtil
     public enum Enum_RandomFormat
     {
         /// <summary>
-        /// 只有数字
+        /// 生成结果 只有数字
         /// </summary>
         OnlyNumber,
         /// <summary>
-        /// 只有字母(大小写)
+        /// 生成结果包含 大写字母 和 小写字母
         /// </summary>
         OnlyLetter,
         /// <summary>
-        /// 字母(大小写)和数字
+        /// 生成结果 只有小写字母
+        /// </summary>
+        OnlyLowerLetter,
+        /// <summary>
+        /// 生成结果 只有大写字母
+        /// </summary>
+        OnlyUpperLetter,
+        /// <summary>
+        /// 生成结果包含 小写字母和数字
+        /// </summary>
+        NumberAndLowerLetter,
+        /// <summary>
+        /// 生成结果包含 大写字母和数字
+        /// </summary>
+        NumberAndUpperLetter,
+        /// <summary>
+        /// 生成结果包含 大写字母、小写字母、数字
         /// </summary>
         NumberAndLetter
     }

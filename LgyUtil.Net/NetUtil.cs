@@ -290,8 +290,7 @@ namespace LgyUtil
         #endregion
 
         /// <summary>
-        /// <para>发送Server-Send-Events</para>
-        /// <para>前端使用EventSource接收</para>
+        /// 发送Server-Send-Events，前端使用EventSource接收
         /// </summary>
         /// <param name="response">当前请求的Response对象</param>
         /// <param name="id">当前事件id，用于前端断开重连时使用</param>
@@ -309,8 +308,7 @@ namespace LgyUtil
         }
 
         /// <summary>
-        /// <para>发送Server-Send-Events</para>
-        /// <para>前端使用EventSource接收</para>
+        /// 发送Server-Send-Events，前端使用EventSource接收
         /// </summary>
         /// <param name="response">当前请求的Response对象</param>
         /// <param name="id">当前事件id，用于前端断开重连时使用</param>
