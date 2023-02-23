@@ -144,7 +144,7 @@
         //将t的属性映射到Test1，并返回一个新的Test1实例
         var t2 = t.MappingTo<Test1>();
 ## 十、RandomUtil，随机数帮助类(LgyUtil)
-    可以生成3种随机类型码：只有数字、只有字母(大小写)、字母(大小写)和数字
+    可以生成7种随机类型码：只有数字、只有大写字母、只有小写字母、大小写字母、小写字母和数字、大写字母和数字、大小写字母和数字
     使用方法：链式调用
         //输出7位只有数字的随机数
         RandomUtil.Init(7,Enum_RandomFormat.OnlyNumber).GetRandom();
