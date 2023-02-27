@@ -204,3 +204,20 @@
 12. ReplaceRegex()，根据正则表达式替换
 13. GetStringByRegex()，根据正则表达式，返回匹配的第一组内容
 14. Split()，将字符串拆分成数组，返回string[]
+15. FormatTemplate(),根据模板格式化字符串，可以使用匿名类或普通类
+    - 匿名类
+
+          string str="{a},{b}";
+          str.FormatTemplate(new {a=1,b="2"});
+          //输出1,2
+
+    - 普通类
+
+          string str="{a},{b}";
+          class Temp
+          {
+              public string a { get; set; }
+              public int b { get; set; }
+          }
+          str.FormatTemplate(new Temp{a="1",b=2});
+          //输出1,2

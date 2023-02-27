@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using LgyUtil.NStringFormat;
+using Newtonsoft.Json;
 using System;
 using System.Globalization;
 using System.Text;
@@ -242,6 +243,17 @@ namespace LgyUtil
         public static string[] Split(this string s, string separator, bool includeEmpty = true)
         {
             return s.Split(new string[] { separator }, includeEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries);
+        }
+        /// <summary>
+        /// 字符串模板，格式化内容(使用的NString)
+        /// </summary>
+        /// <param name="template">模板，参数用{name}表格</param>
+        /// <param name="obj">模板内的对象，可以使用匿名了，或者直接是类对象</param>
+        /// <param name="throwOnMissingValue">缺少对象时报错，默认true</param>
+        /// <returns></returns>
+        public static string FormatTemplate(this string template, object obj, bool throwOnMissingValue = true)
+        {
+            return StringTemplate.Format(template, obj, throwOnMissingValue);
         }
     }
 }
