@@ -1,6 +1,7 @@
 ﻿using LgyUtil.NStringFormat;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -252,6 +253,17 @@ namespace LgyUtil
         /// <param name="throwOnMissingValue">缺少对象时报错，默认true</param>
         /// <returns></returns>
         public static string FormatTemplate(this string template, object obj, bool throwOnMissingValue = true)
+        {
+            return StringTemplate.Format(template, obj, throwOnMissingValue);
+        }
+        /// <summary>
+        /// 字符串模板，格式化内容(使用的NString)
+        /// </summary>
+        /// <param name="template">模板，参数用{name}表格</param>
+        /// <param name="obj">模板内的对象</param>
+        /// <param name="throwOnMissingValue">缺少对象时报错，默认true</param>
+        /// <returns></returns>
+        public static string FormatTemplateDic(this string template, IDictionary<string,object> obj, bool throwOnMissingValue = true)
         {
             return StringTemplate.Format(template, obj, throwOnMissingValue);
         }

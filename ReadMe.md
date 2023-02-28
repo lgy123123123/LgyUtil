@@ -221,3 +221,8 @@
           }
           str.FormatTemplate(new Temp{a="1",b=2});
           //输出1,2
+16. FormatTemplateDic()，根据模板格式化字符串，参数为Dictionary<string,object>
+
+        string str="{a},{b}";
+        str.FormatTemplateDic(new Dictionary<string, object>{{"a","1"},{"b",2}});
+        //输出1,2
