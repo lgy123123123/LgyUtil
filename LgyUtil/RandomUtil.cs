@@ -150,6 +150,7 @@ namespace LgyUtil
         /// <returns></returns>
         public string[] GetRandoms(int numCount)
         {
+            this.NotSame = false;
             CheckNotSame();
             string[] randoms = new string[numCount];
             for (int i = 0; i < numCount; i++)
@@ -159,13 +160,11 @@ namespace LgyUtil
             return randoms;
         }
         /// <summary>
-        /// 设置本次生成的内容不会出现重复的数字或字母，批量生成时此配置无效
+        /// 设置本次生成的内容不会出现重复的数字或字母，注：批量生成、按模板生成，此配置无效
         /// </summary>
         /// <returns></returns>
         public RandomUtil SetNotSame()
         {
-            if (IsRandomTemplate)
-                throw new LgyUtilException("按模板生成时，不能设置不重复");
             this.NotSame = true;
             return this;
         }
@@ -249,7 +248,7 @@ namespace LgyUtil
                     }
                     dicTemplateValues.Add("RandomTemplate_" + i, randomOne.ToString());
                 }
-                RandomStr = RandomFormatTemplate.FormatTemplateDic(dicTemplateValues,false);
+                RandomStr = RandomFormatTemplate.FormatTemplate(dicTemplateValues,false);
             }
             //按枚举生成
             else
@@ -340,6 +339,10 @@ namespace LgyUtil
         /// <exception cref="LgyUtilException"></exception>
         private void CheckNotSame()
         {
+            //按模板生成时，不重复配置无效
+            if (this.IsRandomTemplate)
+                this.NotSame = false;
+
             if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 52)
                 throw new LgyUtilException("设置不重复，且只生成字母的时候，随机数长度，不能超过52个");
             if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 10)

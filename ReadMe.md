@@ -204,7 +204,13 @@
 12. ReplaceRegex()，根据正则表达式替换
 13. GetStringByRegex()，根据正则表达式，返回匹配的第一组内容
 14. Split()，将字符串拆分成数组，返回string[]
-15. FormatTemplate(),根据模板格式化字符串，可以使用匿名类或普通类
+15. FormatTemplate(),根据模板格式化字符串，可以使用Dictionary<string, object>、匿名类、普通类
+    - Dictionary<string, object>
+          
+          string str="{a},{b}";
+          str.FormatTemplate(new Dictionary<string, object>{{"a",1},{"b","2"}});
+          //输出1,2
+
     - 匿名类
 
           string str="{a},{b}";
@@ -221,8 +227,3 @@
           }
           str.FormatTemplate(new Temp{a="1",b=2});
           //输出1,2
-16. FormatTemplateDic()，根据模板格式化字符串，参数为Dictionary<string,object>
-
-        string str="{a},{b}";
-        str.FormatTemplateDic(new Dictionary<string, object>{{"a","1"},{"b",2}});
-        //输出1,2
