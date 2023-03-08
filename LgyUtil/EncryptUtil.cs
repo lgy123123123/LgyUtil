@@ -1,9 +1,20 @@
-﻿using Quartz.Util;
-using System;
+﻿using System;
 using System.IO;
-using System.Numerics;
 using System.Security.Cryptography;
 using System.Text;
+using Org.BouncyCastle.Asn1.Pkcs;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Encodings;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.X509;
+using Quartz.Util;
 
 namespace LgyUtil
 {
@@ -170,27 +181,30 @@ namespace LgyUtil
         #endregion
 
         #region RSA加密（非对称加密）
+
+        #region RSA加密解密Xml
         /// <summary>
-        /// 获取RSA公钥和私钥
+        /// 获取RSA公钥和私钥，xml格式
         /// </summary>
         /// <returns>公钥，私钥</returns>
-        public static (string, string) GetRSAKey()
+        public static (string, string) GetRSAKey_Xml()
         {
             (string publicKey, string privateKey) = ("", "");
-            using (RSACryptoServiceProvider rsa = new RSACryptoServiceProvider())
+            using (var rsa = RSA.Create())
             {
+                rsa.KeySize = 2048;
                 privateKey = rsa.ToXmlString(true);
                 publicKey = rsa.ToXmlString(false);
             }
             return (publicKey, privateKey);
         }
         /// <summary>
-        /// RSA公钥加密
+        /// RSA公钥加密,xml格式
         /// </summary>
         /// <param name="data">需要加密的字符串</param>
-        /// <param name="xmlPublicKey">公钥</param>
+        /// <param name="xmlPublicKey">xml公钥</param>
         /// <returns>返回RSA加密后的密文</returns>
-        public static String RSAPublicEncrypt(string data, string xmlPublicKey)
+        public static string RSAPublicEncrypt_Xml(string data, string xmlPublicKey)
         {
             RSACryptoServiceProvider provider = new RSACryptoServiceProvider();
             provider.FromXmlString(xmlPublicKey);
@@ -222,12 +236,12 @@ namespace LgyUtil
 
         }
         /// <summary>
-        /// RSA私钥解密
+        /// RSA私钥解密,xml格式
         /// </summary>
         /// <param name="data">需要解密的长字符串</param>
-        /// <param name="xmlPrivateKey">私钥</param>
+        /// <param name="xmlPrivateKey">xml私钥</param>
         /// <returns>返回RSA分段解密的明文</returns>
-        public static String RSAPrivateDecrypt(string data, string xmlPrivateKey)
+        public static string RSAPrivateDecrypt_Xml(string data, string xmlPrivateKey)
         {
             RSACryptoServiceProvider provider = new RSACryptoServiceProvider();
             provider.FromXmlString(xmlPrivateKey);
@@ -257,6 +271,142 @@ namespace LgyUtil
                 return Encoding.Default.GetString(PlaiStream.ToArray());
             }
         }
+        #endregion
+
+        #region RSA加密解密Pem
+        /// <summary>
+        /// 获取RSA公钥和私钥，pem格式
+        /// </summary>
+        /// <param name="isFormat">是否包含pem前缀后缀格式，默认不包含</param>
+        /// <returns></returns>
+        public static (string, string) GetRSAKey_Pem(bool isFormat = false)
+        {
+            (string publicKey, string privateKey) = ("", "");
+            RsaKeyPairGenerator gen = new RsaKeyPairGenerator();
+            gen.Init(new KeyGenerationParameters(new Org.BouncyCastle.Security.SecureRandom(), 2048));
+            var keyPair = gen.GenerateKeyPair();
+
+            #region 私钥生成
+            PrivateKeyInfo privateKeyInfo = PrivateKeyInfoFactory.CreatePrivateKeyInfo(keyPair.Private);
+            byte[] serializedPrivateBytes = privateKeyInfo.ToAsn1Object().GetEncoded();
+            privateKey = Convert.ToBase64String(serializedPrivateBytes);
+            #endregion
+
+            #region 公钥生成
+            SubjectPublicKeyInfo publicKeyInfo = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(keyPair.Public);
+            byte[] serializedPublicBytes = publicKeyInfo.ToAsn1Object().GetDerEncoded();
+            publicKey = Convert.ToBase64String(serializedPublicBytes);
+            #endregion
+
+            if (isFormat)
+            {
+                publicKey = RsaFormatPem(publicKey, true);
+                privateKey = RsaFormatPem(privateKey, false);
+            }
+
+            return (publicKey, privateKey);
+        }
+        /// <summary>
+        /// 格式化公钥/私钥
+        /// </summary>
+        /// <param name="key">生成的公钥/私钥</param>
+        /// <param name="isPublic">true:公钥 false:私钥</param>
+        /// <returns>PEM格式的公钥/私钥</returns>
+        private static string RsaFormatPem(string key, bool isPublic)
+        {
+            if (key.StartsWith("-----"))
+                return key;
+            else if (key.Contains(Environment.NewLine))
+                return RsaFormatPemAddPerfixSuffix(key, isPublic);
+            else
+            {
+                string result = string.Empty;
+                int length = key.Length / 64;
+                for (int i = 0; i < length; i++)
+                {
+                    int start = i * 64;
+                    result = result + key.Substring(start, 64) + Environment.NewLine;
+                }
+                result = result + key.Substring(length * 64);
+                result = RsaFormatPemAddPerfixSuffix(key, isPublic);
+                return result;
+            }
+        }
+        /// <summary>
+        /// 加上pem格式的标准头和尾
+        /// </summary>
+        /// <param name="key">秘钥</param>
+        /// <param name="isPublic">是否是公钥</param>
+        /// <returns></returns>
+        private static string RsaFormatPemAddPerfixSuffix(string key, bool isPublic)
+        {
+            string typeName = isPublic ? "PUBLIC" : "PRIVATE";
+            key = key.Insert(0, $"-----BEGIN {typeName} KEY-----{Environment.NewLine}");
+            key += $"{Environment.NewLine}-----END {typeName} KEY-----";
+            return key;
+        }
+        /// <summary>
+        /// rsa公钥加密，pem格式
+        /// </summary>
+        /// <param name="data">需要加密的字符串</param>
+        /// <param name="pemPublicKey">pem公钥</param>
+        /// <returns></returns>
+        /// <exception cref="LgyUtilException"></exception>
+        public static string RSAPublicEncrypt_Pem(string data, string pemPublicKey)
+        {
+            pemPublicKey = RsaFormatPem(pemPublicKey, true);//必须用标准pem格式进行加密解密
+            StringReader sr = new StringReader(pemPublicKey);
+            AsymmetricKeyParameter publickey = new PemReader(sr).ReadObject() as AsymmetricKeyParameter;
+
+            if (publickey == null)
+                throw new LgyUtilException("PEM格式公钥不能为空");
+
+            try
+            {
+                var engine = new Pkcs1Encoding(new RsaEngine());
+                engine.Init(true, publickey);
+
+                byte[] bytes = Encoding.UTF8.GetBytes(data);
+                bytes = engine.ProcessBlock(bytes, 0, bytes.Length);
+
+                return Convert.ToBase64String(bytes);
+            }
+            catch
+            {
+                throw new LgyUtilException("加密失败");
+            }
+        }
+        /// <summary>
+        /// rsa私钥解密，pem格式
+        /// </summary>
+        /// <param name="data">需要解密的字符串</param>
+        /// <param name="pemPrivateKey">pem私钥</param>
+        /// <returns></returns>
+        public static string RSAPrivateDecrypt_Pem(string data, string pemPrivateKey)
+        {
+            pemPrivateKey = RsaFormatPem(pemPrivateKey, false);//必须用标准pem格式进行加密解密
+            byte[] bytes = Convert.FromBase64String(data);
+            StringReader sr = new StringReader(pemPrivateKey);
+            AsymmetricKeyParameter prikey = new PemReader(sr).ReadObject() as AsymmetricKeyParameter;
+
+            if (prikey == null)
+                throw new LgyUtilException("私钥读取失败");
+
+            try
+            {
+                var engine = new Pkcs1Encoding(new RsaEngine());
+                engine.Init(false, prikey);
+                bytes = engine.ProcessBlock(bytes, 0, bytes.Length);
+
+                return Encoding.UTF8.GetString(bytes);
+            }
+            catch
+            {
+                throw new LgyUtilException("解密失败");
+            }
+        }
+        #endregion
+
         #endregion
 
         /// <summary>

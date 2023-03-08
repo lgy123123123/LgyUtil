@@ -94,14 +94,22 @@
 
         EncryptUtil.EncryptDES()
         EncryptUtil.DecryptDES()
-3. RSA加密（非对称加密）：
+3. RSA加密（非对称加密）两种格式的秘钥xml、pem：
 
         1)先获取公钥和私钥
-            (string publicKey,string privateKey) = EncryptUtil.GetRSAKey();
+            //xml格式秘钥
+            (string publicKey,string privateKey) = EncryptUtil.GetRSAKey_Xml();
+            //pem格式秘钥，有两种格式，在获取秘钥时，填写第一个参数
+            //1.带标准头尾的  -----BEGIN PUBLIC这种
+            //2.无换行的纯Base64字符串的
+            (string publicKey,string privateKey) = EncryptUtil.GetRSAKey_Pem();
         2)公钥加密：
-            EncryptUtil.RSAPublicEncrypt("数据","公钥");
+            EncryptUtil.RSAPublicEncrypt_Xml("数据","xml公钥");
+            EncryptUtil.RSAPublicEncrypt_Pem("数据","pem公钥");
         3)私钥解密：
-            EncryptUtil.RSAPrivateDecrypt("加密数据","私钥");
+            EncryptUtil.RSAPrivateDecrypt_Xml("xml加密数据","xml私钥");
+            EncryptUtil.RSAPrivateDecrypt_Pem("pem加密数据","pem私钥");
+
 4. GetMd5()，获取字符串的md5
 ## 六、EnumUtil，枚举帮助和扩展(LgyUtil)
 1. GetEnumDescription()，获取枚举[Description]标签的描述
