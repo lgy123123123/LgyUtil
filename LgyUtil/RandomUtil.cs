@@ -343,6 +343,9 @@ namespace LgyUtil
             if (this.IsRandomTemplate)
                 this.NotSame = false;
 
+            if (!this.NotSame)
+                return;
+
             if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 52)
                 throw new LgyUtilException("设置不重复，且只生成字母的时候，随机数长度，不能超过52个");
             if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 10)
