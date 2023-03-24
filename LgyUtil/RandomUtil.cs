@@ -150,7 +150,6 @@ namespace LgyUtil
         /// <returns></returns>
         public string[] GetRandoms(int numCount)
         {
-            this.NotSame = false;
             CheckNotSame();
             string[] randoms = new string[numCount];
             for (int i = 0; i < numCount; i++)
@@ -211,7 +210,7 @@ namespace LgyUtil
             {
                 var m = matches[i];
                 //去除两侧大括号，只保留模板
-                TemplateArr[i]=(m.Value.ReplaceRegex(@"\{|}", ""));
+                TemplateArr[i]=m.Value.ReplaceRegex(@"\{|}", "");
                 this.RandomFormatTemplate = this.RandomFormatTemplate.ReplaceByIndex(m.Index, m.Length, "{RandomTemplate_" + i + "}");
             }
         }

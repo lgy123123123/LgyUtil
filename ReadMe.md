@@ -142,40 +142,55 @@
 5. SerializeNewtonJson()，将对象用NewtonJson序列化为json字符串
 
         public class Test { 
-                public DateTime a;
-                public string b;
+            public DateTime a;
+            public string b;
         }
         var t=new Test(){ a= DateTime.Now,b="x" };
         t.SerializeNewtonJson();
         //输出为{"a":"2023-02-17 16:31:19","b":"x"}
 
-6.MappingTo()，映射对象，映射完的对象，是个全新的，不影响源对象
+6.MappingTo()，映射对象，比AutoFac简单，上手快。
 
-        public class Test { 
-                public DateTime a;
-                public string b;
+        //2个基础类
+        public class A { 
+            public DateTime x;
+            public string y;
         }
-        public class Test1 { 
-                public string b;
+        public class B { 
+            public string y;
+            public int z;
         }
-        var t=new Test(){ a= DateTime.Now,b="x" };
-        var t1=new Test();
-        //将t的属性，映射到t1里
-        t.MappingTo(t1);
-        //将t的属性映射到Test1，并返回一个新的Test1实例
-        var t2 = t.MappingTo<Test1>();
+
+        var a=new A(){ x= DateTime.Now,y="x" };
+        var b=new B(){ y="abc",z=1};
+
+        //1、将a的属性，映射到b里
+        a.MappingTo(b);//b的内容为 y="x",z=1，覆盖同名同类型内容，其它不动
+        //2、将a的属性映射到b，并返回一个新的B实例，覆盖同名同类型内容，其它不动
+        B b = a.MappingTo<b>();
+        //3、自定义配置映射，具体配置参数，请参考https://github.com/MapsterMapper/Mapster
+        B b = a.MappingTo(b, setter =>
+        {
+            //null值不映射
+            setter.IgnoreNullValues(true);
+        });
 ## 十、RandomUtil，随机数帮助类(LgyUtil)
-可以生成7种随机类型码：只有数字、只有大写字母、只有小写字母、大小写字母、小写字母和数字、大写字母和数字、大小写字母和数字
+可以生成7种随机类型码：只有数字、只有大写字母、只有小写字母、大小写字母、小写字母和数字、大写字母和数字、大小写字母和数字。
+
+也可以根据模板生成。随机数内容，用一对大括号包括。 n:数字 x:小写字母 X:大写字母。大括号里的内容，只能包含nXx三种字母，若出现{axnX}，此为错误模板，不会解析。
 
 使用方法：链式调用
 
     //输出7位只有数字的随机数
     RandomUtil.Init(7,Enum_RandomFormat.OnlyNumber).GetRandom();
+    //根据模板，生成随机数。注意：{anXx}为错误模板，不解析
+    RandomUtil.Init("1234-{nnXXxx}-{anXx}-567-{xxnnXX}").GetRandom();
+    //输出内容1234-62DGxg-{anXx}-567-td67IN
 链式调用的所有方法：
 
     GetRandom()，生成一个随机数
-    GetRandoms()，生成多个随机数
-    SetNotSame()，设置的一个随机数中，不出现重复的内容，如生成3个不重复的数字，123，不会出现111
+    GetRandoms()，生成多个随机数(结果可能会出现重复的情况，设置SetNotSame后，只是生成的一个随机数里的内容不会重复)
+    SetNotSame()，生成的一个随机数中，不出现重复的内容，如生成3个不重复的数字，123，不会出现111。注：按模板生成时，此配置无效
     SetPrefix()，设置随机码前缀
     SetSuffix()，设置随机码后缀
 ## 十一、RegexUtil，正则表达式帮助类(LgyUtil)
