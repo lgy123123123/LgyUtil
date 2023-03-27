@@ -85,11 +85,13 @@
 1. AES加密解密(对称加密)：
 
         string key="1234567890123456";//秘钥必须16位
-        string vector = "1234567890123456";//偏移向量也必须是16位，可以不填写，有默认向量
+        string vector = "1234567890123456";//偏移向量也必须是16位，有默认值，可以不填写
+        var model=CipherMode.CBC;//加密模式，默认是CBC，可以不填写
+        padding=PaddingMode.PKCS7;//偏移量,默认是PKCS7，可以不填写
         //加密
-        string miwen = EncryptUtil.AESEncrypt("加密内容",key,vector);
+        string miwen = EncryptUtil.AESEncrypt("加密内容",key,model,padding);
         //解密
-        string mingwen = EncryptUtil.AESDecrypt(miwen,key,vector);
+        string mingwen = EncryptUtil.AESDecrypt(miwen,key,vector,model,padding);
 2. DES加密解密(对称加密)：与上面AES使用方法相同， 只是秘钥和向量都必须是8位长度
 
         EncryptUtil.EncryptDES()

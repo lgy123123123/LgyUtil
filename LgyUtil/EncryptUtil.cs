@@ -1,20 +1,16 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using Org.BouncyCastle.Asn1.Pkcs;
+﻿using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Bcpg.OpenPgp;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Encodings;
 using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Math;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.X509;
-using Quartz.Util;
+using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace LgyUtil
 {
@@ -34,8 +30,10 @@ namespace LgyUtil
         /// <param name="data">待加密的字符串</param>
         /// <param name="key">加密密钥(8位)</param>
         /// <param name="vector">向量字符串，可不填写(8位)</param>
+        /// <param name="model">加密模式，默认是CBC</param>
+        /// <param name="padding">偏移量，默认是PKCS7</param>
         /// <returns>加密成功返回加密后的字符串，失败返回源串</returns>
-        public static string EncryptDES(string data, string key, string vector = "")
+        public static string EncryptDES(string data, string key, string vector = "", CipherMode model = CipherMode.CBC, PaddingMode padding = PaddingMode.PKCS7)
         {
             if (key.Length != 8 || (vector.IsNotNullOrEmpty() && vector.Length != 8))
                 throw new LgyUtilException("参数key和vector的长度，必须都为8");
@@ -43,6 +41,8 @@ namespace LgyUtil
             byte[] rgbIV = vector.IsNullOrEmpty() ? Keys : Encoding.UTF8.GetBytes(vector);
             byte[] inputByteArray = Encoding.UTF8.GetBytes(data);
             DESCryptoServiceProvider dCSP = new DESCryptoServiceProvider();
+            dCSP.Mode = model;
+            dCSP.Padding = padding;
             MemoryStream mStream = new MemoryStream();
             CryptoStream cStream = new CryptoStream(mStream, dCSP.CreateEncryptor(rgbKey, rgbIV), CryptoStreamMode.Write);
             cStream.Write(inputByteArray, 0, inputByteArray.Length);
@@ -57,8 +57,10 @@ namespace LgyUtil
         /// <param name="data">待解密的字符串</param>
         /// <param name="key">解密密钥(8位)</param>
         /// <param name="vector">向量字符串(8位)</param>
+        /// <param name="model">加密模式，默认是CBC</param>
+        /// <param name="padding">偏移量，默认是PKCS7</param>
         /// <returns>解密成功返回解密后的字符串，失败返源串</returns>
-        public static string DecryptDES(string data, string key, string vector = "")
+        public static string DecryptDES(string data, string key, string vector = "", CipherMode model = CipherMode.CBC, PaddingMode padding = PaddingMode.PKCS7)
         {
             if (key.Length != 8 || (vector.IsNotNullOrEmpty() && vector.Length != 8))
                 throw new LgyUtilException("参数key和vector的长度，必须都为8");
@@ -68,6 +70,8 @@ namespace LgyUtil
             byte[] rgbIV = vector.IsNullOrEmpty() ? Keys : Encoding.UTF8.GetBytes(vector);
             byte[] inputByteArray = Convert.FromBase64String(data);
             DESCryptoServiceProvider DCSP = new DESCryptoServiceProvider();
+            DCSP.Mode = model;
+            DCSP.Padding = padding;
             MemoryStream mStream = new MemoryStream();
             CryptoStream cStream = new CryptoStream(mStream, DCSP.CreateDecryptor(rgbKey, rgbIV), CryptoStreamMode.Write);
             cStream.Write(inputByteArray, 0, inputByteArray.Length);
@@ -87,8 +91,10 @@ namespace LgyUtil
         /// <param name="data">被加密的明文</param>
         /// <param name="key">密钥(16位)</param>
         /// <param name="vector">向量(16位)</param>
+        /// <param name="model">加密模式，默认是CBC</param>
+        /// <param name="padding">偏移量，默认是PKCS7</param>
         /// <returns>密文</returns>
-        public static string AESEncrypt(string data, string key, string vector = "")
+        public static string AESEncrypt(string data, string key, string vector = "", CipherMode model = CipherMode.CBC, PaddingMode padding = PaddingMode.PKCS7)
         {
             if (key.Length != 16 || (vector.IsNotNullOrEmpty() && vector.Length != 16))
                 throw new LgyUtilException("参数key和vector的长度，必须都为16");
@@ -100,6 +106,8 @@ namespace LgyUtil
             Byte[] Cryptograph = null; // 加密后的密文
 
             Rijndael Aes = Rijndael.Create();
+            Aes.Mode = model;
+            Aes.Padding = padding;
             try
             {
                 // 开辟一块内存流
@@ -132,8 +140,10 @@ namespace LgyUtil
         /// <param name="data">被解密的密文</param>
         /// <param name="key">密钥(16位)</param>
         /// <param name="vector">向量(16位)</param>
+        /// <param name="model">加密模式，默认是CBC</param>
+        /// <param name="padding">偏移量，默认是PKCS7</param>
         /// <returns>明文</returns>
-        public static string AESDecrypt(string data, string key, string vector = "")
+        public static string AESDecrypt(string data, string key, string vector = "", CipherMode model = CipherMode.CBC, PaddingMode padding = PaddingMode.PKCS7)
         {
             if (data.IsNullOrEmpty())
                 return "";
@@ -147,6 +157,8 @@ namespace LgyUtil
             Byte[] original = null; // 解密后的明文
 
             Rijndael Aes = Rijndael.Create();
+            Aes.Mode = model;
+            Aes.Padding = padding;
             try
             {
                 // 开辟一块内存流，存储密文
@@ -172,7 +184,7 @@ namespace LgyUtil
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
                 original = null;
             }
