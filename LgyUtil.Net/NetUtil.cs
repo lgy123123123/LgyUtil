@@ -349,7 +349,10 @@ namespace LgyUtil
                 return "";
             if (!string.IsNullOrEmpty(headerName) && context.Request.Headers.ContainsKey(headerName))
                 return context.Request.Headers[headerName];
-            return context.Connection.RemoteIpAddress.ToString();
+            if (context.Connection.RemoteIpAddress.IsIPv4MappedToIPv6)
+                return context.Connection.RemoteIpAddress.ToString().Replace("::ffff:", "");//改成ipv4格式的ip
+            else
+                return context.Connection.RemoteIpAddress.ToString();
         }
         /// <summary>
         /// 通过nginx获取ip，nginx需要配置X-Real-IP节点
