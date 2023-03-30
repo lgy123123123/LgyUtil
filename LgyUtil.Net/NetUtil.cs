@@ -9,6 +9,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using UAParser;
 
 namespace LgyUtil
 {
@@ -44,12 +45,12 @@ namespace LgyUtil
         /// <param name="dicHeader">请求头</param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null,TimeSpan? timeout=null)
+        public static HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
             HttpResponseMessage ret = null;
             using (HttpClient client = new HttpClient())
             {
-                if(timeout != null)
+                if (timeout != null)
                 {
                     client.Timeout = timeout.Value;
                 }
@@ -67,7 +68,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Post_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Post(url, postData, dicHeader,timeout);
+            var response = Post(url, postData, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
@@ -81,7 +82,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static T Post_ReturnModel<T>(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
         {
-            return (Post_ReturnString(url, postData, dicHeader,timeout)).DeserializeNewtonJson<T>();
+            return (Post_ReturnString(url, postData, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
         /// post请求，返回请求结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
@@ -196,7 +197,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Get_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Get(url, dicHeader,timeout);
+            var response = Get(url, dicHeader, timeout);
             response.EnsureSuccessStatusCode();
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
@@ -297,13 +298,13 @@ namespace LgyUtil
         /// <param name="data">发送的数据</param>
         /// <param name="eventName">前端接收的事件名称</param>
         /// <param name="retry">多长时间前端再次发送消息</param>
-        public static void SendSseMessage(HttpResponse response,string id,string data,string eventName,TimeSpan retry)
+        public static void SendSseMessage(HttpResponse response, string id, string data, string eventName, TimeSpan retry)
         {
             //浏览器规定返回类型
             response.ContentType = "text/event-stream";
             string writeString = $"retry:{retry.Milliseconds}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
             var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
-            response.Body.Write(writeBytes,0,writeBytes.Length);
+            response.Body.Write(writeBytes, 0, writeBytes.Length);
             response.Body.Flush();
         }
 
@@ -363,6 +364,33 @@ namespace LgyUtil
         public static string GetIp_Nginx(HttpContext context)
         {
             return GetIp(context, "X-Real-IP");
+        }
+
+        private static Parser parser;
+        private static Parser ParserObj
+        {
+            get
+            {
+                if (parser is null)
+                    parser = Parser.GetDefault(new ParserOptions
+                    {
+                        //1秒超时
+                        MatchTimeOut = TimeSpan.FromSeconds(1),
+                        //使用编译的正则
+                        UseCompiledRegex = true
+                    });
+                return parser;
+            }
+        }
+
+        /// <summary>
+        /// 解析UserAgent(引用了UAParser)，OS:操作系统信息  Device:设备信息   UA:浏览器信息
+        /// </summary>
+        /// <param name="userAgent">请求的UserAgent</param>
+        /// <returns></returns>
+        public static ClientInfo GetUserAgentDetail(string userAgent)
+        {
+            return ParserObj.Parse(userAgent);
         }
     }
 }
