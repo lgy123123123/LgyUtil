@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using LgyUtil.Net.Model;
 using Microsoft.AspNetCore.Http;
 using UAParser;
 
@@ -388,9 +389,9 @@ namespace LgyUtil
         /// </summary>
         /// <param name="userAgent">请求的UserAgent</param>
         /// <returns></returns>
-        public static ClientInfo GetUserAgentDetail(string userAgent)
+        public static UserAgentInfo GetUserAgentDetail(string userAgent)
         {
-            return ParserObj.Parse(userAgent);
+            return new UserAgentInfo(ParserObj.Parse(userAgent));
         }
     }
 }
