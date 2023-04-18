@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -266,6 +267,39 @@ namespace LgyUtil
         public static string FormatTemplate(this string template, object obj, bool throwOnMissingValue = true)
         {
             return StringTemplate.Format(template, obj, throwOnMissingValue);
+        }
+        /// <summary>
+        /// Trim扩展，可直接填写字符串
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="trimString">清空两边的字符串</param>
+        /// <returns></returns>
+        public static string Trim(this string s,string trimString)
+        {
+            if(trimString.IsNullOrEmpty()) return s;
+            return s.Trim(trimString.ToArray());
+        }
+        /// <summary>
+        /// TrimStart扩展，可直接填写字符串
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="trimString">清空起始的字符串</param>
+        /// <returns></returns>
+        public static string TrimStart(this string s,string trimString)
+        {
+            if (trimString.IsNullOrEmpty()) return s;
+            return s.TrimStart(trimString.ToArray());
+        }
+        /// <summary>
+        /// TrimEnd扩展，可直接填写字符串
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="trimString">清空结尾的字符串</param>
+        /// <returns></returns>
+        public static string TrimEnd(this string s, string trimString)
+        {
+            if (trimString.IsNullOrEmpty()) return s;
+            return s.TrimEnd(trimString.ToArray());
         }
     }
 }

@@ -209,27 +209,28 @@
 2. IsNullOrEmptyTrim()，trim后，字符串是否为空
 3. IsNotNullOrEmpty()，字符串是否不为空
 4. Format()，就是string.Format
-5. DeserializeNewtonJson()，使用NewtonJson，反序列化字符串为对象
-6. ToDateTime()，转为时间，支持格式化时间
+5. Trim、TrimStart、TrimEnd，三种清空，可以直接填写字符串
+6. DeserializeNewtonJson()，使用NewtonJson，反序列化字符串为对象
+7. ToDateTime()，转为时间，支持格式化时间
 
         //默认格式转换
         "2010-05-06".ToDateTime()
         //格式化字符串转换
         "20100506".ToDateTime("yyyyMMdd")
 
-7. ToByteArr()，转为二进制数组
-8. ByteToString()，二进制数组转为字符串
-9. ToEnum\<Enum>()，字符串转枚举
-10. RegexIsMatch()，匹配正则表达式
-11. ReplaceByIndex()，根据下标索引，替换字符串
+8. ToByteArr()，转为二进制数组
+9. ByteToString()，二进制数组转为字符串
+10. ToEnum\<Enum>()，字符串转枚举
+11. RegexIsMatch()，匹配正则表达式
+12. ReplaceByIndex()，根据下标索引，替换字符串
 
         //替换手机号 177****7777
         "17777777777".ReplaceByIndex(3,4,"*");
 
-12. ReplaceRegex()，根据正则表达式替换
-13. GetStringByRegex()，根据正则表达式，返回匹配的第一组内容
-14. Split()，将字符串拆分成数组，返回string[]
-15. FormatTemplate(),根据模板格式化字符串，可以使用Dictionary<string, object>、匿名类、普通类
+13. ReplaceRegex()，根据正则表达式替换
+14. GetStringByRegex()，根据正则表达式，返回匹配的第一组内容
+15. Split()，将字符串拆分成数组，返回string[]
+16. FormatTemplate(),根据模板格式化字符串，可以使用Dictionary<string, object>、匿名类、普通类
     - Dictionary<string, object>
           
           string str="{a},{b}";
