@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using Mapster;
+using Newtonsoft.Json;
+using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
-using Mapster;
-using Newtonsoft.Json;
 
 namespace LgyUtil
 {
@@ -275,6 +272,19 @@ namespace LgyUtil
 
         #region 对象映射相关
         /// <summary>
+        /// 普通类映射
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TDestination"></typeparam>
+        /// <param name="source">源对象</param>
+        /// <param name="dest">目的对象，会覆盖这个对象的属性</param>
+        /// <returns>返回传入的目的对象</returns>
+        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class, new()
+        {
+            return source.Adapt<TSource, TDestination>(dest);
+        }
+
+        /// <summary>
         /// 自定义映射
         /// 将类的属性，映射到另一个类，只能映射普通的类对象
         /// 自定义配置，查询文档(官方英文文档)https://github.com/MapsterMapper/Mapster
@@ -283,14 +293,27 @@ namespace LgyUtil
         /// <typeparam name="TSource">源类型</typeparam>
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source"></param>
-        /// <param name="dest">映射目的对象</param>
+        /// <param name="dest">目的对象，会覆盖这个对象的属性</param>
         /// <param name="customConfig">里面的对象，可以.Map(s=>s.Name,d=>d.name1).Map(s=>s.Value,d=>d.value1)来配置自定义映射</param>
+        /// <param name="key1">不用传</param>
+        /// <param name="key2">不用传</param>
         /// <returns>返回传入的目的对象</returns>
-        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TSource, TDestination>> customConfig = null) where TSource : class, new() where TDestination : class, new()
+        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TDestination>> customConfig = null, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class, new() where TDestination : class, new()
         {
-            TypeAdapterSetter<TSource, TDestination> setter = TypeAdapterConfig.GlobalSettings.ForType<TSource, TDestination>();
-            customConfig?.Invoke(setter);
-            return source.Adapt<TSource,TDestination>(dest);
+            if (customConfig != null)
+            {
+                var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
+                {
+                    var setter = conf.ForDestinationType<TDestination>();
+                    customConfig(setter);
+                    setter.Config.Compile();
+                }, key1, key2);
+                return source.Adapt<TSource, TDestination>(dest, config);
+            }
+            else
+            {
+                return source.Adapt<TSource, TDestination>(dest);
+            }
         }
         /// <summary>
         /// 普通类映射
@@ -298,10 +321,32 @@ namespace LgyUtil
         /// </summary>
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source"></param>
-        /// <returns></returns>
+        /// <returns>返回映射目的对象</returns>
         public static TDestination MappingTo<TDestination>(this object source) where TDestination : class, new()
         {
             return source.Adapt<TDestination>();
+        }
+        /// <summary>
+        /// 自定义映射
+        /// 将类的属性，映射到另一个类，只能映射普通的类对象
+        /// 自定义配置，查询文档(官方英文文档)https://github.com/MapsterMapper/Mapster
+        /// (热心网友中文翻译文档)https://www.cnblogs.com/staneee/p/14912794.html
+        /// </summary>
+        /// <typeparam name="TDestination"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="customConfig">里面的对象，可以.Map(s=>s.Name,d=>d.name1).Map(s=>s.Value,d=>d.value1)来配置自定义映射</param>
+        /// <param name="key1">不用传</param>
+        /// <param name="key2">不用传</param>
+        /// <returns>返回映射目的对象</returns>
+        public static TDestination MappingTo<TDestination>(this object source, Action<TypeAdapterSetter<TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TDestination : class, new()
+        {
+            var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
+            {
+                var setter = conf.ForDestinationType<TDestination>();
+                customConfig(setter);
+                setter.Config.Compile();
+            }, key1, key2);
+            return source.Adapt<TDestination>(config);
         }
         /// <summary>
         /// 普通类映射
@@ -311,9 +356,9 @@ namespace LgyUtil
         /// <param name="source"></param>
         /// <param name="destination">目的类型(注意，不是对象，是类型)</param>
         /// <returns>返回一个new目的类型 需要自己进行as 转换</returns>
-        public static object MappingTo<TSource>(this TSource source,Type destination) where TSource : class, new()
+        public static object MappingTo<TSource>(this TSource source, Type destination) where TSource : class, new()
         {
-            return source.Adapt(typeof(TSource),destination);
+            return source.Adapt(typeof(TSource), destination);
         }
         #endregion
     }

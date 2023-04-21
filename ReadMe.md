@@ -171,7 +171,7 @@
         //2、将a的属性映射到b，并返回一个新的B实例，覆盖同名同类型内容，其它不动
         B b = a.MappingTo<b>();
         //3、自定义配置映射，具体配置参数，请参考https://github.com/MapsterMapper/Mapster
-        B b = a.MappingTo(b, setter =>
+        B b = a.MappingTo(setter =>
         {
             //null值不映射
             setter.IgnoreNullValues(true);
@@ -253,3 +253,23 @@
           }
           str.FormatTemplate(new Temp{a="1",b=2});
           //输出1,2
+## 十三、TaskUtil，多线程帮助类(LgyUtil)
+1. 执行多线程时，控制并行线程个数
+
+        //最多10个线程并行执行
+        using(var taskMaxUtil = TaskUtil.GetTaskMaxUtil(10))
+        {
+            //执行100次，最大线程数为10
+            for (int i = 0; i < 100; i++)
+            {
+                var tempI = i;
+                taskMaxUtil.AddRunTask(() =>
+                {
+                    Console.WriteLine(tempI);
+                    Thread.Sleep(1000);
+                });
+            }
+            if (taskMaxUtil.WaitAll())
+                Console.WriteLine("所有线程执行完成");
+        }
+        
