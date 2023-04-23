@@ -140,9 +140,9 @@
 1. CloneNewtonJson()，改成使用Mapster克隆，速度快 ~~用NewtonJson，序列化 再 序列化 克隆对象~~
 2. CloneBinary()，改成使用Mapster克隆，速度快 ~~用二进制方法克隆对象，类必须加上[Serializable]特性~~
 3. CloneMapster(),使用Mapster克隆，速度快
-3. In()，类似sql的in，判断内容是否在数组中出现
-4. NotIn()，类似sql的not in
-5. SerializeNewtonJson()，将对象用NewtonJson序列化为json字符串
+4. In()，类似sql的in，判断内容是否在数组中出现
+5. NotIn()，类似sql的not in
+6. SerializeNewtonJson()，将对象用NewtonJson序列化为json字符串
 
         public class Test { 
             public DateTime a;
@@ -152,7 +152,7 @@
         t.SerializeNewtonJson();
         //输出为{"a":"2023-02-17 16:31:19","b":"x"}
 
-6.MappingTo()，映射对象，比AutoFac简单，上手快。
+7.MappingTo()，映射对象，比AutoFac简单，上手快。
 
         //2个基础类
         public class A { 
