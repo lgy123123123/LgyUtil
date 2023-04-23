@@ -15,42 +15,34 @@ namespace LgyUtil
     public static class ObjectUtil
     {
         /// <summary>
-        /// 克隆对象（按照NewtonJson方式）
+        /// 克隆对象，不用NewtonJson了，改为Mapster克隆，速度极快
         /// </summary>
         /// <typeparam name="T">可序列化的类</typeparam>
         /// <param name="obj"></param>
         /// <returns>克隆后的对象</returns>
         public static T CloneNewtonJson<T>(this T obj)
         {
-            var str = JsonConvert.SerializeObject(obj);
-            return JsonConvert.DeserializeObject<T>(str);
+            return obj.Adapt<T>();
         }
         /// <summary>
-        /// 克隆对象（二进制方法），需要给克隆的类以及这个类中使用的类都加上[Serializable]特性，否则会有异常！！！
+        /// 克隆对象，改为Mapster克隆，速度极快
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
         public static T CloneBinary<T>(this T source)
         {
-            if (!typeof(T).IsSerializable)
-            {
-                throw new ArgumentException("The type must be serializable.", "source");
-            }
-
-            if (ReferenceEquals(source, null))
-            {
-                return default;
-            }
-
-            var formatter = new BinaryFormatter();
-            var stream = new MemoryStream();
-            using (stream)
-            {
-                formatter.Serialize(stream, source);
-                stream.Seek(0, SeekOrigin.Begin);
-                return (T)formatter.Deserialize(stream);
-            }
+            return source.Adapt<T>();
+        }
+        /// <summary>
+        /// 克隆对象，使用Mapster
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static T CloneMapster<T>(this T source)
+        {
+            return source.Adapt<T>();
         }
         #region In
         /// <summary>
@@ -277,7 +269,7 @@ namespace LgyUtil
         /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TDestination"></typeparam>
         /// <param name="source">源对象</param>
-        /// <param name="dest">目的对象，会覆盖这个对象的属性</param>
+        /// <param name="dest">目的对象，会覆盖这个对象的属性，可以传null</param>
         /// <returns>返回传入的目的对象</returns>
         public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class, new()
         {
@@ -293,27 +285,20 @@ namespace LgyUtil
         /// <typeparam name="TSource">源类型</typeparam>
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source"></param>
-        /// <param name="dest">目的对象，会覆盖这个对象的属性</param>
-        /// <param name="customConfig">里面的对象，可以.Map(s=>s.Name,d=>d.name1).Map(s=>s.Value,d=>d.value1)来配置自定义映射</param>
+        /// <param name="dest">目的对象，会覆盖这个对象的属性，可以传null</param>
+        /// <param name="customConfig">映射配置，例如：setter=>{setter.Map(dest=>dest.Name,source=>source.name1).Ignore(dest=>dest.value1)}</param>
         /// <param name="key1">不用传</param>
         /// <param name="key2">不用传</param>
         /// <returns>返回传入的目的对象</returns>
-        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TDestination>> customConfig = null, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class, new() where TDestination : class, new()
+        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TSource, TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class, new() where TDestination : class, new()
         {
-            if (customConfig != null)
+            var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
-                var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
-                {
-                    var setter = conf.ForDestinationType<TDestination>();
-                    customConfig(setter);
-                    setter.Config.Compile();
-                }, key1, key2);
-                return source.Adapt<TSource, TDestination>(dest, config);
-            }
-            else
-            {
-                return source.Adapt<TSource, TDestination>(dest);
-            }
+                var setter = conf.ForType<TSource, TDestination>();
+                customConfig(setter);
+                setter.Config.Compile();
+            }, key1, key2);
+            return source.Adapt<TSource, TDestination>(dest, config);
         }
         /// <summary>
         /// 普通类映射
@@ -334,7 +319,7 @@ namespace LgyUtil
         /// </summary>
         /// <typeparam name="TDestination"></typeparam>
         /// <param name="source"></param>
-        /// <param name="customConfig">里面的对象，可以.Map(s=>s.Name,d=>d.name1).Map(s=>s.Value,d=>d.value1)来配置自定义映射</param>
+        /// <param name="customConfig">映射配置，例如：setter=>{setter.Map&lt;TDestination,TSource&gt;(dest=>dest.Name,source=>source.name1).Ignore(dest=>dest.value1)}</param>
         /// <param name="key1">不用传</param>
         /// <param name="key2">不用传</param>
         /// <returns>返回映射目的对象</returns>

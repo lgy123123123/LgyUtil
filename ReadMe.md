@@ -137,8 +137,9 @@
 4. ToObject()，根据二进制数组，返回对象，类必须打上[Serializable]标签
 5. ToEnum\<Enum>()，将数值转换为枚举对象
 ## 九、ObjectUtil，对象扩展类(LgyUtil)
-1. CloneNewtonJson()，用NewtonJson，序列化 再 序列化 克隆对象
-2. CloneBinary()，用二进制方法克隆对象，类必须加上[Serializable]特性
+1. CloneNewtonJson()，改成使用Mapster克隆，速度快 ~~用NewtonJson，序列化 再 序列化 克隆对象~~
+2. CloneBinary()，改成使用Mapster克隆，速度快 ~~用二进制方法克隆对象，类必须加上[Serializable]特性~~
+3. CloneMapster(),使用Mapster克隆，速度快
 3. In()，类似sql的in，判断内容是否在数组中出现
 4. NotIn()，类似sql的not in
 5. SerializeNewtonJson()，将对象用NewtonJson序列化为json字符串
