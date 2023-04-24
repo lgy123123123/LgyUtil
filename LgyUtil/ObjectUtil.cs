@@ -15,32 +15,50 @@ namespace LgyUtil
     public static class ObjectUtil
     {
         /// <summary>
-        /// 克隆对象，不用NewtonJson了，改为Mapster克隆，速度极快
+        /// 克隆对象（按照NewtonJson方式）
         /// </summary>
         /// <typeparam name="T">可序列化的类</typeparam>
         /// <param name="obj"></param>
         /// <returns>克隆后的对象</returns>
         public static T CloneNewtonJson<T>(this T obj)
         {
-            return obj.Adapt<T>();
+            var str = JsonConvert.SerializeObject(obj);
+            return JsonConvert.DeserializeObject<T>(str);
         }
         /// <summary>
-        /// 克隆对象，改为Mapster克隆，速度极快
+        /// 克隆对象（二进制方法），需要给克隆的类以及这个类中使用的类都加上[Serializable]特性，否则会有异常！！！
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
         public static T CloneBinary<T>(this T source)
         {
-            return source.Adapt<T>();
+            if (!typeof(T).IsSerializable)
+            {
+                throw new ArgumentException("The type must be serializable.", "source");
+            }
+
+            if (ReferenceEquals(source, null))
+            {
+                return default;
+            }
+
+            var formatter = new BinaryFormatter();
+            var stream = new MemoryStream();
+            using (stream)
+            {
+                formatter.Serialize(stream, source);
+                stream.Seek(0, SeekOrigin.Begin);
+                return (T)formatter.Deserialize(stream);
+            }
         }
         /// <summary>
-        /// 克隆对象，使用Mapster
+        /// 克隆对象，使用Mapster，只能克隆普通类(DataTable不能克隆)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static T CloneMapster<T>(this T source)
+        public static T CloneMapster<T>(this T source) where T : class, new()
         {
             return source.Adapt<T>();
         }
