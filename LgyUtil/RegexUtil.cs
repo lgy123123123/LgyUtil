@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LgyUtil
 {
@@ -85,5 +87,49 @@ namespace LgyUtil
         {
             return ip.RegexIsMatch(IP);
         }
+
+        #region 密码正则表达式
+        /// <summary>
+        /// 密码验证：必须包含数字、字母(不区分大小写)
+        /// </summary>
+        public const string Pwd_NumberLetter = @"(?=.*\d)(?=.*[a-zA-z]).*";
+        /// <summary>
+        /// 密码验证：必须包含数字、字母(不区分大小写)、特殊符号(! @ # $ % ^ &amp; * ( ) _ + - = . , { } [ ] ?)
+        /// </summary>
+        public const string Pwd_NumberLetterSymbols = @"(?=.*\d)(?=.*[a-zA-z])(?=.*[!@#\$%\^&\*\(\)_\+\-=\.,\{\}\[\]\?]).*";
+        /// <summary>
+        /// 密码验证：必须包含数字、大写字母、小写字母
+        /// </summary>
+        public const string Pwd_NumberLetterBigSmall = @"(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*";
+        /// <summary>
+        /// 密码验证：必须包含数字、大写字母、小写字母、特殊符号(! @ # $ % ^ &amp; * ( ) _ + - = . , { } [ ] ?)
+        /// </summary>
+        public const string Pwd_NumberLetterBigSmallSymbols = @"(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#\$%\^&\*\(\)_\+\-=\.,\{\}\[\]\?]).*";
+
+        /// <summary>
+        /// 密码验证：必须包含数字、字母(不区分大小写)
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static bool IsPwd_NumberLetter(string password) => password.RegexIsMatch(Pwd_NumberLetter);
+        /// <summary>
+        /// 密码验证：必须包含数字、字母(不区分大小写)、特殊符号(! @ # $ % ^ &amp; * ( ) _ + - = . , { } [ ] ?)
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static bool IsPwd_NumberLetterSymbols(string password) => password.RegexIsMatch(Pwd_NumberLetterSymbols);
+        /// <summary>
+        /// 密码验证：必须包含数字、大写字母、小写字母
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static bool IsPwd_NumberLetterBigSmall(string password) => password.RegexIsMatch(Pwd_NumberLetterBigSmall);
+        /// <summary>
+        /// 密码验证：必须包含数字、大写字母、小写字母、特殊符号(! @ # $ % ^ &amp; * ( ) _ + - = . , { } [ ] ?)
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public static bool IsPwd_NumberLetterBigSmallSymbols(string password) => password.RegexIsMatch(Pwd_NumberLetterBigSmallSymbols);
+        #endregion
     }
 }
