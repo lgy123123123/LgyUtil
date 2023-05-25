@@ -205,6 +205,10 @@
     4. RegexUtil.IsDomainName()，是否是域名
     5. RegexUtil.IsEmail()，是否是邮件
     6. RegexUtil.IsIP()，是否是IP地址
+    7. RegexUtil.IsPwd_NumberLetter()，密码验证：必须包含数字、字母(不区分大小写)
+    8. RegexUtil.IsPwd_NumberLetterSymbols()，密码验证：必须包含数字、字母(不区分大小写)、特殊符号(! @ # $ % ^ & * ( ) _ + - = . , { } [ ] ?)
+    9. RegexUtil.IsPwd_NumberLetterBigSmall()，密码验证：必须包含数字、大写字母、小写字母
+    10. RegexUtil.IsPwd_NumberLetterBigSmallSymbols()，密码验证：必须包含数字、大写字母、小写字母、特殊符号(! @ # $ % ^ & * ( ) _ + - = . , { } [ ] ?)
 ## 十二、StringUtil，字符串帮助和扩展类(LgyUtil)
 1. IsNullOrEmpty()，字符串是否为空
 2. IsNullOrEmptyTrim()，trim后，字符串是否为空
