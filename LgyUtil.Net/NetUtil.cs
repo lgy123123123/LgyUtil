@@ -30,6 +30,20 @@ namespace LgyUtil
             {
                 foreach (var kvHeader in dicHeader)
                 {
+                    if (kvHeader.Key == "Authorization")
+                    {
+                        string[] auth = kvHeader.Value.Split(' ');
+                        if (auth.Length != 2)
+                            throw new Exception("header中，Authorization内容格式不正确，应为Schema token，token前面必须有模式");
+                        request.Headers.Authorization = new AuthenticationHeaderValue(auth[0], auth[1]);
+                        continue;
+                    }
+                    else if (kvHeader.Key == "ContentType")
+                    {
+                        request.Content.Headers.ContentType = new MediaTypeHeaderValue(kvHeader.Value);
+                        continue;
+                    }
+
                     request.Content.Headers.Add(kvHeader.Key, kvHeader.Value);
                 }
             }
