@@ -4,14 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>
-	    源码：https://github.com/lgy123123123/LgyUtil
-		缓存帮助类(CacheMemoryUtil、CacheRedisUtil)
+		源码：https://github.com/lgy123123123/LgyUtil
+		缓存帮助类(MemoryCache、RedisCache)
 	</Description>
     <Authors>lgy</Authors>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
