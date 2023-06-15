@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace LgyUtil.Cache.Custom
 {
@@ -14,6 +18,27 @@ namespace LgyUtil.Cache.Custom
         /// </summary>
         ConcurrentDictionary<string, MemoryCacheModel> dicCache { get; set; } = new ConcurrentDictionary<string, MemoryCacheModel>();
 
+        /// <summary>
+        /// 内存缓存帮助类
+        /// </summary>
+        /// <param name="clearExpirationTime">定期清理缓存的时间，默认5分钟清理一次，使用TimeSpan.Zero，不进行清理</param>
+        public MemoryCache(TimeSpan? clearExpirationTime = null)
+        {
+            //默认5分钟清理一次
+            if (clearExpirationTime == null)
+                clearExpirationTime = TimeSpan.FromMinutes(5);
+
+            if (clearExpirationTime != TimeSpan.Zero)//zero不清理
+                //开一个线程，定时检查缓存是否过期
+                Task.Run(() =>
+                {
+                    Thread.Sleep(clearExpirationTime.Value);
+                    foreach (var val in dicCache.Values.Where(c => c.ExpiresSliding != null || c.ExpiressAbsoulte != null))
+                    {
+                        CheckDataExpiress(val.Key);
+                    }
+                });
+        }
         /// <summary>
         /// 是否存在key
         /// </summary>
@@ -38,6 +63,7 @@ namespace LgyUtil.Cache.Custom
                 throw new Exception("绝对过期时间，不能小于当前时间");
             var cache = new MemoryCacheModel
             {
+                Key = key,
                 Value = value,
                 ExpiresSliding = expiresSliding,
                 ExpiressAbsoulte = expiressAbsoulte
@@ -112,6 +138,7 @@ namespace LgyUtil.Cache.Custom
         /// </summary>
         /// <param name="key"></param>
         public void Remove(string key) => dicCache.TryRemove(key, out _);
+
         /// <summary>
         /// 清空缓存
         /// </summary>

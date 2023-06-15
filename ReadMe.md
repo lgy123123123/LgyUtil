@@ -277,4 +277,29 @@
             if (taskMaxUtil.WaitAll())
                 Console.WriteLine("所有线程执行完成");
         }
-        
+## 十四、ICache，缓存帮助类(LgyUtil.Cache)
+- 缓存分为本地缓存(MemoryCache)、Redis缓存(RedisCache)。两个使用方法一样，构造一个静态变量，全局使用
+
+        // 本地缓存，构造函数中，可以设置清理缓存时间，默认5分钟清理一次，使用TimeSpan.Zero，不进行清理
+        // MemoryCache(TimeSpan? clearExpirationTime = null)
+        public static ICache cache=new MemoryCache();
+        // Redis缓存
+        public static ICache cacheRedis=new ReidsCache("localhost");//构造函数，填写redis连接字符串
+1. 设置缓存，Set\<T>(string key, T value, TimeSpan? expiresSliding = null,DateTime? expiressAbsoulte = null)，可以设置滑动过期时间和绝对过期时间
+
+        //设置缓存后，每读取一次，缓存有效期延长1小时，缓存最多保持1天，1天后，缓存一定消失
+        cache.Set("test",new List<string>(){"1","2"},TimeSpan.FromHours(1),DateTime.Now.AddDays(1));
+
+        //设置缓存后，每读取一次，缓存有效期延长1小时，一直读取，一直延长。1小时内没有读取，缓存过期
+        cache.Set("test",new List<string>(){"1","2"},TimeSpan.FromHours(1));
+
+        //设置缓存后，读取也不会延长缓存有效期，缓存最多保持1天，1天后，缓存一定消失
+        cache.Set("test",new List<string>(){"1","2"},null,DateTime.Now.AddDays(1));
+2. 获取缓存，Get\<T>(string key)
+3. 获取字符串缓存，GetString(string key)
+4. 验证是否存在缓存，Exists(string key)
+5. 删除一个缓存，Remove(string key)
+6. 清空缓存，或清空多个缓存，RemoveAll(params string[] keys)
+7. 根据key前缀，清空缓存，RemoveAllPrefix(string prefix)
+8. 根据key前缀，获取缓存，GetKeysByPrefix(string prefix)
+9. 获取所有key,GetAllKeys()

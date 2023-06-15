@@ -11,6 +11,10 @@ namespace LgyUtil.Cache.Custom
     internal class MemoryCacheModel
     {
         /// <summary>
+        /// 缓存key
+        /// </summary>
+        public string Key { get; set; }
+        /// <summary>
         /// 缓存的值
         /// </summary>
         public object Value { get; set; }
