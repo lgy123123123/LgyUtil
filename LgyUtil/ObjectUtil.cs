@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Xml.Serialization;
 
 namespace LgyUtil

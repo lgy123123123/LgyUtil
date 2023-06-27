@@ -164,27 +164,17 @@ namespace LgyUtil
             }
             return str;
         }
-        /// <summary>
-        /// 是否匹配正则表达式
-        /// </summary>
-        /// <param name="s"></param>
-        /// <param name="pattern">RegexUtil里面的内容，也可自己写表达式</param>
-        /// <returns></returns>
-        public static bool RegexIsMatch(this string s, string pattern)
-        {
-            return Regex.IsMatch(s, pattern);
-        }
 
         /// <summary>
         /// 是否匹配正则表达式
         /// </summary>
         /// <param name="s"></param>
         /// <param name="pattern">RegexUtil里面的内容，也可自己写表达式</param>
-        /// <param name="option"></param>
+        /// <param name="options">正则表达式选项</param>
         /// <returns></returns>
-        public static bool RegexIsMatch(this string s, string pattern, RegexOptions option)
+        public static bool RegexIsMatch(this string s, string pattern, RegexOptions options = RegexOptions.None)
         {
-            return Regex.IsMatch(s, pattern, option);
+            return Regex.IsMatch(s, pattern, options);
         }
         /// <summary>
         /// 将字符串下标序号内容，替换成指定字符串
@@ -208,20 +198,9 @@ namespace LgyUtil
         /// <param name="s"></param>
         /// <param name="pattern">正则表达式</param>
         /// <param name="replacement">替换内容</param>
-        /// <returns></returns>
-        public static string ReplaceRegex(this string s, string pattern, string replacement)
-        {
-            return Regex.Replace(s, pattern, replacement);
-        }
-        /// <summary>
-        /// 正则表达式替换字符串
-        /// </summary>
-        /// <param name="s"></param>
-        /// <param name="pattern">正则表达式</param>
-        /// <param name="replacement">替换内容</param>
         /// <param name="option">正则表达式选项</param>
         /// <returns></returns>
-        public static string ReplaceRegex(this string s, string pattern, string replacement, RegexOptions option)
+        public static string ReplaceRegex(this string s, string pattern, string replacement, RegexOptions option = RegexOptions.None)
         {
             return Regex.Replace(s, pattern, replacement, option);
         }
@@ -230,10 +209,11 @@ namespace LgyUtil
         /// </summary>
         /// <param name="s"></param>
         /// <param name="pattern">正则表达式</param>
+        /// <param name="options">正则表达式选项</param>
         /// <returns></returns>
-        public static string GetStringByRegex(this string s, string pattern)
+        public static string GetStringByRegex(this string s, string pattern, RegexOptions options = RegexOptions.None)
         {
-            return Regex.Match(s, pattern).Value;
+            return Regex.Match(s, pattern, options).Value;
         }
         /// <summary>
         /// 分隔字符串，返回数组
@@ -274,9 +254,9 @@ namespace LgyUtil
         /// <param name="s"></param>
         /// <param name="trimString">清空两边的字符串</param>
         /// <returns></returns>
-        public static string Trim(this string s,string trimString)
+        public static string Trim(this string s, string trimString)
         {
-            if(trimString.IsNullOrEmpty()) return s;
+            if (trimString.IsNullOrEmpty()) return s;
             return s.Trim(trimString.ToArray());
         }
         /// <summary>
@@ -285,7 +265,7 @@ namespace LgyUtil
         /// <param name="s"></param>
         /// <param name="trimString">清空起始的字符串</param>
         /// <returns></returns>
-        public static string TrimStart(this string s,string trimString)
+        public static string TrimStart(this string s, string trimString)
         {
             if (trimString.IsNullOrEmpty()) return s;
             return s.TrimStart(trimString.ToArray());

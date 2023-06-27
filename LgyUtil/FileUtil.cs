@@ -1,6 +1,8 @@
-﻿using System;
+﻿using LgyUtil.OtherSource;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -132,15 +134,16 @@ namespace LgyUtil
             return ret;
         }
         /// <summary>
-        /// 获取文件夹中的文件全路径
+        /// 获取文件夹中的文件全路径，获取结果，按照windows系统文件名排序规则，升序排序
         /// </summary>
         /// <param name="dir">文件夹路径</param>
         /// <param name="deep">深度查找，是否包括文件夹中的文件</param>
+        /// <param name="searchPattern">文件名匹配字符串，仅支持?和*，不支持正则表达式</param>
         /// <returns>文件绝对路径集合</returns>
-        public static List<string> GetAllFiles(string dir, bool deep = true)
+        public static List<string> GetAllFiles(string dir, bool deep = true, string searchPattern="*")
         {
             List<string> ret = new List<string>();
-            return GetAllFilesDeep(dir, deep, ret);
+            return GetAllFilesDeep(dir, deep, ret, searchPattern);
         }
         /// <summary>
         /// 递归获取文件名
@@ -148,23 +151,44 @@ namespace LgyUtil
         /// <param name="path">路径</param>
         /// <param name="deep">深度查找，是否包括文件夹中的文件</param>
         /// <param name="ret">文件绝对路径集合</param>
+        /// <param name="searchPattern">匹配字符串，仅支持?和*，不支持正则表达式</param>
         /// <returns>文件绝对路径集合</returns>
-        private static List<string> GetAllFilesDeep(string path, bool deep, List<string> ret)
+        private static List<string> GetAllFilesDeep(string path, bool deep, List<string> ret, string searchPattern)
         {
             if (File.Exists(path))
                 ret.Add(path);
             else if (Directory.Exists(path))
             {
-                foreach (string f in Directory.GetFiles(path))
+                foreach (string f in SortByWindowsFileName(Directory.GetFiles(path, searchPattern)))
                 {
-                    GetAllFilesDeep(f, deep, ret);
+                    GetAllFilesDeep(f, deep, ret, searchPattern);
                 }
-                foreach (string dir in Directory.GetDirectories(path))
+                foreach (string dir in SortByWindowsFileName(Directory.GetDirectories(path)))
                 {
-                    GetAllFilesDeep(dir, deep, ret);
+                    GetAllFilesDeep(dir, deep, ret, searchPattern);
                 }
             }
             return ret;
+        }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，升序
+        /// </summary>
+        /// <param name="fileNames"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> SortByWindowsFileName(IEnumerable<string> fileNames)
+        {
+            return fileNames.OrderBy(f => f, new AlphanumComparator<string>());
+        }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，降序
+        /// </summary>
+        /// <param name="fileNames"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> SortByWindowsFileNameDesc(IEnumerable<string> fileNames)
+        {
+            return fileNames.OrderByDescending(f => f, new AlphanumComparator<string>());
         }
 
         #region 文件编码格式 https://www.cnblogs.com/cyberarmy/p/5652835.html

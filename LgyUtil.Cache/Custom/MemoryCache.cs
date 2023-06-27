@@ -39,24 +39,13 @@ namespace LgyUtil.Cache.Custom
                     }
                 });
         }
-        /// <summary>
-        /// 是否存在key
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public bool Exists(string key)
         {
             CheckDataExpiress(key);
             return dicCache.ContainsKey(key);
         }
-        /// <summary>
-        /// 添加缓存
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <param name="expiresSliding">滑动过期时间(一段内不访问，则清空缓存，访问后，按滑动时间重新计算)，null则不设置</param>
-        /// <param name="expiressAbsoulte">绝对过期时间，null则不设置</param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public void Set<T>(string key, T value, TimeSpan? expiresSliding = null, DateTime? expiressAbsoulte = null)
         {
             if (expiressAbsoulte != null && expiressAbsoulte.Value < DateTime.Now)
@@ -108,12 +97,7 @@ namespace LgyUtil.Cache.Custom
                 }
             }
         }
-        /// <summary>
-        /// 获取引用类型缓存，没有的时候，返回默认值
-        /// </summary>
-        /// <param name="key"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public T Get<T>(string key)
         {
             CheckDataExpiress(key, true);
@@ -121,11 +105,7 @@ namespace LgyUtil.Cache.Custom
                 return (T)dicCache[key].Value;
             return default;
         }
-        /// <summary>
-        /// 获取字符串缓存
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public string GetString(string key)
         {
             CheckDataExpiress(key, true);
@@ -133,16 +113,10 @@ namespace LgyUtil.Cache.Custom
                 return dicCache[key].Value as string;
             return null;
         }
-        /// <summary>
-        /// 删除key
-        /// </summary>
-        /// <param name="key"></param>
+        /// <inheritdoc/>
         public void Remove(string key) => dicCache.TryRemove(key, out _);
 
-        /// <summary>
-        /// 清空缓存
-        /// </summary>
-        /// <param name="keys">可选key，不填清空所有</param>
+        /// <inheritdoc/>
         public void RemoveAll(params string[] keys)
         {
             if (keys.Length > 0)
@@ -155,10 +129,7 @@ namespace LgyUtil.Cache.Custom
             else
                 dicCache.Clear();
         }
-        /// <summary>
-        /// 根据key前缀，删除缓存
-        /// </summary>
-        /// <param name="prefix">key前缀</param>
+        /// <inheritdoc/>
         public void RemoveAllPrefix(string prefix)
         {
             var findKeys = GetKeysByPrefix(prefix);
@@ -167,23 +138,12 @@ namespace LgyUtil.Cache.Custom
                 Remove(key);
             }
         }
-        /// <summary>
-        /// 根据前缀获取key
-        /// </summary>
-        /// <param name="prefix">前缀</param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public string[] GetKeysByPrefix(string prefix) => dicCache.Keys.Where(k => k.StartsWith(prefix)).ToArray();
 
-        /// <summary>
-        /// 根据包含内容获取key
-        /// </summary>
-        /// <param name="contains">包含内容</param>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public string[] GetKeysByContains(string contains) => dicCache.Keys.Where(k => k.Contains(contains)).ToArray();
-        /// <summary>
-        /// 获取所有key
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public string[] GetAllKeys() => dicCache.Keys.ToArray();
     }
 }

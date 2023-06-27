@@ -1,21 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>
 	    源码：https://github.com/lgy123123123/LgyUtil
 		post get请求帮助类(NetUtil)
+		2.0以后，仅支持net5、6、7
 	</Description>
     <Authors>lgy</Authors>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.1.7</Version>
+    <Version>2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="LgyUtil" Version="1.1.15" />
+    <PackageReference Include="LgyUtil" Version="1.1.21" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="UAParser" Version="3.1.47" />
   </ItemGroup>
