@@ -26,7 +26,7 @@ namespace LgyUtil
         private static ConcurrentDictionary<string, HttpClient> _httpCollection = new ConcurrentDictionary<string, HttpClient>();
 
         /// <summary>
-        /// 获取HttpClient
+        /// 获取HttpClient，有缓存机制
         /// <para>静态ip，获得永久不过期的HttpClient</para>
         /// <para>域名，获得15分钟重建一次的HttpClient</para>
         /// </summary>
@@ -62,7 +62,21 @@ namespace LgyUtil
             {
                 foreach (var kvHeader in dicHeader)
                 {
-                    request.Content.Headers.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value);
+                    //添加失败，查看其他的添加内容
+                    if(!request.Content.Headers.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value))
+                    {
+                        if (kvHeader.Key.Equals("Authorization", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            var splitToken = kvHeader.Value.Split(' ');
+                            if (splitToken.Length != 2)
+                                throw new Exception("Header为Authorization时，格式必须为xxxxx xxxxx(schemc token)，中间必须有个空格");
+                            request.Headers.Authorization = new AuthenticationHeaderValue(splitToken[0], splitToken[1]);
+                        }
+                        else if (kvHeader.Key.Equals("ContentType", StringComparison.CurrentCultureIgnoreCase))
+                            request.Content.Headers.ContentType = new MediaTypeHeaderValue(kvHeader.Value);
+                        else
+                            throw new Exception($"添加Header:{kvHeader.Key}失败，请使用GetHttpClient，自定义执行请求");
+                    }
                 }
             }
             if (dicHeader == null || !dicHeader.ContainsKey("ContentType"))
@@ -87,7 +101,7 @@ namespace LgyUtil
             return client.SendAsync(request).GetAwaiter().GetResult();
         }
         /// <summary>
-        /// post请求，返回请求结果字符串(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求，返回请求结果字符串
         /// </summary>
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
@@ -102,7 +116,7 @@ namespace LgyUtil
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
         /// <summary>
-        /// post请求，返回模型(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求，返回模型
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="url">请求路径</param>
@@ -115,7 +129,7 @@ namespace LgyUtil
             return (Post_ReturnString(url, postData, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
-        /// post请求，返回请求结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求，返回请求结果流
         /// </summary>
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
@@ -132,23 +146,24 @@ namespace LgyUtil
         #endregion
         #region 异步Post
         /// <summary>
-        /// post请求(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求
         /// </summary>
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> PostAsync(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        public static async Task<HttpResponseMessage> PostAsync(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption= HttpCompletionOption.ResponseContentRead)
         {
             HttpClient client = GetHttpClient(url);
             if (timeout != null)
                 client.Timeout = timeout.Value;
             var request = Post_BuildRequest(url, postData, dicHeader);
-            return await client.SendAsync(request);
+            return await client.SendAsync(request,completionOption);
         }
         /// <summary>
-        /// post请求，返回请求结果字符串(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求，返回请求结果字符串
         /// </summary>
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
@@ -163,7 +178,7 @@ namespace LgyUtil
             return await response.Content.ReadAsStringAsync();
         }
         /// <summary>
-        /// post请求，返回模型(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求，返回模型
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="url">请求路径</param>
@@ -176,16 +191,17 @@ namespace LgyUtil
             return (await PostAsync_ReturnString(url, postData, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
-        /// post请求，返回请求结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// post请求，返回请求结果流
         /// </summary>
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
         /// <param name="dicHeader">请求头</param>
         /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
         /// <returns></returns>
-        public static async Task<Stream> PostAsync_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        public static async Task<Stream> PostAsync_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await PostAsync(url, postData, dicHeader, timeout);
+            var response = await PostAsync(url, postData, dicHeader, timeout,completionOption);
             if (!response.IsSuccessStatusCode)
                 throw new Exception(await response.Content.ReadAsStringAsync());
             return await response.Content.ReadAsStreamAsync();
@@ -196,7 +212,7 @@ namespace LgyUtil
         #region Get请求
         #region 同步Get
         /// <summary>
-        /// Get请求(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求
         /// </summary>
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
@@ -217,7 +233,7 @@ namespace LgyUtil
             return client.GetAsync(new Uri(url)).GetAwaiter().GetResult();
         }
         /// <summary>
-        /// Get请求，返回结果字符串(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求，返回结果字符串
         /// </summary>
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
@@ -231,7 +247,7 @@ namespace LgyUtil
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
         }
         /// <summary>
-        /// Get请求，返回模型(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求，返回模型
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="url">请求路径</param>
@@ -243,7 +259,7 @@ namespace LgyUtil
             return (Get_ReturnString(url, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
-        /// Get请求，返回结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求，返回结果流
         /// </summary>
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
@@ -258,13 +274,14 @@ namespace LgyUtil
         #endregion
         #region 异步Get
         /// <summary>
-        /// Get请求(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求
         /// </summary>
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        public static async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
             HttpClient client = GetHttpClient(url);
             if (dicHeader != null)
@@ -276,10 +293,10 @@ namespace LgyUtil
             }
             if (timeout != null)
                 client.Timeout = timeout.Value;
-            return await client.GetAsync(new Uri(url));
+            return await client.GetAsync(new Uri(url),completionOption);
         }
         /// <summary>
-        /// Get请求，返回结果字符串(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求，返回结果字符串
         /// </summary>
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
@@ -292,7 +309,7 @@ namespace LgyUtil
             return await response.Content.ReadAsStringAsync();
         }
         /// <summary>
-        /// Get请求，返回模型(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求，返回模型
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="url">请求路径</param>
@@ -304,15 +321,16 @@ namespace LgyUtil
             return (await GetAsync_ReturnString(url, dicHeader, timeout)).DeserializeNewtonJson<T>();
         }
         /// <summary>
-        /// Get请求，返回结果流(每次都会新建一个tcp，linux下可以放心使用，windows下会不会立即释放tcp连接，谨慎使用)
+        /// Get请求，返回结果流
         /// </summary>
         /// <param name="url">请求地址，参数加在这里</param>
         /// <param name="dicHeader">请求头</param>
         /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
         /// <returns></returns>
-        public static async Task<Stream> GetAsync_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        public static async Task<Stream> GetAsync_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await GetAsync(url, dicHeader, timeout);
+            var response = await GetAsync(url, dicHeader, timeout,completionOption);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStreamAsync();
         }

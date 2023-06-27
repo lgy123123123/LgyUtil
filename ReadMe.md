@@ -277,7 +277,7 @@
             if (taskMaxUtil.WaitAll())
                 Console.WriteLine("所有线程执行完成");
         }
-## 十四、ICache，缓存帮助类(LgyUtil.Cache)
+## 十四、ICache，缓存帮助类(<font color="red">LgyUtil.Cache</font>)
 - 缓存分为本地缓存(MemoryCache)、Redis缓存(RedisCache)。两个使用方法一样，构造一个静态变量，全局使用
 
         // 本地缓存，构造函数中，可以设置清理缓存时间，默认5分钟清理一次，使用TimeSpan.Zero，不进行清理
@@ -303,3 +303,41 @@
 7. 根据key前缀，清空缓存，RemoveAllPrefix(string prefix)
 8. 根据key前缀，获取缓存，GetKeysByPrefix(string prefix)
 9. 获取所有key,GetAllKeys()
+## 十五、网络请求帮助类(<font color="red">LgyUtil.Net</font>)
+1. 获取HttpClient对象，使用完，不用释放
+
+        NetUtil.GetHttpClient(string url, SocketsHttpHandler _socketsHttpHandler = null)
+    - 静态ip获取一个永久不变的对象
+    - 域名则是15分钟刷新一次的对象
+2. 发送Post、Get请求
+    - NetUtil.Post
+    - NetUtil.PostAsync
+    - NetUtil.Get
+    - NetUtil.GetAsync
+
+            HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+            HttpResponseMessage Get(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+3. 发送Post、Get请求，返回字符串
+    - NetUtil.Post_ReturnString
+    - NetUtil.PostAsync_ReturnString
+    - NetUtil.Get_ReturnString
+    - NetUtil.GetAsync_ReturnString
+
+            string Post_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+            string Get_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+4. 发送Post、Get请求，返回模型类
+    - NetUtil.Post_ReturnModel
+    - NetUtil.PostAsync_ReturnModel
+    - NetUtil.Get_ReturnModel
+    - NetUtil.GetAsync_ReturnModel
+
+            T Post_ReturnModel<T>(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+            T Get_ReturnModel<T>(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+5. 发送Post、Get请求，返回流
+    - NetUtil.Post_ReturnStream
+    - NetUtil.PostAsync_ReturnStream
+    - NetUtil.Get_ReturnStream
+    - NetUtil.GetAsync_ReturnStream
+
+            Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+            Stream Get_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
