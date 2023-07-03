@@ -1,18 +1,34 @@
 ﻿using CSRedis;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 
 namespace LgyUtil.Cache.Custom
 {
     /// <summary>
-    /// 内存缓存帮助类
+    /// redis内存缓存帮助类，大的类对象或数组，占用内存较大
     /// </summary>
     public sealed class RedisCache : ICache
     {
         private CSRedisClient Client { get; set; }
+
         /// <summary>
-        /// 构造Redis缓存对象，并同时初始化RedisHelper对象
+        /// 设置序列化配置
+        /// </summary>
+        private void SetSerializeSetting() 
+        {
+            Client.CurrentSerialize = (obj) =>
+            {
+                //默认值和null,不进行序列化，节省了空间
+                return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.Ignore
+                });
+            };
+        }
+
+        /// <summary>
+        /// 构造Redis缓存对象
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="port">端口号</param>
@@ -28,6 +44,7 @@ namespace LgyUtil.Cache.Custom
             if (string.IsNullOrEmpty(password))
                 connectString += $",password={password}";
             Client = new CSRedisClient(connectString);
+            SetSerializeSetting();
             RedisHelper.Initialization(Client);
         }
         /// <summary>
@@ -38,6 +55,7 @@ namespace LgyUtil.Cache.Custom
         public RedisCache(string master, string connectString)
         {
             Client = new CSRedisClient(master, connectString.Split(';'));
+            SetSerializeSetting();
             RedisHelper.Initialization(Client);
         }
         /// <summary>
@@ -47,6 +65,7 @@ namespace LgyUtil.Cache.Custom
         public RedisCache(string connectString)
         {
             Client = new CSRedisClient(connectString);
+            SetSerializeSetting();
             RedisHelper.Initialization(Client);
         }
         /// <inheritdoc/>
@@ -67,7 +86,7 @@ namespace LgyUtil.Cache.Custom
             };
             if (expiresSliding != null)
                 cache.SlidingAbsoluteDate = DateTime.Now.Add(expiresSliding.Value);
-            RedisHelper.Set(key, cache);
+            Client.Set(key, cache);
             SetCacheExpiress(key, cache);
         }
         /// <summary>
@@ -79,7 +98,7 @@ namespace LgyUtil.Cache.Custom
         {
             var expiress = GetMinExpiressTime(cache.ExpiresSliding, cache.ExpiressAbsoulte);
             if (expiress != null)
-                RedisHelper.Expire(key, expiress.Value);
+                Client.Expire(key, expiress.Value);
         }
         /// <summary>
         /// 获取最小的过期时间间隔
@@ -109,7 +128,7 @@ namespace LgyUtil.Cache.Custom
         {
             if (Exists(key))
             {
-                var cache = RedisHelper.Get<RedisCacheModel<T>>(key);
+                var cache = Client.Get<RedisCacheModel<T>>(key);
                 SetCacheExpiress(key, cache);
 
                 return cache.Value;
@@ -121,7 +140,7 @@ namespace LgyUtil.Cache.Custom
         {
             if (Exists(key))
             {
-                var cache = RedisHelper.Get<RedisCacheModel<string>>(key);
+                var cache = Client.Get<RedisCacheModel<string>>(key);
                 SetCacheExpiress(key, cache);
                 return cache.Value;
             }
@@ -130,15 +149,15 @@ namespace LgyUtil.Cache.Custom
         /// <inheritdoc/>
         public void Remove(string key)
         {
-            RedisHelper.Del(key);
+            Client.Del(key);
         }
         /// <inheritdoc/>
         public void RemoveAll(params string[] keys)
         {
             if (keys.Length > 0)
-                RedisHelper.Del(keys);
+                Client.Del(keys);
             else
-                RedisHelper.NodesServerManager.FlushDb();
+                Client.NodesServerManager.FlushDb();
         }
         /// <inheritdoc/>
         public void RemoveAllPrefix(string prefix)
@@ -147,9 +166,9 @@ namespace LgyUtil.Cache.Custom
             RemoveAll(keys);
         }
         /// <inheritdoc/>
-        public string[] GetKeysByPrefix(string prefix) => RedisHelper.Keys(prefix + "*");
+        public string[] GetKeysByPrefix(string prefix) => Client.Keys(prefix + "*");
 
         /// <inheritdoc/>
-        public string[] GetAllKeys() => RedisHelper.Keys("*");
+        public string[] GetAllKeys() => Client.Keys("*");
     }
 }
