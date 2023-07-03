@@ -51,19 +51,28 @@ namespace LgyUtil
             return _httpCollection[address.Host];
         }
 
-        #region Post请求
-        private static HttpRequestMessage Post_BuildRequest(string url, string postData = "", Dictionary<string, string> dicHeader = null)
+        /// <summary>
+        /// 获取请求的request对象
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="postData"></param>
+        /// <param name="isPost"></param>
+        /// <param name="dicHeader"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        private static HttpRequestMessage BuildRequest(string url, string postData, bool isPost, Dictionary<string, string> dicHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
             {
-                Content = new StringContent(postData)
+                Content = new StringContent(postData),
+                Method = isPost ? HttpMethod.Post : HttpMethod.Get,
             };
             if (dicHeader != null)
             {
                 foreach (var kvHeader in dicHeader)
                 {
                     //添加失败，查看其他的添加内容
-                    if(!request.Content.Headers.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value))
+                    if (!request.Content.Headers.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value))
                     {
                         if (kvHeader.Key.Equals("Authorization", StringComparison.CurrentCultureIgnoreCase))
                         {
@@ -80,8 +89,32 @@ namespace LgyUtil
                 }
             }
             if (dicHeader == null || !dicHeader.ContainsKey("ContentType"))
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            {
+                if(isPost)
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                else
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+            }
+                
             return request;
+        }
+
+        #region Post请求
+        /// <summary>
+        /// post请求
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="postData">请求体body,json字符串</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static async Task<HttpResponseMessage> PostBase(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            HttpClient client = GetHttpClient(url);
+            if (timeout != null)
+                client.Timeout = timeout.Value;
+            var request = BuildRequest(url, postData, true, dicHeader);
+            return await client.SendAsync(request);
         }
         #region 同步Post
         /// <summary>
@@ -94,11 +127,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            HttpClient client = GetHttpClient(url);
-            if (timeout != null)
-                client.Timeout = timeout.Value;
-            var request = Post_BuildRequest(url, postData, dicHeader);
-            return client.SendAsync(request).GetAwaiter().GetResult();
+            return PostBase(url,postData,dicHeader,timeout).Result;
         }
         /// <summary>
         /// post请求，返回请求结果字符串
@@ -110,7 +139,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Post_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Post(url, postData, dicHeader, timeout);
+            var response = PostBase(url, postData, dicHeader, timeout).Result;
             if (!response.IsSuccessStatusCode)
                 throw new Exception(response.Content.ReadAsStringAsync().Result);
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -138,7 +167,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Post(url, postData, dicHeader, timeout);
+            var response = PostBase(url, postData, dicHeader, timeout).Result;
             if (!response.IsSuccessStatusCode)
                 throw new Exception(response.Content.ReadAsStringAsync().Result);
             return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
@@ -154,13 +183,9 @@ namespace LgyUtil
         /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
         /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> PostAsync(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption= HttpCompletionOption.ResponseContentRead)
+        public static async Task<HttpResponseMessage> PostAsync(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            HttpClient client = GetHttpClient(url);
-            if (timeout != null)
-                client.Timeout = timeout.Value;
-            var request = Post_BuildRequest(url, postData, dicHeader);
-            return await client.SendAsync(request,completionOption);
+            return await PostBase(url,postData,dicHeader,timeout);
         }
         /// <summary>
         /// post请求，返回请求结果字符串
@@ -201,7 +226,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<Stream> PostAsync_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await PostAsync(url, postData, dicHeader, timeout,completionOption);
+            var response = await PostAsync(url, postData, dicHeader, timeout, completionOption);
             if (!response.IsSuccessStatusCode)
                 throw new Exception(await response.Content.ReadAsStringAsync());
             return await response.Content.ReadAsStreamAsync();
@@ -210,6 +235,21 @@ namespace LgyUtil
         #endregion
 
         #region Get请求
+        /// <summary>
+        /// Get请求
+        /// </summary>
+        /// <param name="url">请求地址，参数加在这里</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        private static async Task<HttpResponseMessage> GetBase(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            HttpClient client = GetHttpClient(url);
+            if (timeout != null)
+                client.Timeout = timeout.Value;
+            HttpRequestMessage request = BuildRequest(url, "", false, dicHeader);
+            return await client.SendAsync(request);
+        }
         #region 同步Get
         /// <summary>
         /// Get请求
@@ -220,17 +260,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static HttpResponseMessage Get(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            HttpClient client = GetHttpClient(url);
-            if (dicHeader != null)
-            {
-                foreach (var kvHeader in dicHeader)
-                {
-                    client.DefaultRequestHeaders.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value);
-                }
-            }
-            if (timeout != null)
-                client.Timeout = timeout.Value;
-            return client.GetAsync(new Uri(url)).GetAwaiter().GetResult();
+            return GetBase(url,dicHeader,timeout).Result;
         }
         /// <summary>
         /// Get请求，返回结果字符串
@@ -241,7 +271,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Get_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Get(url, dicHeader, timeout);
+            var response = GetBase(url, dicHeader, timeout).Result;
             if (!response.IsSuccessStatusCode)
                 throw new Exception(response.Content.ReadAsStringAsync().Result);
             return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -283,17 +313,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<HttpResponseMessage> GetAsync(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            HttpClient client = GetHttpClient(url);
-            if (dicHeader != null)
-            {
-                foreach (var kvHeader in dicHeader)
-                {
-                    client.DefaultRequestHeaders.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value);
-                }
-            }
-            if (timeout != null)
-                client.Timeout = timeout.Value;
-            return await client.GetAsync(new Uri(url),completionOption);
+            return await GetBase(url,dicHeader, timeout);
         }
         /// <summary>
         /// Get请求，返回结果字符串
@@ -330,7 +350,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<Stream> GetAsync_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await GetAsync(url, dicHeader, timeout,completionOption);
+            var response = await GetAsync(url, dicHeader, timeout, completionOption);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsStreamAsync();
         }
