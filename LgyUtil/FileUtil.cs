@@ -182,6 +182,18 @@ namespace LgyUtil
         }
 
         /// <summary>
+        /// 按照windows系统文件名排序规则排序，升序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items">要排序的对象数组</param>
+        /// <param name="orderField">选择排序的字符串字段</param>
+        /// <returns></returns>
+        public static IEnumerable<T> SortByWindowsFileName<T>(IEnumerable<T> items,Func<T,string> orderField) where T : class
+        {
+            return items.OrderBy(orderField, new AlphanumComparator<string>());
+        }
+
+        /// <summary>
         /// 按照windows系统文件名排序规则排序，降序
         /// </summary>
         /// <param name="fileNames"></param>
@@ -189,6 +201,18 @@ namespace LgyUtil
         public static IEnumerable<string> SortByWindowsFileNameDesc(IEnumerable<string> fileNames)
         {
             return fileNames.OrderByDescending(f => f, new AlphanumComparator<string>());
+        }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，降序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items">要排序的对象数组</param>
+        /// <param name="orderField">选择排序的字符串字段</param>
+        /// <returns></returns>
+        public static IEnumerable<T> SortByWindowsFileNameDesc<T>(IEnumerable<T> items, Func<T, string> orderField) where T : class
+        {
+            return items.OrderByDescending(orderField, new AlphanumComparator<string>());
         }
 
         #region 文件编码格式 https://www.cnblogs.com/cyberarmy/p/5652835.html
