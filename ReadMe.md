@@ -130,6 +130,8 @@
 5. FileUtil.ReadFileShare()，以非独占的方式，读取文件。解决windows下，用程序读取文件时，文件不能被文本编辑器打开。
 6. FileUtil.GetAllFiles()，获取文件夹下所有文件（返回文件名数组）
 7. FileUtil.GetAllFilesDeep()，深度查找文件或文件夹
+1. FileUtil.SortByWindowsFileName(),按照windows文件名排序规则，排序字符串
+1. FileUtil.SortByWindowsFileNameDesc()，按照windows文件名排序规则，倒序排序字符串
 ## 八、ObjectConvertUtil，类型转换方法(LgyUtil)
 1. ToInt()，ToDouble()，ToLong()，ToDecimal()，ToFloat()，任何对象都可以调用，原理是Convert.ToXXX，支持转为科学计数法
 2. ToBool()，字符串"true"(不区分大小写),"1"，数值1，都会返回true，其余返回false
