@@ -74,8 +74,10 @@ namespace LgyUtil.OtherSource
                 return 0;
             }
 
-            int thisMarker = 0, thisNumericChunk = 0;
-            int thatMarker = 0, thatNumericChunk = 0;
+            int thisMarker = 0;
+            double thisNumericChunk = 0;
+            int thatMarker = 0;
+            double thatNumericChunk = 0;
 
             while (thisMarker < s1.Length || thatMarker < s2.Length)
             {
@@ -119,8 +121,8 @@ namespace LgyUtil.OtherSource
                 // If both chunks contain numeric characters, sort them numerically
                 if (char.IsDigit(thisChunk[0]) && char.IsDigit(thatChunk[0]))
                 {
-                    thisNumericChunk = Convert.ToInt32(thisChunk.ToString());
-                    thatNumericChunk = Convert.ToInt32(thatChunk.ToString());
+                    thisNumericChunk = Convert.ToDouble(thisChunk.ToString());
+                    thatNumericChunk = Convert.ToDouble(thatChunk.ToString());
 
                     if (thisNumericChunk < thatNumericChunk)
                     {
