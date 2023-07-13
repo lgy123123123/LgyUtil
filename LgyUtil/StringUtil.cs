@@ -248,38 +248,80 @@ namespace LgyUtil
         {
             return StringTemplate.Format(template, obj, throwOnMissingValue);
         }
+
+        #region Trim扩展
         /// <summary>
-        /// Trim扩展，可直接填写字符串
+        /// Trim扩展，可直接填写字符串，若替换一次后，开头或结尾还有要trim的内容，不再进行替换
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="trimString">清空两边的字符串</param>
+        /// <param name="trimStrings">清空两边的字符串</param>
         /// <returns></returns>
-        public static string Trim(this string s, string trimString)
+        public static string Trim(this string s, params string[] trimStrings)
         {
-            if (trimString.IsNullOrEmpty()) return s;
-            return s.Trim(trimString.ToArray());
+            if (trimStrings.IsNullOrEmpty())
+                return s;
+            string trimRegex = GetTrimRegex(trimStrings, ts => $"(^{Regex.Escape(ts)})|({Regex.Escape(ts)}$)");
+            if (trimRegex.IsNullOrEmpty())
+                return s;
+            return s.ReplaceRegex(trimRegex, "", RegexOptions.Compiled);
         }
         /// <summary>
-        /// TrimStart扩展，可直接填写字符串
+        /// TrimStart扩展，可直接填写字符串，若替换一次后，开头还有要trim的内容，不再进行替换
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="trimString">清空起始的字符串</param>
+        /// <param name="trimStrings">清空起始的字符串</param>
         /// <returns></returns>
-        public static string TrimStart(this string s, string trimString)
+        public static string TrimStart(this string s, params string[] trimStrings)
         {
-            if (trimString.IsNullOrEmpty()) return s;
-            return s.TrimStart(trimString.ToArray());
+            if (trimStrings.IsNullOrEmpty())
+                return s;
+            string trimRegex = GetTrimRegex(trimStrings, ts => $"(^{Regex.Escape(ts)})");
+            if (trimRegex.IsNullOrEmpty())
+                return s;
+            return s.ReplaceRegex(trimRegex, "", RegexOptions.Compiled);
         }
         /// <summary>
-        /// TrimEnd扩展，可直接填写字符串
+        /// TrimEnd扩展，可直接填写字符串，若替换一次后，结尾还有要trim的内容，不再进行替换
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="trimString">清空结尾的字符串</param>
+        /// <param name="trimStrings">清空结尾的字符串</param>
         /// <returns></returns>
-        public static string TrimEnd(this string s, string trimString)
+        public static string TrimEnd(this string s, params string[] trimStrings)
         {
-            if (trimString.IsNullOrEmpty()) return s;
-            return s.TrimEnd(trimString.ToArray());
+            if (trimStrings.IsNullOrEmpty())
+                return s;
+            string trimRegex = GetTrimRegex(trimStrings, ts => $"({Regex.Escape(ts)}$)");
+            if (trimRegex.IsNullOrEmpty())
+                return s;
+            return s.ReplaceRegex(trimRegex, "", RegexOptions.Compiled);
+        }
+        private static string GetTrimRegex(string[] trimStrings, Func<string, string> replaceFunc)
+        {
+            return trimStrings.Where(ts => ts.IsNotNullOrEmpty()).JoinToString(replaceFunc, "|");
+        }
+        #endregion
+
+        /// <summary>
+        /// EndsWith扩展，可以匹配多个
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool EndsWith(this string s, params string[] value)
+        {
+            if (value.Length == 0) return false;
+            return value.Any(v => s.EndsWith(v));
+        }
+        /// <summary>
+        /// StartsWith扩展，可以匹配多个
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool StartsWith(this string s, params string[] value)
+        {
+            if (value.Length == 0) return false;
+            return value.Any(v => s.StartsWith(v));
         }
     }
 }
