@@ -323,5 +323,16 @@ namespace LgyUtil
             if (value.Length == 0) return false;
             return value.Any(v => s.StartsWith(v));
         }
+
+        /// <summary>
+        /// 字符串包含任意一个匹配项，就返回true
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="containsObj"></param>
+        /// <returns></returns>
+        public static bool ContainsAny(this string s,params string[] containsObj)
+        {
+            return containsObj.Any(v=> s.Contains(v));
+        }
     }
 }

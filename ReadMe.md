@@ -260,6 +260,12 @@
           }
           str.FormatTemplate(new Temp{a="1",b=2});
           //输出1,2
+17. Trim(),可以接填填写字符串，若替换一次后，开头或结尾还有要trim的内容，不再进行替换
+ 1. TrimStart(),可直接填写字符串，若替换一次后，开头还有要trim的内容，不再进行替换
+ 1. TrimEnd(),可直接填写字符串，若替换一次后，结尾还有要trim的内容，不再进行替换
+ 1. EndsWith(),可以匹配多个字符串
+ 1. StartsWith(),可以匹配多个字符串
+ 1. ContainsAny(),字符串包含任意一个匹配项，就返回true
 ## 十三、TaskUtil，多线程帮助类(LgyUtil)
 1. 执行多线程时，控制并行线程个数
 

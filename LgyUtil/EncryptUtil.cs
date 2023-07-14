@@ -184,7 +184,7 @@ namespace LgyUtil
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 original = null;
             }
