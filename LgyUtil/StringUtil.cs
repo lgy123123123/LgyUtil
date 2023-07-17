@@ -97,15 +97,30 @@ namespace LgyUtil
             return JsonConvert.DeserializeObject<T>(s, settings);
         }
         /// <summary>
-        /// 字符串转日期
+        /// 字符串转日期，支持季度格式Q代表季度
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="format">日期格式</param>
+        /// <param name="format">日期格式，Q代表季度</param>
         /// <returns></returns>
         public static DateTime ToDateTime(this string s, string format = null)
         {
             if (format.IsNullOrEmpty())
                 return DateTime.Parse(s);
+            //季度
+            else if(format.Contains("Q"))
+            {
+                int quarterStrIndex = format.IndexOf("Q");
+                //获取季度数字
+                int quarterNum = s.Substring(quarterStrIndex, 1).ToInt();
+                //去掉季度格式字符串
+                format = format.Replace("Q", "");
+                s = s.Remove(quarterStrIndex, 1);
+                //执行正常格式化
+                var dtTemp= DateTime.ParseExact(s, format, CultureInfo.CurrentCulture);
+                //添加季度
+                return dtTemp.AddQuarter(quarterNum);
+            }
+            //其它正常格式
             else
                 return DateTime.ParseExact(s, format, CultureInfo.CurrentCulture);
         }
