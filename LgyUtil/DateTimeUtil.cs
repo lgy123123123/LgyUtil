@@ -77,9 +77,9 @@ namespace LgyUtil
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
-        public static double GetQuarter(this DateTime dt)
+        public static int GetQuarter(this DateTime dt)
         {
-            return Math.Ceiling((double)dt.Month / 3);
+            return Math.Ceiling((double)dt.Month / 3).ToInt();
         }
         /// <summary>
         /// <para>获取月份差，返回正整数</para>
@@ -219,6 +219,25 @@ namespace LgyUtil
         public static DateTime GetMinuteEnd(this DateTime dt)
         {
             return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 59);
+        }
+
+        /// <summary>
+        /// 格式化日期，Q代表季度，只解析第一个Q
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <param name="format">格式化字符串，Q代表季度，只解析第一个Q</param>
+        /// <returns></returns>
+        public static string ToStringExt(this DateTime dt, string format)
+        {
+            if (format.Contains("Q"))
+            {
+                int quarterIndex = format.IndexOf("Q");
+                int quarterNum = dt.GetQuarter();
+                string ret = dt.ToString(format.Replace("Q", ""));
+                return ret.Insert(quarterIndex,quarterNum.ToString());
+            }
+            else
+                return dt.ToString(format);
         }
     }
 }

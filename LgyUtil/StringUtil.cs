@@ -97,17 +97,17 @@ namespace LgyUtil
             return JsonConvert.DeserializeObject<T>(s, settings);
         }
         /// <summary>
-        /// 字符串转日期，支持季度格式Q代表季度
+        /// 字符串转日期，支持季度格式，Q代表季度，只解析第一个Q
         /// </summary>
         /// <param name="s"></param>
-        /// <param name="format">日期格式，Q代表季度</param>
+        /// <param name="format">日期格式，Q代表季度，只解析第一个Q</param>
         /// <returns></returns>
         public static DateTime ToDateTime(this string s, string format = null)
         {
             if (format.IsNullOrEmpty())
                 return DateTime.Parse(s);
             //季度
-            else if(format.Contains("Q"))
+            else if (format.Contains("Q"))
             {
                 int quarterStrIndex = format.IndexOf("Q");
                 //获取季度数字
@@ -116,9 +116,9 @@ namespace LgyUtil
                 format = format.Replace("Q", "");
                 s = s.Remove(quarterStrIndex, 1);
                 //执行正常格式化
-                var dtTemp= DateTime.ParseExact(s, format, CultureInfo.CurrentCulture);
+                var dtTemp = DateTime.ParseExact(s, format, CultureInfo.CurrentCulture);
                 //添加季度
-                return dtTemp.AddQuarter(quarterNum);
+                return dtTemp.AddQuarter(quarterNum - 1);
             }
             //其它正常格式
             else
@@ -345,9 +345,9 @@ namespace LgyUtil
         /// <param name="s"></param>
         /// <param name="containsObj"></param>
         /// <returns></returns>
-        public static bool ContainsAny(this string s,params string[] containsObj)
+        public static bool ContainsAny(this string s, params string[] containsObj)
         {
-            return containsObj.Any(v=> s.Contains(v));
+            return containsObj.Any(v => s.Contains(v));
         }
     }
 }
