@@ -81,6 +81,9 @@
 19. GetHourEnd()，获取传入日期 59分59秒
 20. GetMinuteStart()，获取传入日期 0秒
 21. GetMinuteEnd()，获取传入日期 59秒
+ 1. ToStringExt(),格式化日期扩展，Q代表季度，只解析第一个Q
+        
+        new DateTime(2010,5,3).ToStringExt("yyyy/Q")
 ## 五、EncryptUtil，加密算法帮助类(LgyUtil)
 1. AES加密解密(对称加密)：
 
@@ -216,14 +219,15 @@
 2. IsNullOrEmptyTrim()，trim后，字符串是否为空
 3. IsNotNullOrEmpty()，字符串是否不为空
 4. Format()，就是string.Format
-5. Trim、TrimStart、TrimEnd，三种清空，可以直接填写字符串
-6. DeserializeNewtonJson()，使用NewtonJson，反序列化字符串为对象
-7. ToDateTime()，转为时间，支持格式化时间
+5. DeserializeNewtonJson()，使用NewtonJson，反序列化字符串为对象
+6. ToDateTime()，转为时间，支持格式化时间，支持季度，Q代表季度，只解析第一个Q
 
         //默认格式转换
         "2010-05-06".ToDateTime()
         //格式化字符串转换
         "20100506".ToDateTime("yyyyMMdd")
+        //季度转日期
+        "2010/2".ToDateTime("yyyy/Q")
 
 8. ToByteArr()，转为二进制数组
 9. ByteToString()，二进制数组转为字符串
