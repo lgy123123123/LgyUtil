@@ -5,22 +5,27 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>
 		源码：https://github.com/lgy123123123/LgyUtil
-		1、quartz.net定时(CronUtil)
-		2、DataTable扩展(DataTableUtil)
-		3、DateTime扩展(DataTimeUtil)
-		4、枚举工具(EnumUtil)
-		5、文件帮助类工具(FileUtil)
-		6、日志物理文件记录工具(LogUtil)
-		7、基础对象操作工具，序列化，强制转换，克隆，对象映射(ObjectUtil)
-		8、随机数帮助类(RandomUtil)
-		9、反射工具(ReflectionUtil)
-		10、正则表达式帮助类(RegexUtil)
-		11、字符串工具，反序列化等操作(StringUtil)
-		12、线程帮助类(TaskUtil、ThreadUtil)
-		13、xml序列化帮助类(XmlUtil)
+		源码：https://gitee.com/linguangyu996/LgyUtil
+		1、配置文件帮助类(AppSettingUtil)
+		2、数组扩展方法(ArrayUtil)
+		3、quartz.net定时帮助类(CronUtil)
+		4、DataTable扩展(DataTableUtil)
+		5、DateTime扩展(DataTimeUtil)
+		6、加密帮助类(EncryptUtil)
+		7、枚举工具(EnumUtil)
+		8、文件帮助类工具(FileUtil)
+		9、日志物理文件记录工具(LogUtil)
+		10、强制转换扩展(ObjectConvertUtil)
+		11、序列化，克隆，对象映射帮助类(ObjectUtil)
+		12、随机数帮助类(RandomUtil)
+		13、反射工具(ReflectionUtil)
+		14、正则表达式帮助类(RegexUtil)
+		15、字符串工具：反序列化，模板格式化等操作(StringUtil)
+		16、线程帮助类(TaskUtil、ThreadUtil)
+		17、xml序列化帮助类(XmlUtil)
 	</Description>
     <Authors>lgy</Authors>
-    <Version>1.1.27</Version>
+    <Version>1.2.0</Version>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -28,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
-	  <None Include="..\ReadMe.md" Pack="true" PackagePath="\"/>
+	  <None Include="..\ReadMe.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

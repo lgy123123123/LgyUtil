@@ -353,3 +353,61 @@
 
             Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
             Stream Get_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+## 十六、AppSettingUtil，配置项帮助类，仅支持json文件(LgyUtil)
+1. AppSettingUtil.Init\<T>()，初始化并返回配置项实例，支持配置文件热重载
+1. AppSettingUtil.InitStatic\<T>()，初始化静态类，支持配置文件热重载
+
+    ~~~ c#
+        T Init<T>(string jsonPath, bool hotReload = false, Action<T> afterInitOrReload = null)
+        void InitStatic<T>(string jsonPath, bool hotReload = false, Action<T> afterInitOrReload = null)
+
+        //配置项文件，比如是appSetting.json
+        {
+            "Conn": {
+                "Db1": "abc",
+                "Db2": "bcd"
+            },
+            "Other": 1
+        }
+
+        //1、初始化并返回实例，允许热重载
+        Settings mySetting = AppSettingUtil.Init<Settings>("appSetting.json",true,(s)=>
+        {
+            //初始化和热重载执行的方法
+            s.Conn.Db1="xyz";
+        });
+        //普通的配置项类
+        public class Settings
+        {
+            public ConnSetting Conn { get; set; }
+            public int Other { get; set; }
+
+            public class ConnSetting
+            {
+                public string Db1 { get; set; }
+                public string Db2 { get; set; }
+            }
+        }
+
+        2、初始化静态类，允许热重载
+        AppSettingUtil.InitStatic<Settings>("appSetting.json",true,(s)=>
+        {
+            //初始化和热重载执行的方法
+            Settings.Conn.Db1="xyz";
+        });
+        //静态属性的配置项类
+        public class Settings
+        {
+            //静态对象
+            public static ConnSetting Conn { get; set; }
+            //静态对象
+            public static int Other { get; set; }
+
+            public class ConnSetting
+            {
+                public string Db1 { get; set; }
+                public string Db2 { get; set; }
+            }
+        }
+    ~~~
+

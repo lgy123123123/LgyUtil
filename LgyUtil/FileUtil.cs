@@ -1,10 +1,13 @@
 ﻿using LgyUtil.OtherSource;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace LgyUtil
 {
@@ -52,27 +55,54 @@ namespace LgyUtil
             return sc.ToString();
         }
         /// <summary>
-        /// 监视文件/文件夹改变，包括子文件夹的内容
+        /// 监视文件/文件夹改变，包括子文件夹的内容，延迟200ms执行(避免change事件被执行多次)
         /// </summary>
         /// <param name="DirectoryPath">监视的文件夹</param>
         /// <param name="ChangeAction">文件修改时执行的方法(改变文件的全路径,文件改变事件类型)</param>
         /// <param name="Filter">文件过滤，可以是某个文件名a.txt，也可以是通配符*.txt，默认是*.*</param>
         /// <param name="RenameAction">重命名时执行的方法</param>
         /// <returns></returns>
-        public static void WatchFileChanged(string DirectoryPath, Action<FileSystemEventArgs> ChangeAction=null, string Filter = "*.*", Action<RenamedEventArgs> RenameAction=null)
+        public static void WatchFileChanged(string DirectoryPath, Action<FileSystemEventArgs> ChangeAction = null, string Filter = "*.*", Action<RenamedEventArgs> RenameAction = null)
         {
             FileSystemWatcher watch = new FileSystemWatcher(DirectoryPath, Filter);
             watch.BeginInit();
             watch.EnableRaisingEvents = true;
-            watch.Created += new FileSystemEventHandler((sender, e) => { ChangeAction?.Invoke(e); });
-            watch.Changed += new FileSystemEventHandler((sender, e) => { ChangeAction?.Invoke(e); });
-            watch.Deleted += new FileSystemEventHandler((sender, e) => { ChangeAction?.Invoke(e); });
+            watch.Created += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
+            watch.Changed += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
+            watch.Deleted += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
             watch.Renamed += new RenamedEventHandler((sender, e) => { RenameAction?.Invoke(e); });
             watch.NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess
                                   | NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size;
             watch.IncludeSubdirectories = true;
             watch.EndInit();
         }
+
+        #region 监视文件变化内部方法
+        /// <summary>
+        /// 可以执行变化事件的集合
+        /// </summary>
+        private static ConcurrentDictionary<string,int> dicChangeFiles = new ConcurrentDictionary<string,int>();
+        /// <summary>
+        /// 文件变化执行事件，防止change事件重复执行，所以延迟200ms执行
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="ChangeAction"></param>
+        private static void FileChangeEvent(FileSystemEventArgs e, Action<FileSystemEventArgs> ChangeAction)
+        {
+            if (dicChangeFiles.ContainsKey(e.Name))
+                return;
+            else if (!dicChangeFiles.TryAdd(e.Name, 1))
+                return;
+            
+            Task.Run(async () =>
+            {
+                //延迟200ms执行
+                await Task.Delay(200);
+                dicChangeFiles.TryRemove(e.Name, out _);
+                ChangeAction(e);
+            });
+        }
+        #endregion
 
         /// <summary>
         /// 复制文件夹或文件
@@ -122,7 +152,7 @@ namespace LgyUtil
         {
             string ret = "";
             if (!File.Exists(path)) return ret;
-            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 if (encoding is null)
                     encoding = Encoding.UTF8;
@@ -140,7 +170,7 @@ namespace LgyUtil
         /// <param name="deep">深度查找，是否包括文件夹中的文件</param>
         /// <param name="searchPattern">文件名匹配字符串，仅支持?和*，不支持正则表达式</param>
         /// <returns>文件绝对路径集合</returns>
-        public static List<string> GetAllFiles(string dir, bool deep = true, string searchPattern="*")
+        public static List<string> GetAllFiles(string dir, bool deep = true, string searchPattern = "*")
         {
             List<string> ret = new List<string>();
             return GetAllFilesDeep(dir, deep, ret, searchPattern);
@@ -188,7 +218,7 @@ namespace LgyUtil
         /// <param name="items">要排序的对象数组</param>
         /// <param name="orderField">选择排序的字符串字段</param>
         /// <returns></returns>
-        public static IEnumerable<T> SortByWindowsFileName<T>(IEnumerable<T> items,Func<T,string> orderField) where T : class
+        public static IEnumerable<T> SortByWindowsFileName<T>(IEnumerable<T> items, Func<T, string> orderField) where T : class
         {
             return items.OrderBy(orderField, new AlphanumComparator<string>());
         }
