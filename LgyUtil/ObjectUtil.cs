@@ -1,6 +1,8 @@
 ﻿using Mapster;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -63,14 +65,14 @@ namespace LgyUtil
         {
             return source.Adapt<T>();
         }
-        #region In
+        
         /// <summary>
         /// 类似sql的in方法
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="compareObj"></param>
         /// <returns></returns>
-        public static bool In(this string obj, params string[] compareObj)
+        public static bool In<T>(this T obj, params T[] compareObj)
         {
             return compareObj.Contains(obj);
         }
@@ -80,134 +82,33 @@ namespace LgyUtil
         /// <param name="obj"></param>
         /// <param name="compareObj"></param>
         /// <returns></returns>
-        public static bool In(this int obj, params int[] compareObj)
+        public static bool In<T>(this T obj, IEnumerable<T> compareObj)
         {
             return compareObj.Contains(obj);
         }
-        /// <summary>
-        /// 类似sql的in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool In(this float obj, params float[] compareObj)
-        {
-            return compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool In(this double obj, params double[] compareObj)
-        {
-            return compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool In(this decimal obj, params decimal[] compareObj)
-        {
-            return compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool In(this byte obj, params byte[] compareObj)
-        {
-            return compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool In<T>(this T obj, params T[] compareObj) where T : struct
-        {
-            return compareObj.Contains(obj);
-        }
-        #endregion
 
-        #region NotIn
         /// <summary>
         /// 类似sql的not in方法
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="compareObj"></param>
         /// <returns></returns>
-        public static bool NotIn(this string obj, params string[] compareObj)
+        public static bool NotIn<T>(this T obj, params T[] compareObj)
         {
             return !compareObj.Contains(obj);
         }
+
         /// <summary>
         /// 类似sql的not in方法
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="compareObj"></param>
         /// <returns></returns>
-        public static bool NotIn(this int obj, params int[] compareObj)
+        public static bool NotIn<T>(this T obj, IEnumerable<T> compareObj)
         {
             return !compareObj.Contains(obj);
         }
-        /// <summary>
-        /// 类似sql的not in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool NotIn(this float obj, params float[] compareObj)
-        {
-            return !compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的not in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool NotIn(this double obj, params double[] compareObj)
-        {
-            return !compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的not in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool NotIn(this decimal obj, params decimal[] compareObj)
-        {
-            return !compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的not in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool NotIn(this byte obj, params byte[] compareObj)
-        {
-            return !compareObj.Contains(obj);
-        }
-        /// <summary>
-        /// 类似sql的not in方法
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="compareObj"></param>
-        /// <returns></returns>
-        public static bool NotIn<T>(this T obj, params T[] compareObj) where T : struct
-        {
-            return !compareObj.Contains(obj);
-        }
-        #endregion
+
         /// <summary>
         /// 比较两个对象的内容是否相同(通过newtonjson序列化)
         /// </summary>
