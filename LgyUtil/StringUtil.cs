@@ -192,7 +192,7 @@ namespace LgyUtil
             return Regex.IsMatch(s, pattern, options);
         }
         /// <summary>
-        /// 将字符串下标序号内容，替换成指定字符串
+        /// 指定索引位置，替换成其它字符串(手机号掩码时使用)
         /// </summary>
         /// <param name="s"></param>
         /// <param name="startIndex">替换起始索引序号</param>
@@ -205,7 +205,7 @@ namespace LgyUtil
                 return s;
             if (s.Length < startIndex + length)
                 length = s.Length - startIndex;
-            return s.Insert(startIndex, replaceContent).Remove(startIndex + replaceContent.Length, length);
+            return s.Remove(startIndex,length).Insert(startIndex, replaceContent);
         }
         /// <summary>
         /// 正则表达式替换字符串
@@ -325,7 +325,7 @@ namespace LgyUtil
         public static bool EndsWith(this string s, params string[] value)
         {
             if (value.Length == 0) return false;
-            return value.Any(v => s.EndsWith(v));
+            return value.Any(s.EndsWith);
         }
         /// <summary>
         /// StartsWith扩展，可以匹配多个
@@ -336,7 +336,7 @@ namespace LgyUtil
         public static bool StartsWith(this string s, params string[] value)
         {
             if (value.Length == 0) return false;
-            return value.Any(v => s.StartsWith(v));
+            return value.Any(s.StartsWith);
         }
 
         /// <summary>
@@ -347,7 +347,18 @@ namespace LgyUtil
         /// <returns></returns>
         public static bool ContainsAny(this string s, params string[] containsObj)
         {
-            return containsObj.Any(v => s.Contains(v));
+            return containsObj.Any(s.Contains);
+        }
+
+        /// <summary>
+        /// 字符串包含任意一个匹配项，就返回true
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="containsObj"></param>
+        /// <returns></returns>
+        public static bool ContainsAny(this string s, IEnumerable<string> containsObj)
+        {
+            return containsObj.Any(s.Contains);
         }
     }
 }

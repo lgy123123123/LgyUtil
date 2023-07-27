@@ -124,6 +124,19 @@ namespace LgyUtil
         {
             return array.Any(compareObj.Contains);
         }
+
+        /// <summary>
+        /// 数组包含某些项目，符合一个就返回true（解决了数组的Contains方法只能输入一个参数匹配的问题）
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        /// <param name="compareObj">包含的数组</param>
+        /// <returns></returns>
+        public static bool ContainsAny<T>(this IEnumerable<T> array, IEnumerable<T> compareObj)
+        {
+            return array.Any(compareObj.Contains);
+        }
+
         /// <summary>
         /// 数组切片，在.net6出现了新的语法糖[1..2]可以替代这个方法
         /// </summary>
