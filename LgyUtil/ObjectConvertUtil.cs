@@ -11,7 +11,7 @@ namespace LgyUtil
     public static class ObjectConvertUtil
     {
         /// <summary>
-        /// 转成int类型(支持字符串科学计数法转换)
+        /// 转成int类型(支持字符串科学计数法转换，支持百分比转换)
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="ignoreError">忽略错误，转换错误时，返回0</param>
@@ -20,9 +20,12 @@ namespace LgyUtil
         {
             try
             {
-                if (obj is string s && s.IsNotNullOrEmpty() && (s.Contains("E") || s.Contains("e")))
+                if (obj is string s && s.IsNotNullOrEmpty())
                 {
-                    return int.Parse(s, System.Globalization.NumberStyles.Any);
+                    if (s.Contains("E") || s.Contains("e"))
+                        return int.Parse(s, System.Globalization.NumberStyles.Any);
+                    else if (s.EndsWith("%"))
+                        return Convert.ToInt32(s.TrimEnd('%')) / 100;
                 }
                 return Convert.ToInt32(obj);
             }
@@ -65,7 +68,7 @@ namespace LgyUtil
         {
             try
             {
-                if(obj is string s && s.IsNotNullOrEmpty())
+                if (obj is string s && s.IsNotNullOrEmpty())
                 {
                     if (s.Contains("E") || s.Contains("e"))
                         return double.Parse(s, System.Globalization.NumberStyles.Any);
@@ -102,7 +105,7 @@ namespace LgyUtil
             return ret;
         }
         /// <summary>
-        /// 转成long类型(支持字符串科学计数法转换)
+        /// 转成long类型(支持字符串科学计数法转换，支持百分比转换)
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="ignoreError">忽略错误，转换错误时，返回0</param>
@@ -111,9 +114,12 @@ namespace LgyUtil
         {
             try
             {
-                if (obj is string s && s.IsNotNullOrEmpty() && (s.Contains("E") || s.Contains("e")))
+                if (obj is string s && s.IsNotNullOrEmpty())
                 {
-                    return long.Parse(s, System.Globalization.NumberStyles.Any);
+                    if (s.Contains("E") || s.Contains("e"))
+                        return long.Parse(s, System.Globalization.NumberStyles.Any);
+                    else if (s.EndsWith("%"))
+                        return Convert.ToInt64(s.TrimEnd('%')) / 100;
                 }
                 return Convert.ToInt64(obj);
             }

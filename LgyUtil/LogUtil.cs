@@ -198,11 +198,11 @@ namespace LgyUtil
         {
             if (days <= 0)
                 throw new LgyUtilException("定时删除日志的保留天数，必须大于0");
-            CronUtil.AddCronJob("定时删日志", $"{startHour} {startMinute} {startSecond} * * ? *", () =>
+            TimerUtil.AddCronJob("定时删日志", $"{startHour} {startMinute} {startSecond} * * ? *", (info) =>
             {
                 DateTime dtDelBefore = DateTime.Now.Date.AddDays(0 - days);
                 DelLog(AppDomain.CurrentDomain.BaseDirectory + "Log/", dtDelBefore);
-            }, true);
+            }, new JobOption { RunNow = true });
         }
         /// <summary>
         /// 删除日志

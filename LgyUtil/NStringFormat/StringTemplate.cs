@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,11 +17,11 @@ namespace LgyUtil.NStringFormat
 
         private static readonly Regex TemplateRegex = new Regex("(?<open>{+)(?<key>\\w+)\\s*(?<alignment>,\\s*-?\\d+)?\\s*(?<format>:[^}]+)?(?<close>}+)");
 
-        private static readonly NSCache<string, StringTemplate> TemplateCache = new NSCache<string, StringTemplate>();
+        private static readonly ConcurrentDictionary<string, StringTemplate> TemplateCache = new ConcurrentDictionary<string, StringTemplate>();
 
-        private static readonly NSCache<Type, IStringTemplateValueConverter> ValueConverterCache = new NSCache<Type, IStringTemplateValueConverter>();
+        private static readonly ConcurrentDictionary<Type, IStringTemplateValueConverter> ValueConverterCache = new ConcurrentDictionary<Type, IStringTemplateValueConverter>();
 
-        private static readonly NSCache<Type, NSCache<string, Func<object, object>>> GettersCache = new NSCache<Type, NSCache<string, Func<object, object>>>();
+        private static readonly ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<object, object>>> GettersCache = new ConcurrentDictionary<Type, ConcurrentDictionary<string, Func<object, object>>>();
 
         private static readonly Lazy<MethodInfo> ConvertStringTemplateValueMethodInfo = new Lazy<MethodInfo>(() => typeof(IStringTemplateValueConverter).GetRuntimeMethod("Convert", new Type[1] { typeof(object) }));
 
@@ -290,17 +291,17 @@ namespace LgyUtil.NStringFormat
 
         private static StringTemplate GetTemplate(string template)
         {
-            return TemplateCache.GetOrAdd(template, () => new StringTemplate(template));
+            return TemplateCache.GetOrAdd(template, new StringTemplate(template));
         }
 
         private static IStringTemplateValueConverter GetValueConverterFromCache(Type valueConverterType)
         {
-            return ValueConverterCache.GetOrAdd(valueConverterType, () => (IStringTemplateValueConverter)Activator.CreateInstance(valueConverterType));
+            return ValueConverterCache.GetOrAdd(valueConverterType, (IStringTemplateValueConverter)Activator.CreateInstance(valueConverterType));
         }
 
         private static Func<object, object> GetGetterFromCache(Type type, string memberName)
         {
-            return GettersCache.GetOrAdd(type, () => new NSCache<string, Func<object, object>>()).GetOrAdd(memberName, () => CreateGetter(type, memberName));
+            return GettersCache.GetOrAdd(type, new ConcurrentDictionary<string, Func<object, object>>()).GetOrAdd(memberName, CreateGetter(type, memberName));
         }
 
         private static Func<object, object> CreateGetter(Type type, string memberName)

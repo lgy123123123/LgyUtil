@@ -4,9 +4,10 @@
     <TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>
-	    源码：https://github.com/lgy123123123/LgyUtil
+		源码：https://github.com/lgy123123123/LgyUtil
 		post get请求帮助类(NetUtil)
 		2.0以后，仅支持net5、6、7
+		如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
 	</Description>
     <Authors>lgy</Authors>
     <Company>lgy</Company>

@@ -2,6 +2,7 @@
 1. 工具的每个部分，都发布了独立的包，可以按需引入(LgyUtil、LgyUtil.Cache、LgyUtil.Compress、LgyUtil.ModelCheck、LgyUtil.Net、LgyUtil.SSH)
 2. 下面每个说明最后括号内标记的内容，为工具所在的包，如 (LgyUtil),说明在LgyUtil包下
 3. 每个方法若写为EncryptUtil.EncryptDES，则是通过帮助类，静态调用。若只有方法名ContainsAny，则为对象直接点出方法来使用(new List<string>().      ContainsAny("1"))。
+1. 如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
 ## 一、ArrayUtil，数组扩展类(LgyUtil)
 1. ForEach()，Exists()，Find()，FindAll()，FindIndex()，Sort()，ConvertAll()，普通数组[]增加扩展功能，都是List存在的功能
 
@@ -45,15 +46,53 @@
             string[] str={"a","b","c","d"};  str.IsNullOrEmpty()---->false
             string[] str={};                 str.IsNullOrEmpty()---->true
             string[] str=null;               str.IsNullOrEmpty()---->true
-## 二、CronUtil，定时帮助类，对Quartz进行了封装(LgyUtil)
-1. 开始必须初始化定时对象，执行:CronUtil.InitScheduler()
-2. 添加定时任务
-    - AddCronJob()，按照cron表达式定时
-    - AddSecondJob()，按照秒定时
-    - AddMinuteJob()，按照分钟定时
-    - AddHourJob()，按照小时定时
-    - AddJob()，自定义定时方式(TriggerBuilder对象)
-3. 停止方法StopJob
+## 二、TimerUtil，简易定时帮助类，依靠Timer对象(LgyUtil)
+1. 添加定时任务
+
+    - 按照cron表达式定时(支持6-7位cron表达式)
+    
+    ~~~ c#
+      AddCronJob(string jobName,string cron,Action<JobExecInfo> doing, JobOption options=null)
+    ~~~
+    - 按照秒定时
+    
+    ~~~ c#
+      AddSecondJob(string jobName,double second,Action<JobExecInfo> doing,JobOption options = null)
+    ~~~
+    - 按照分钟定时
+    
+    ~~~ c#
+      AddMinuteJob(string jobName, double minute, Action<JobExecInfo> doing, JobOption options = null)
+    ~~~
+    - 按照小时定时
+    
+    ~~~ c#
+      AddHourJob(string jobName, double hour, Action<JobExecInfo> doing, JobOption options = null)
+    ~~~
+    - 按照天定时
+    
+    ~~~ c#
+      AddDayJob(string jobName, double day, Action<JobExecInfo> doing, JobOption options = null)
+    ~~~
+    - 自定义时间间隔定时
+    
+    ~~~ c#
+      AddCustomJob(string jobName, TimeSpan customTimeSpan, Action<JobExecInfo> doing, JobOption options = null)
+    ~~~
+2. 定时选项说明(JobOption)
+
+    - StartTime：任务开始执行时间。若设置了RunNow，会先执行一次，再按照StartTime执行
+    - EndTime：任务结束执行时间(结束后，自动删除任务)
+    - RunNow：立即执行一次，默认false。若设置了StartTime，立即执行后，等到达StartTime后执行第二次
+    - ContinueNotFinish:上次执行未结束，到下次触发时间，是否继续触发本次任务，默认false
+        - true:不管上次执行是否结束，本次依然执行
+        - false:上次未结束，跳过本次任务，等待下次触发(此任务只会有一个线程在执行)
+    - MaxExecTimes：最大执行次数，默认无限次数执行，到达最大次数时，停止并删除任务
+    - ErrorContinue：发生错误时，是否继续执行，默认false，发生错误，停止job
+    - ErrorDoing：发生错误时，执行的方法
+    - AfterStopDoing：任务停止之后执行的方法rStopDoing:任务停止之后执行的方法
+2. 获取未来5次触发时间，GetNext5TriggerTimes(string jobName)
+3. 停止并删除任务，StopJob(string jobName)
 ## 三、DataTable扩展，效率不高，程序中避免使用DataTable(LgyUtil)
 1. ToList\<T>()，将表转成数组
 2. ToDictionary<string,T>()，将表转成字典
@@ -410,4 +449,12 @@
             }
         }
     ~~~
-
+## 十七、CronUtil，定时帮助类，对Quartz进行了封装(<font color="red">LgyUtil.Quartz</font>)
+1. 开始必须初始化定时对象，执行:CronUtil.InitScheduler()
+2. 添加定时任务
+    - AddCronJob()，按照cron表达式定时
+    - AddSecondJob()，按照秒定时
+    - AddMinuteJob()，按照分钟定时
+    - AddHourJob()，按照小时定时
+    - AddJob()，自定义定时方式(TriggerBuilder对象)
+3. 停止方法StopJob
