@@ -223,27 +223,22 @@ namespace LgyUtil
         }
 
         /// <summary>
-        /// 格式化日期，Q代表季度，只解析第一个Q(解决linux格式化/转成-问题)
+        /// 格式化日期，Q代表季度，也解决了linux下字符(/)会被转成(-)的问题
         /// </summary>
         /// <param name="dt"></param>
-        /// <param name="format">格式化字符串，Q代表季度，只解析第一个Q</param>
+        /// <param name="format">格式化字符串，Q代表季度</param>
         /// <returns></returns>
         public static string ToStringExt(this DateTime dt, string format)
         {
             DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
             dtFormat.ShortDatePattern = format;
-            dtFormat.FullDateTimePattern = format;
             if (format.Contains("Q"))
             {
-                int quarterIndex = format.IndexOf("Q");
                 int quarterNum = dt.GetQuarter();
-                dtFormat.ShortDatePattern = format.Replace("Q", "");
-                dtFormat.FullDateTimePattern = dtFormat.ShortDatePattern;
-                string ret = dt.ToString(dtFormat.ShortDatePattern, dtFormat);
-                return ret.Insert(quarterIndex, quarterNum.ToString());
+                return dt.ToString("d",dtFormat).Replace("Q",quarterNum.ToString());
             }
             else
-                return dt.ToString(format, dtFormat);
+                return dt.ToString("d", dtFormat);
         }
     }
 }
