@@ -120,7 +120,7 @@
 19. GetHourEnd()，获取传入日期 59分59秒
 20. GetMinuteStart()，获取传入日期 0秒
 21. GetMinuteEnd()，获取传入日期 59秒
- 1. ToStringExt(),格式化日期扩展，也解决了linux下字符(/)会被转成(-)的问题
+ 1. ToStringExt(),格式化日期扩展，Q代表季度，也解决了linux下字符(/)会被转成(-)的问题
         
         new DateTime(2010,5,3).ToStringExt("yyyy/Q")
 ## 五、EncryptUtil，加密算法帮助类(LgyUtil)
