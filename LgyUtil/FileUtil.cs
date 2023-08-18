@@ -60,9 +60,8 @@ namespace LgyUtil
         /// <param name="DirectoryPath">监视的文件夹</param>
         /// <param name="ChangeAction">文件修改时执行的方法(改变文件的全路径,文件改变事件类型)</param>
         /// <param name="Filter">文件过滤，可以是某个文件名a.txt，也可以是通配符*.txt，默认是*.*</param>
-        /// <param name="RenameAction">重命名时执行的方法</param>
         /// <returns></returns>
-        public static void WatchFileChanged(string DirectoryPath, Action<FileSystemEventArgs> ChangeAction = null, string Filter = "*.*", Action<RenamedEventArgs> RenameAction = null)
+        public static void WatchFileChanged(string DirectoryPath, Action<FileSystemEventArgs> ChangeAction = null, string Filter = "*.*")
         {
             FileSystemWatcher watch = new FileSystemWatcher(DirectoryPath, Filter);
             watch.BeginInit();
@@ -70,7 +69,7 @@ namespace LgyUtil
             watch.Created += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
             watch.Changed += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
             watch.Deleted += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
-            watch.Renamed += new RenamedEventHandler((sender, e) => { RenameAction?.Invoke(e); });
+            watch.Renamed += new RenamedEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
             watch.NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess
                                   | NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size;
             watch.IncludeSubdirectories = true;

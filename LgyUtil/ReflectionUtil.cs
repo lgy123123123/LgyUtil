@@ -1,4 +1,7 @@
-﻿using System;
+﻿using LgyUtil.OtherSource;
+using System;
+using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace LgyUtil
@@ -77,7 +80,7 @@ namespace LgyUtil
             Type t = ass.GetType(className, false, ignoreCase);
             if (t == null)
                 throw new LgyUtilException($"反射错误：未找到名为{className}的类型");
-            if (param == null || param.Length == 0)
+            if ((param == null || param.Length == 0) && typeof(T) != typeof(object))//object类型，不能使用泛型返回，否则返回的对象不正确
                 return Activator.CreateInstance<T>();
             return (T)Activator.CreateInstance(t, param);
         }
@@ -167,5 +170,121 @@ namespace LgyUtil
         {
             return GetInstance<object>(ass, className, null, ignoreCase);
         }
+
+        #region 通过表达式树构建方法，并执行
+
+        /// <summary>
+        /// method缓存
+        /// </summary>
+        static Lazy<ConcurrentDictionary<string, Func<object, object[], object>>> dicGetSetMethodCache = new Lazy<ConcurrentDictionary<string, Func<object, object[], object>>>(true);
+        /// <summary>
+        /// 获取缓存的key
+        /// </summary>
+        /// <param name="modelType"></param>
+        /// <param name="methodName"></param>
+        /// <returns></returns>
+        static string GetGetSetMethodKey(Type modelType, string methodName)
+        {
+            return $"{modelType.Namespace}.{modelType.Name}.{methodName}";
+        }
+
+        /// <summary>
+        /// 给类的属性赋值(调用的是属性set方法)
+        /// </summary>
+        /// <param name="instance">类的实例</param>
+        /// <param name="propName">属性名</param>
+        /// <param name="setValue">赋值内容</param>
+        /// <exception cref="LgyUtilException"></exception>
+        public static void SetModelPropertyValue(object instance, string propName, object setValue)
+        {
+            var modelType = instance.GetType();
+
+            string key = GetGetSetMethodKey(modelType, "Set_" + propName);
+            if (dicGetSetMethodCache.Value.TryGetValue(key, out var func))
+            {
+                func(instance, new object[] { setValue });
+                return;
+            }
+
+            var prop = modelType.GetProperty(propName);
+            if (prop is null)
+                throw new LgyUtilException($"属性名错误：{modelType.Name}.{propName}");
+            var setMethod = prop.GetSetMethod();
+            if (setMethod == null)
+                throw new LgyUtilException($"属性没有Set方法：{modelType.Name}.{propName}");
+
+            var func2 = ExpressionExecMethod.GetExecFuntion(setMethod);
+            dicGetSetMethodCache.Value.TryAdd($"{modelType.Namespace}.{modelType.Name}.Set{propName}", func2);
+
+            func2(instance, new object[] { setValue });
+        }
+
+        /// <summary>
+        /// 获取类的属性值(调用的是属性的get方法)
+        /// </summary>
+        /// <param name="instance">类的实例</param>
+        /// <param name="propName">属性名</param>
+        /// <returns></returns>
+        /// <exception cref="LgyUtilException"></exception>
+        public static object GetModelPropertyValue(object instance, string propName)
+        {
+            var modelType = instance.GetType();
+
+            string key = GetGetSetMethodKey(modelType, "Get_" + propName);
+            if (dicGetSetMethodCache.Value.TryGetValue(key, out var func))
+                return func(instance, null);
+
+            var prop = modelType.GetProperty(propName);
+            if (prop is null)
+                throw new LgyUtilException($"属性名错误：{modelType.Name}.{propName}");
+            var getMethod = prop.GetGetMethod();
+            if (getMethod == null)
+                throw new LgyUtilException($"属性没有Get方法：{modelType.Name}.{propName}");
+
+            var func2 = ExpressionExecMethod.GetExecFuntion(getMethod);
+
+            dicGetSetMethodCache.Value.TryAdd($"{modelType.Namespace}.{modelType.Name}.Set{propName}", func2);
+
+            return func2(instance, null);
+        }
+
+        /// <summary>
+        /// 执行类中的方法，也可以是静态方法
+        /// </summary>
+        /// <param name="instance">类实例，执行静态方法时填null</param>
+        /// <param name="method">执行的方法</param>
+        /// <param name="methodParams">方法参数</param>
+        /// <returns></returns>
+        public static object ExecMethod(object instance, MethodInfo method, params object[] methodParams)
+        {
+            return ExpressionExecMethod.GetExecFuntion(method)(instance, methodParams);
+        }
+
+        /// <summary>
+        /// 执行类中的方法，也可以是静态方法
+        /// </summary>
+        /// <param name="instance">类实例，执行静态方式时填null</param>
+        /// <param name="instanceType">类的类型</param>
+        /// <param name="methodName">执行的方法名</param>
+        /// <param name="methodParams">方法参数</param>
+        /// <returns></returns>
+        /// <exception cref="LgyUtilException"></exception>
+        public static object ExecModelMethod(object instance, Type instanceType, string methodName, params object[] methodParams)
+        {
+            string key = GetGetSetMethodKey(instanceType, methodName);
+            if(dicGetSetMethodCache.Value.TryGetValue((string)key, out var func)) 
+                return func(instance, methodParams);
+
+            var method = instanceType.GetMethod(methodName);
+            if (method == null)
+                throw new LgyUtilException($"没有找到方法：{instanceType.Name}.{methodName}");
+
+            var func2 = ExpressionExecMethod.GetExecFuntion(method);
+            dicGetSetMethodCache.Value.TryAdd(key, func2);
+
+            return func2(instance, methodParams);
+        }
+
+        #endregion
     }
 }

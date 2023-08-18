@@ -458,3 +458,11 @@
     - AddHourJob()，按照小时定时
     - AddJob()，自定义定时方式(TriggerBuilder对象)
 3. 停止方法StopJob
+## 十八、ReflectionUtil，反射帮助类(LgyUtil)
+1. GetAssembly(string dll)，加载程序集，一般用于加载外部的dll
+2. ExecDll，执行dll的方法中，某个类的方法
+1. ExecAssembly，执行程序集中，某个类的方法
+1. GetInstance，获取类的实例
+1. SetModelPropertyValue，设置实例的某个属性的值，使用表达式树，比反射快(有缓存)
+1. GetModelPropertyValue，获取实例的某个属性的值，使用表达式树，比反射快(有缓存)
+1. ExecMethod，执行实例中的方法，使用表达式树，比反射快(有缓存)
