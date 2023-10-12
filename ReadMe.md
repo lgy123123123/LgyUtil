@@ -235,11 +235,13 @@
     //输出内容1234-62DGxg-{anXx}-567-td67IN
 链式调用的所有方法：
 
-    GetRandom()，生成一个随机数
-    GetRandoms()，生成多个随机数(结果可能会出现重复的情况，设置SetNotSame后，只是生成的一个随机数里的内容不会重复)
-    SetNotSame()，生成的一个随机数中，不出现重复的内容，如生成3个不重复的数字，123，不会出现111。注：按模板生成时，此配置无效
-    SetPrefix()，设置随机码前缀
-    SetSuffix()，设置随机码后缀
+- GetRandom()，生成一个随机数
+- GetRandoms()，生成多个随机数(结果可能会出现重复的情况，设置SetNotSame后，只是生成的一个随机数里的内容不会重复)
+- SetNotSame()，生成的一个随机数中，不出现重复的内容，如生成3个不重复的数字，123，不会出现111。注：按模板生成时，此配置无效
+- SetNotSameList(),批量生成随机数时，每组内容不重复
+- SetPrefix()，设置随机码前缀
+- SetSuffix()，设置随机码后缀
+- SetExcludeSymbol(),设置排除的字符，设置后，随机码不会出现此内容,如排除a、2、6、c，可以设置SetExcludeSymbol("a26c")
 ## 十一、RegexUtil，正则表达式帮助类(LgyUtil)
 只有简单的几个正则判断
 
@@ -310,7 +312,7 @@
  1. StartsWith(),可以匹配多个字符串
  1. ContainsAny(),字符串包含任意一个匹配项，就返回true
 ## 十三、TaskUtil，多线程帮助类(LgyUtil)
-1. 执行多线程时，控制并行线程个数
+1. TaskUtil.GetTaskMaxUtil，执行多线程时，控制并行线程个数
 
         //最多10个线程并行执行
         using(var taskMaxUtil = TaskUtil.GetTaskMaxUtil(10))
@@ -328,6 +330,9 @@
             if (taskMaxUtil.WaitAll())
                 Console.WriteLine("所有线程执行完成");
         }
+2. TaskUtil.SetTimeout(TimeSpan delay, Func\<Task> action)，延迟执行，类似js中的setTimeout
+1. TaskUtil.SetTimeoutSecond(int second, Func<Task> action)，延迟执行，类似js中的setTimeout
+1. TaskUtil.SetTimeoutMinute(int minute, Func<Task> action)，延迟执行，类似js中的setTimeout
 ## 十四、ICache，缓存帮助类(<font color="red">LgyUtil.Cache</font>)
 - 缓存分为本地缓存(MemoryCache)、Redis缓存(RedisCache)。两个使用方法一样，构造一个静态变量，全局使用
 

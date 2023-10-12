@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -29,7 +31,7 @@ namespace LgyUtil
         /// <summary>
         /// 是否是按模板生成
         /// </summary>
-        private bool IsRandomTemplate { get;set; }
+        private bool IsRandomTemplate { get; set; }
         /// <summary>
         /// 解析后的模板集合
         /// </summary>
@@ -38,6 +40,10 @@ namespace LgyUtil
         /// 生成的一个随机码中，没有重复的数字或字母
         /// </summary>
         private bool NotSame { get; set; } = false;
+        /// <summary>
+        /// 生成的多个随机码，没有重复的
+        /// </summary>
+        private bool NotSameList { get; set; } = false;
         /// <summary>
         /// 系统随机实例
         /// </summary>
@@ -55,21 +61,28 @@ namespace LgyUtil
         /// </summary>
         private string Suffix { get; set; }
         /// <summary>
-        /// 生成时，是否移除字母L(大小写)、字母O(大小写)、数字1、数字0
-        /// </summary>
-        private bool IsRemoveLO { get; set; }
-        /// <summary>
         /// 小写字母
         /// </summary>
-        private readonly string[] lowerLetters =
-            {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
-             "v", "w", "x", "y", "z"};
+        private readonly char[] lowerLetters =
+            {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+             'v', 'w', 'x', 'y', 'z'};
         /// <summary>
         /// 大写字母
         /// </summary>
-        private readonly string[] upperLetters =
-            {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U",
-             "V", "W", "X", "Y", "Z"};
+        private readonly char[] upperLetters =
+            {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+             'V', 'W', 'X', 'Y', 'Z'};
+
+        /// <summary>
+        /// 排除的LO字符数组
+        /// </summary>
+        private readonly char[] excludeSymbolLO = new char[] { 'l', 'O', 'o', '1', '0' };
+
+        /// <summary>
+        /// 排除的字符
+        /// </summary>
+        private HashSet<char> ExcludeSymbol { get; set; } = new HashSet<char>();
+
         /// <summary>
         /// 生成那种随机数
         /// </summary>
@@ -140,11 +153,12 @@ namespace LgyUtil
         /// <returns></returns>
         public string GetRandom()
         {
-            CheckNotSame();
+            CheckNotSame(false);
             return GetRandomDetail();
         }
         /// <summary>
         /// 批量获取随机码
+        /// <para>注意：设置批量不重复后，尽量不要生成超过200个随机码</para>
         /// </summary>
         /// <param name="numCount">生成个数</param>
         /// <returns></returns>
@@ -152,19 +166,44 @@ namespace LgyUtil
         {
             CheckNotSame();
             string[] randoms = new string[numCount];
+            int tryTimes = 1;//尝试重复的次数
             for (int i = 0; i < numCount; i++)
             {
-                randoms[i] = GetRandom();
+                if (NotSameList)//设置不重复，最多尝试100次
+                    tryTimes = 100;
+                else
+                    tryTimes = 1;//初始尝试1次
+
+                while (tryTimes > 0)
+                {
+                    var randomOne = GetRandomDetail();
+                    if (!randoms.Contains(randomOne))
+                    {
+                        randoms[i] = randomOne;
+                        break;
+                    }
+                    tryTimes--;
+                }
             }
             return randoms;
         }
         /// <summary>
-        /// 设置本次生成的内容不会出现重复的数字或字母，注：批量生成、按模板生成，此配置无效
+        /// 设置生成的一个随机码中，不会出现重复内容，模板无效
         /// </summary>
         /// <returns></returns>
         public RandomUtil SetNotSame()
         {
             this.NotSame = true;
+            return this;
+        }
+
+        /// <summary>
+        /// 设置批量生成随机码时，每组随机码不会出现重复内容
+        /// </summary>
+        /// <returns></returns>
+        public RandomUtil SetNotSameList()
+        {
+            this.NotSameList = true;
             return this;
         }
         /// <summary>
@@ -193,7 +232,24 @@ namespace LgyUtil
         /// <returns></returns>
         public RandomUtil NotContainsLO()
         {
-            IsRemoveLO = true;
+            this.ExcludeSymbol.UnionWith(excludeSymbolLO);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置排除的符号
+        /// </summary>
+        /// <param name="items">字母或数字，填写所有排除的内容</param>
+        /// <returns></returns>
+        public RandomUtil SetExcludeSymbol(string items)
+        {
+            if (items.IsNullOrEmptyTrim())
+                throw new LgyUtilException("排除的符号不能为空");
+            var excludeItems = items.Distinct().ToArray();
+            foreach (var item in excludeItems)
+            {
+                this.ExcludeSymbol.Add(item);
+            }
             return this;
         }
         #endregion
@@ -204,13 +260,13 @@ namespace LgyUtil
         /// </summary>
         private void AnalysisTemplate()
         {
-            var matches= Regex.Matches(this.RandomFormatTemplate, @"\{[nxX]+}");
+            var matches = Regex.Matches(this.RandomFormatTemplate, @"\{[nxX]+}", RegexOptions.Compiled);
             TemplateArr = new string[matches.Count];
             for (int i = matches.Count - 1; i >= 0; i--)
             {
                 var m = matches[i];
                 //去除两侧大括号，只保留模板
-                TemplateArr[i]=m.Value.ReplaceRegex(@"\{|}", "");
+                TemplateArr[i] = m.Value.ReplaceRegex(@"\{|}", "");
                 this.RandomFormatTemplate = this.RandomFormatTemplate.ReplaceByIndex(m.Index, m.Length, "{RandomTemplate_" + i + "}");
             }
         }
@@ -222,32 +278,33 @@ namespace LgyUtil
         {
             RandomStr = string.Empty;
             //按模板生成
-            if(IsRandomTemplate)
+            if (IsRandomTemplate)
             {
                 //根据解析的模板，生成的内容
-                Dictionary<string,object> dicTemplateValues= new Dictionary<string, object>();
+                Dictionary<string, object> dicTemplateValues = new Dictionary<string, object>();
                 //循环解析后的模板
                 for (int i = 0; i < TemplateArr.Length; i++)
                 {
-                    StringBuilder randomOne=new StringBuilder();
+                    StringBuilder randomOne = new StringBuilder();
                     foreach (char item in TemplateArr[i])
                     {
+                        int tryTimes = 0;
                         switch (item)
                         {
                             case 'n':
-                                randomOne.Append(GetRandomOne(Enum_RandomOneType.Number));
+                                randomOne.Append(GetRandomOne(Enum_RandomOneType.Number, ref tryTimes));
                                 break;
                             case 'x':
-                                randomOne.Append(GetRandomOne(Enum_RandomOneType.LowerLetter));
+                                randomOne.Append(GetRandomOne(Enum_RandomOneType.LowerLetter, ref tryTimes));
                                 break;
                             case 'X':
-                                randomOne.Append(GetRandomOne(Enum_RandomOneType.UpperLetter));
+                                randomOne.Append(GetRandomOne(Enum_RandomOneType.UpperLetter, ref tryTimes));
                                 break;
                         }
                     }
                     dicTemplateValues.Add("RandomTemplate_" + i, randomOne.ToString());
                 }
-                RandomStr = RandomFormatTemplate.FormatTemplate(dicTemplateValues,false);
+                RandomStr = RandomFormatTemplate.FormatTemplate(dicTemplateValues, false);
             }
             //按枚举生成
             else
@@ -257,47 +314,54 @@ namespace LgyUtil
                     case Enum_RandomFormat.OnlyNumber:
                         for (int i = 0; i < RandomLength; i++)
                         {
-                            RandomStr += GetRandomOne(Enum_RandomOneType.Number);
+                            int tryTimes = 0;
+                            RandomStr += GetRandomOne(Enum_RandomOneType.Number, ref tryTimes);
                         }
                         break;
                     case Enum_RandomFormat.OnlyLetter:
                         for (int i = 0; i < RandomLength; i++)
                         {
+                            int tryTimes = 0;
                             bool isBig = randomInstance.Next(0, 2).ToBool();
-                            RandomStr += GetRandomOne(isBig ? Enum_RandomOneType.UpperLetter : Enum_RandomOneType.LowerLetter);
+                            RandomStr += GetRandomOne(isBig ? Enum_RandomOneType.UpperLetter : Enum_RandomOneType.LowerLetter, ref tryTimes);
                         }
                         break;
                     case Enum_RandomFormat.OnlyLowerLetter:
                         for (int i = 0; i < RandomLength; i++)
                         {
-                            RandomStr += GetRandomOne(Enum_RandomOneType.LowerLetter);
+                            int tryTimes = 0;
+                            RandomStr += GetRandomOne(Enum_RandomOneType.LowerLetter, ref tryTimes);
                         }
                         break;
                     case Enum_RandomFormat.OnlyUpperLetter:
                         for (int i = 0; i < RandomLength; i++)
                         {
-                            RandomStr += GetRandomOne(Enum_RandomOneType.UpperLetter);
+                            int tryTimes = 0;
+                            RandomStr += GetRandomOne(Enum_RandomOneType.UpperLetter, ref tryTimes);
                         }
                         break;
                     case Enum_RandomFormat.NumberAndLetter:
                         for (int i = 0; i < RandomLength; i++)
                         {
+                            int tryTimes = 0;
                             Enum_RandomOneType oneType = randomInstance.Next(0, 3).ToEnum<Enum_RandomOneType>();
-                            RandomStr += GetRandomOne(oneType);
+                            RandomStr += GetRandomOne(oneType, ref tryTimes);
                         }
                         break;
                     case Enum_RandomFormat.NumberAndLowerLetter:
                         for (int i = 0; i < RandomLength; i++)
                         {
+                            int tryTimes = 0;
                             bool isNumber = randomInstance.Next(0, 2).ToBool();
-                            RandomStr += GetRandomOne(isNumber ? Enum_RandomOneType.Number : Enum_RandomOneType.LowerLetter);
+                            RandomStr += GetRandomOne(isNumber ? Enum_RandomOneType.Number : Enum_RandomOneType.LowerLetter, ref tryTimes);
                         }
                         break;
                     case Enum_RandomFormat.NumberAndUpperLetter:
                         for (int i = 0; i < RandomLength; i++)
                         {
+                            int tryTimes = 0;
                             bool isNumber = randomInstance.Next(0, 2).ToBool();
-                            RandomStr += GetRandomOne(isNumber ? Enum_RandomOneType.Number : Enum_RandomOneType.UpperLetter);
+                            RandomStr += GetRandomOne(isNumber ? Enum_RandomOneType.Number : Enum_RandomOneType.UpperLetter, ref tryTimes);
                         }
                         break;
                 }
@@ -308,14 +372,15 @@ namespace LgyUtil
         /// 获取一个随机码
         /// </summary>
         /// <param name="oneType">生成类型</param>
+        /// <param name="tryTimes">尝试次数</param>
         /// <returns></returns>
-        private string GetRandomOne(Enum_RandomOneType oneType)
+        private char GetRandomOne(Enum_RandomOneType oneType, ref int tryTimes)
         {
-            string ret = "";
+            char ret = ' ';
             switch (oneType)
             {
                 case Enum_RandomOneType.Number:
-                    ret = randomInstance.Next(0, 10).ToString();
+                    ret = (randomInstance.Next(0, 10).ToString())[0];
                     break;
                 case Enum_RandomOneType.LowerLetter:
                     ret = lowerLetters[randomInstance.Next(0, 26)];
@@ -324,59 +389,60 @@ namespace LgyUtil
                     ret = upperLetters[randomInstance.Next(0, 26)];
                     break;
             }
+            tryTimes++;
+            if (tryTimes == 65)//最多尝试65次，26大写+26小写+10个数字=62
+                return ret;
             //验证是否重复数字或字母
             if (this.RandomStr.IsNotNullOrEmpty() && this.NotSame && this.RandomStr.Contains(ret))
-                ret = GetRandomOne(oneType);
+                ret = GetRandomOne(oneType, ref tryTimes);
             //是否排除 字母l 字母O 字母o 数字1 数字0
-            else if (this.IsRemoveLO && (ret.In("l", "O", "o", "1", "0")))
-                ret = GetRandomOne(oneType);
+            else if (this.ExcludeSymbol.Contains(ret))
+                ret = GetRandomOne(oneType, ref tryTimes);
             return ret;
         }
         /// <summary>
         /// 验证不重复生成时，设置的随机码长度
         /// </summary>
+        /// <param name="isBatch">是否批量生成</param>
         /// <exception cref="LgyUtilException"></exception>
-        private void CheckNotSame()
+        private void CheckNotSame(bool isBatch = true)
         {
             //按模板生成时，不重复配置无效
             if (this.IsRandomTemplate)
                 this.NotSame = false;
 
-            if (!this.NotSame)
-                return;
-
-            if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 52)
-                throw new LgyUtilException("设置不重复，且只生成字母的时候，随机数长度，不能超过52个");
-            if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 10)
-                throw new LgyUtilException("设置不重复，且只生成数字的时候，随机数长度，不能超过10个");
-            if (RandomFormat == Enum_RandomFormat.OnlyLowerLetter && RandomLength > 26)
-                throw new LgyUtilException("设置不重复，且只生成小写字母的时候，随机数长度，不能超过26个");
-            if (RandomFormat == Enum_RandomFormat.OnlyUpperLetter && RandomLength > 26)
-                throw new LgyUtilException("设置不重复，且只生成大写字母的时候，随机数长度，不能超过26个");
-            if (RandomFormat == Enum_RandomFormat.NumberAndLetter && RandomLength > 62)
-                throw new LgyUtilException("设置不重复，且生成数字和字母的时候，随机数长度，不能超过62个");
-            if (RandomFormat == Enum_RandomFormat.NumberAndLowerLetter && RandomLength > 36)
-                throw new LgyUtilException("设置不重复，且生成数字和小写字母的时候，随机数长度，不能超过36个");
-            if (RandomFormat == Enum_RandomFormat.NumberAndUpperLetter && RandomLength > 36)
-                throw new LgyUtilException("设置不重复，且生成数字和大写字母的时候，随机数长度，不能超过36个");
-
-            //对排除字母的验证，减少验证长度
-            if (IsRemoveLO)
+            //排除多少个数字
+            int excludeNumbers = 0;
+            //排除多少个大写字母
+            int excludeBigLettersNum = 0;
+            //排除多少个小写字母
+            int excludeSmallLettersNum = 0;
+            //是否设置排除字符
+            bool isExcludeSymbol = this.ExcludeSymbol.HaveContent();
+            if (isExcludeSymbol)
             {
-                if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 49)
-                    throw new LgyUtilException("设置不重复和排除字母，且只生成字母的时候，随机数长度，不能超过49个");
-                if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 8)
-                    throw new LgyUtilException("设置不重复和排除数字，且只生成数字的时候，随机数长度，不能超过8个");
-                if (RandomFormat == Enum_RandomFormat.OnlyLowerLetter && RandomLength > 24)
-                    throw new LgyUtilException("设置不重复和排除字母，且只生成小写字母的时候，随机数长度，不能超过24个");
-                if (RandomFormat == Enum_RandomFormat.OnlyUpperLetter && RandomLength > 25)
-                    throw new LgyUtilException("设置不重复和排除字母，且只生成大写字母的时候，随机数长度，不能超过25个");
-                if (RandomFormat == Enum_RandomFormat.NumberAndLetter && RandomLength > 57)
-                    throw new LgyUtilException("设置不重复和排除字母与数字，且生成数字和字母的时候，随机数长度，不能超过57个");
-                if (RandomFormat == Enum_RandomFormat.NumberAndLowerLetter && RandomLength > 32)
-                    throw new LgyUtilException("设置不重复和排除字母与数字，且生成数字和小写字母的时候，随机数长度，不能超过32个");
-                if (RandomFormat == Enum_RandomFormat.NumberAndUpperLetter && RandomLength > 33)
-                    throw new LgyUtilException("设置不重复和排除字母与数字，且生成数字和大写字母的时候，随机数长度，不能超过33个");
+                excludeNumbers = this.ExcludeSymbol.Count(s => (int)s >= 48 && (int)s <= 57);
+                excludeBigLettersNum = this.ExcludeSymbol.Count(s => (int)s >= 65 && (int)s <= 90);
+                excludeSmallLettersNum = this.ExcludeSymbol.Count(s => (int)s >= 97 && (int)s <= 122);
+            }
+
+            if (this.NotSame)
+            {
+                string excludeContent = isExcludeSymbol ? "和排除字符" : "";
+                if (RandomFormat == Enum_RandomFormat.OnlyLetter && RandomLength > 52 - excludeBigLettersNum - excludeSmallLettersNum)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且只生成字母的时候，随机数长度，不能超过{52 - excludeBigLettersNum - excludeSmallLettersNum}个");
+                if (RandomFormat == Enum_RandomFormat.OnlyNumber && RandomLength > 10 - excludeNumbers)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且只生成数字的时候，随机数长度，不能超过{10 - excludeNumbers}个");
+                if (RandomFormat == Enum_RandomFormat.OnlyLowerLetter && RandomLength > 26 - excludeSmallLettersNum)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且只生成小写字母的时候，随机数长度，不能超过{26 - excludeSmallLettersNum}个");
+                if (RandomFormat == Enum_RandomFormat.OnlyUpperLetter && RandomLength > 26 - excludeBigLettersNum)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且只生成大写字母的时候，随机数长度，不能超过{26 - excludeBigLettersNum}个");
+                if (RandomFormat == Enum_RandomFormat.NumberAndLetter && RandomLength > 62)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且生成数字和字母的时候，随机数长度，不能超过{62 - excludeBigLettersNum - excludeSmallLettersNum - excludeNumbers}个");
+                if (RandomFormat == Enum_RandomFormat.NumberAndLowerLetter && RandomLength > 36)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且生成数字和小写字母的时候，随机数长度，不能超过{36 - excludeSmallLettersNum - excludeNumbers}个");
+                if (RandomFormat == Enum_RandomFormat.NumberAndUpperLetter && RandomLength > 36)
+                    throw new LgyUtilException($"设置不重复{excludeContent}，且生成数字和大写字母的时候，随机数长度，不能超过{36 - excludeBigLettersNum - excludeNumbers}个");
             }
         }
         #endregion

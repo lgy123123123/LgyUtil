@@ -11,6 +11,42 @@ namespace LgyUtil
     public static class TaskUtil
     {
         /// <summary>
+        /// 延迟执行，类似js中的setTimeout
+        /// </summary>
+        /// <param name="delay">等待时长</param>
+        /// <param name="action">等待时长结束后，执行的方法(同步方法，最后返回return Task.CompletedTask)</param>
+        public static Task SetTimeout(TimeSpan delay, Func<Task> action)
+        {
+            return Task.Run(async () =>
+            {
+                await Task.Delay(delay);
+                await action?.Invoke();
+            });
+        }
+
+        /// <summary>
+        /// 延迟执行，类似js中的setTimeout
+        /// </summary>
+        /// <param name="second">等待秒数</param>
+        /// <param name="action">等待时长结束后，执行的方法(同步方法，最后返回return Task.CompletedTask)</param>
+        /// <returns></returns>
+        public static Task SetTimeoutSecond(int second, Func<Task> action)
+        {
+            return SetTimeout(TimeSpan.FromSeconds(second), action);
+        }
+
+        /// <summary>
+        /// 延迟执行，类似js中的setTimeout
+        /// </summary>
+        /// <param name="minute">等待分钟数</param>
+        /// <param name="action">等待时长结束后，执行的方法(同步方法，最后返回return Task.CompletedTask)</param>
+        /// <returns></returns>
+        public static Task SetTimeoutMinute(int minute, Func<Task> action)
+        {
+            return SetTimeout(TimeSpan.FromMinutes(minute), action);
+        }
+
+        /// <summary>
         /// 设置异步超时时间
         /// </summary>
         /// <typeparam name="TResult"></typeparam>
@@ -67,7 +103,7 @@ namespace LgyUtil
         /// <summary>
         /// 限制并行任务数帮助类，使用完，必须释放
         /// </summary>
-        public sealed class TaskMaxUtil:IDisposable
+        public sealed class TaskMaxUtil : IDisposable
         {
             /// <summary>
             /// 信号量
@@ -76,7 +112,7 @@ namespace LgyUtil
             /// <summary>
             /// 所有任务
             /// </summary>
-            public List<Task> TaskAll { get; private set; }=new List<Task>();
+            public List<Task> TaskAll { get; private set; } = new List<Task>();
             /// <summary>
             /// 初始化帮助类
             /// </summary>

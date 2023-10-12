@@ -214,7 +214,7 @@ namespace LgyUtil
                 throw new LgyUtilException($"属性没有Set方法：{modelType.Name}.{propName}");
 
             var func2 = ExpressionExecMethod.GetExecFuntion(setMethod);
-            dicGetSetMethodCache.Value.TryAdd($"{modelType.Namespace}.{modelType.Name}.Set{propName}", func2);
+            dicGetSetMethodCache.Value.TryAdd(key, func2);
 
             func2(instance, new object[] { setValue });
         }
@@ -243,7 +243,7 @@ namespace LgyUtil
 
             var func2 = ExpressionExecMethod.GetExecFuntion(getMethod);
 
-            dicGetSetMethodCache.Value.TryAdd($"{modelType.Namespace}.{modelType.Name}.Set{propName}", func2);
+            dicGetSetMethodCache.Value.TryAdd(key, func2);
 
             return func2(instance, null);
         }
