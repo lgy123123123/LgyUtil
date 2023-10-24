@@ -52,32 +52,32 @@
     - 按照cron表达式定时(支持6-7位cron表达式)
     
     ~~~ c#
-      AddCronJob(string jobName,string cron,Action<JobExecInfo> doing, JobOption options=null)
+      TimerUtil.AddCronJob(string jobName,string cron,Action<JobExecInfo> doing, JobOption options=null)
     ~~~
     - 按照秒定时
     
     ~~~ c#
-      AddSecondJob(string jobName,double second,Action<JobExecInfo> doing,JobOption options = null)
+      TimerUtil.AddSecondJob(string jobName,double second,Action<JobExecInfo> doing,JobOption options = null)
     ~~~
     - 按照分钟定时
     
     ~~~ c#
-      AddMinuteJob(string jobName, double minute, Action<JobExecInfo> doing, JobOption options = null)
+     TimerUtil. AddMinuteJob(string jobName, double minute, Action<JobExecInfo> doing, JobOption options = null)
     ~~~
     - 按照小时定时
     
     ~~~ c#
-      AddHourJob(string jobName, double hour, Action<JobExecInfo> doing, JobOption options = null)
+      TimerUtil.AddHourJob(string jobName, double hour, Action<JobExecInfo> doing, JobOption options = null)
     ~~~
     - 按照天定时
     
     ~~~ c#
-      AddDayJob(string jobName, double day, Action<JobExecInfo> doing, JobOption options = null)
+      TimerUtil.AddDayJob(string jobName, double day, Action<JobExecInfo> doing, JobOption options = null)
     ~~~
     - 自定义时间间隔定时
     
     ~~~ c#
-      AddCustomJob(string jobName, TimeSpan customTimeSpan, Action<JobExecInfo> doing, JobOption options = null)
+      TimerUtil.AddCustomJob(string jobName, TimeSpan customTimeSpan, Action<JobExecInfo> doing, JobOption options = null)
     ~~~
 2. 定时选项说明(JobOption)
 
@@ -93,6 +93,9 @@
     - AfterStopDoing：任务停止之后执行的方法rStopDoing:任务停止之后执行的方法
 2. 获取未来5次触发时间，GetNext5TriggerTimes(string jobName)
 3. 停止并删除任务，StopJob(string jobName)
+1. 延迟执行1次，自定义时间，TimerUtil.SetTimeout(TimeSpan delay, Action action)
+1. 延迟执行1次，根据秒，TimerUtil.SetTimeoutSecond(int second, Action action)
+1. 延迟执行1次，根据分钟，TimerUtil.SetTimeoutMinute(int minute, Action action)
 ## 三、DataTable扩展，效率不高，程序中避免使用DataTable(LgyUtil)
 1. ToList\<T>()，将表转成数组
 2. ToDictionary<string,T>()，将表转成字典

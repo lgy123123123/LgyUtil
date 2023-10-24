@@ -147,7 +147,7 @@ namespace LgyUtil.TimerUtilModel
                 //修改time下次执行时间
                 JobTimer.Change(nextExecDate - DateTime.Now, TimeSpan.FromMilliseconds(-1));
 
-                //标记未完成，当
+                //标记未完成
                 IsFinish = false;
 
                 Task.Run(() =>

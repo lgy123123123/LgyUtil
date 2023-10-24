@@ -15,12 +15,12 @@ namespace LgyUtil
         /// <summary>
         /// 机器id所占的位数
         /// </summary>
-        private const int workerIdBits = 2;
+        private const int workerIdBits = 5;
 
         /// <summary>
         /// 数据标识id所占的位数
         /// </summary>
-        private const int datacenterIdBits = 2;
+        private const int datacenterIdBits = 5;
 
         /// <summary>
         /// 支持的最大机器id，结果是31 (这个移位算法可以很快的计算出几位二进制数所能表示的最大十进制数)
@@ -35,7 +35,7 @@ namespace LgyUtil
         /// <summary>
         /// 序列在id中占的位数
         /// </summary>
-        private const int sequenceBits = 5;
+        private const int sequenceBits = 12;
 
         /// <summary>
         /// 数据标识id向左移17位(12+5)
@@ -81,17 +81,17 @@ namespace LgyUtil
         /// <summary>
         /// 雪花ID
         /// </summary>
-        /// <param name="datacenterId">数据中心ID</param>
-        /// <param name="workerId">工作机器ID</param>
+        /// <param name="datacenterId">数据中心ID(只能填0-31)</param>
+        /// <param name="workerId">工作机器ID(只能填0-31)</param>
         public SnowflakeId(long datacenterId, long workerId)
         {
             if (datacenterId > maxDatacenterId || datacenterId < 0)
             {
-                throw new Exception($"datacenter Id can't be greater than {maxDatacenterId} or less than 0");
+                throw new Exception($"数据中心ID范围必须是[0,{maxDatacenterId}]");
             }
             if (workerId > maxWorkerId || workerId < 0)
             {
-                throw new Exception($"worker Id can't be greater than {maxWorkerId} or less than 0");
+                throw new Exception($"工作机器ID范围必须是[0,{maxWorkerId}]");
             }
             this.workerId = workerId;
             this.datacenterId = datacenterId;

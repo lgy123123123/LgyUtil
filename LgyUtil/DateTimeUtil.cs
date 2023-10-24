@@ -45,7 +45,7 @@ namespace LgyUtil
             return dt.ToString("yyyy年MM月dd日 HH:mm:ss");
         }
         /// <summary>
-        /// 获取当前unix时间戳(13位)
+        /// 获取当前unix时间戳(13位，与前台js时间戳位数一样)
         /// </summary>
         /// <returns></returns>
         public static long GetTimestamp()
@@ -96,7 +96,7 @@ namespace LgyUtil
             return (dtBig.Year - dtSmall.Year) * 12 + dtBig.Month - dtSmall.Month;
         }
         /// <summary>
-        /// 获取当前年第一天
+        /// 获取当前年第一天 1月1日 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
@@ -109,7 +109,7 @@ namespace LgyUtil
                 return new DateTime(dt.Year, 1, 1, dt.Hour, dt.Minute, dt.Second);
         }
         /// <summary>
-        /// 获取当前年最后一天
+        /// 获取当前年最后一天 12月31日 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
@@ -122,7 +122,7 @@ namespace LgyUtil
                 return new DateTime(dt.Year, 12, 31, dt.Hour, dt.Minute, dt.Second); ;
         }
         /// <summary>
-        /// 获取当前季度第一天
+        /// 获取当前季度第一天 1日 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
@@ -135,7 +135,7 @@ namespace LgyUtil
                 return new DateTime(dt.Year, ((dt.GetQuarter() - 1) * 3 + 1).ToInt(), 1, dt.Hour, dt.Minute, dt.Second);
         }
         /// <summary>
-        /// 获取当前季度最后一天
+        /// 获取当前季度最后一天 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
@@ -145,7 +145,7 @@ namespace LgyUtil
             return dt.GetQuarterStart(formatTime).AddQuarter(1).AddDays(-1);
         }
         /// <summary>
-        /// 获取当前月第一天
+        /// 获取当前月第一天 1日 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
@@ -158,7 +158,7 @@ namespace LgyUtil
                 return new DateTime(dt.Year, dt.Month, 1, dt.Hour, dt.Minute, dt.Second);
         }
         /// <summary>
-        /// 获取当前月最后一天
+        /// 获取当前月最后一天 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <param name="formatTime">是否格式化时间(false:留原有的时分秒)</param>
@@ -168,7 +168,7 @@ namespace LgyUtil
             return dt.GetMonthStart(formatTime).AddMonths(1).AddDays(-1);
         }
         /// <summary>
-        /// 获取当前日开始时间
+        /// 获取当前日开始时间 00:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
@@ -177,7 +177,7 @@ namespace LgyUtil
             return new DateTime(dt.Year, dt.Month, dt.Day, 0, 0, 0);
         }
         /// <summary>
-        /// 获取当前日结束时间
+        /// 获取当前日结束时间 23:59:59
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
@@ -186,7 +186,7 @@ namespace LgyUtil
             return new DateTime(dt.Year, dt.Month, dt.Day, 23, 59, 59);
         }
         /// <summary>
-        /// 获取当前时开始时间
+        /// 获取当前时开始时间 hour:00:00
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
@@ -195,7 +195,7 @@ namespace LgyUtil
             return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 0, 0);
         }
         /// <summary>
-        /// 获取当前时结束时间
+        /// 获取当前时结束时间 hour:59:59
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
@@ -204,7 +204,7 @@ namespace LgyUtil
             return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, 59, 59);
         }
         /// <summary>
-        /// 获取当前分开始时间
+        /// 获取当前分开始时间 hour:minute:00
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
@@ -213,7 +213,7 @@ namespace LgyUtil
             return new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, 0);
         }
         /// <summary>
-        /// 获取当前分结束时间
+        /// 获取当前分结束时间 hour:minute:59
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>

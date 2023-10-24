@@ -14,36 +14,32 @@ namespace LgyUtil
         /// 延迟执行，类似js中的setTimeout
         /// </summary>
         /// <param name="delay">等待时长</param>
-        /// <param name="action">等待时长结束后，执行的方法(同步方法，最后返回return Task.CompletedTask)</param>
-        public static Task SetTimeout(TimeSpan delay, Func<Task> action)
+        /// <param name="action">等待时长结束后，执行的方法</param>
+        public static void SetTimeout(TimeSpan delay, Action action)
         {
-            return Task.Run(async () =>
-            {
-                await Task.Delay(delay);
-                await action?.Invoke();
-            });
+            TimerUtil.SetTimeout(delay, action);
         }
 
         /// <summary>
         /// 延迟执行，类似js中的setTimeout
         /// </summary>
         /// <param name="second">等待秒数</param>
-        /// <param name="action">等待时长结束后，执行的方法(同步方法，最后返回return Task.CompletedTask)</param>
+        /// <param name="action">等待时长结束后，执行的方法</param>
         /// <returns></returns>
-        public static Task SetTimeoutSecond(int second, Func<Task> action)
+        public static void SetTimeoutSecond(int second, Action action)
         {
-            return SetTimeout(TimeSpan.FromSeconds(second), action);
+            TimerUtil.SetTimeoutSecond(second, action);
         }
 
         /// <summary>
         /// 延迟执行，类似js中的setTimeout
         /// </summary>
         /// <param name="minute">等待分钟数</param>
-        /// <param name="action">等待时长结束后，执行的方法(同步方法，最后返回return Task.CompletedTask)</param>
+        /// <param name="action">等待时长结束后，执行的方法</param>
         /// <returns></returns>
-        public static Task SetTimeoutMinute(int minute, Func<Task> action)
+        public static void SetTimeoutMinute(int minute, Action action)
         {
-            return SetTimeout(TimeSpan.FromMinutes(minute), action);
+            TimerUtil.SetTimeoutMinute(minute, action);
         }
 
         /// <summary>

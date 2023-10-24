@@ -31,75 +31,20 @@ namespace LgyUtil.NStringFormat
             ParseTemplate(out _templateWithIndexes, out _placeholders);
         }
 
-        //
-        // 摘要:
-        //     Parses the provided string into a StringTemplate instance. Parsed templates are
-        //     cached, so calling this method twice with the same argument will return the same
-        //     StringTemplate instance.
-        //
-        // 参数:
-        //   template:
-        //     string representation of the template
-        //
-        // 返回结果:
-        //     A StringTemplate instance that can be used to format objects.
-        //
-        // 言论：
-        //     The template syntax is similar to the one used in String.Format, except that
-        //     indexes are replaced by names.
         public static StringTemplate Parse(string template)
         {
             return GetTemplate(template);
         }
 
-        //
-        // 摘要:
-        //     Converts a string to a StringTemplate.
-        //
-        // 参数:
-        //   s:
-        //     The string to convert
-        //
-        // 返回结果:
-        //     A StringTemplate using the converted string
         public static implicit operator StringTemplate(string s)
         {
             return GetTemplate(s);
         }
 
-        //
-        // 摘要:
-        //     Returns a string representation of this StringTemplate.
-        //
-        // 返回结果:
-        //     The string representation of this StringTemplate
         public override string ToString()
         {
             return _template;
         }
-
-        //
-        // 摘要:
-        //     Replaces the template's placeholders with the values from the specified dictionary.
-        //
-        // 参数:
-        //   values:
-        //     A dictionary containing values for each placeholder in the template
-        //
-        //   throwOnMissingValue:
-        //     Indicates whether or not to throw an exception if a value is missing for a placeholder.
-        //     If this parameter is false and no value is found, the placeholder is left as
-        //     is in the formatted string.
-        //
-        //   formatProvider:
-        //     An object that supplies culture-specific formatting information.
-        //
-        // 返回结果:
-        //     The formatted string
-        //
-        // 异常:
-        //   T:System.Collections.Generic.KeyNotFoundException:
-        //     throwOnMissingValue is true and no value was found in the dictionary for a placeholder
         public string Format(IDictionary<string, object> values, bool throwOnMissingValue = true, IFormatProvider formatProvider = null)
         {
             object[] array = new object[_placeholders.Count];
@@ -122,92 +67,16 @@ namespace LgyUtil.NStringFormat
             return string.Format(formatProvider, _templateWithIndexes, array);
         }
 
-        //
-        // 摘要:
-        //     Replaces the template's placeholders with the values from the specified object.
-        //
-        // 参数:
-        //   values:
-        //     An object containing values for the placeholders. For each placeholder, this
-        //     method looks for a corresponding property of field in this object.
-        //
-        //   throwOnMissingValue:
-        //     Indicates whether or not to throw an exception if a value is missing for a placeholder.
-        //     If this parameter is false and no value is found, the placeholder is left as
-        //     is in the formatted string.
-        //
-        //   formatProvider:
-        //     An object that supplies culture-specific formatting information.
-        //
-        // 返回结果:
-        //     The formatted string
-        //
-        // 异常:
-        //   T:System.Collections.Generic.KeyNotFoundException:
-        //     throwOnMissingValue is true and no value was found in the dictionary for a placeholder
         public string Format(object values, bool throwOnMissingValue = true, IFormatProvider formatProvider = null)
         {
             return Format(MakeDictionary(values), throwOnMissingValue, formatProvider);
         }
 
-        //
-        // 摘要:
-        //     Replaces the specified template's placeholders with the values from the specified
-        //     dictionary.
-        //
-        // 参数:
-        //   template:
-        //     The template to use to format the values.
-        //
-        //   values:
-        //     A dictionary containing values for each placeholder in the template
-        //
-        //   throwOnMissingValue:
-        //     Indicates whether or not to throw an exception if a value is missing for a placeholder.
-        //     If this parameter is false and no value is found, the placeholder is left as
-        //     is in the formatted string.
-        //
-        //   formatProvider:
-        //     An object that supplies culture-specific formatting information.
-        //
-        // 返回结果:
-        //     The formatted string
-        //
-        // 异常:
-        //   T:System.Collections.Generic.KeyNotFoundException:
-        //     throwOnMissingValue is true and no value was found in the dictionary for a placeholder
         public static string Format(string template, IDictionary<string, object> values, bool throwOnMissingValue = true, IFormatProvider formatProvider = null)
         {
             return GetTemplate(template).Format(values, throwOnMissingValue, formatProvider);
         }
 
-        //
-        // 摘要:
-        //     Replaces the specified template's placeholders with the values from the specified
-        //     object.
-        //
-        // 参数:
-        //   template:
-        //     The template to use to format the values.
-        //
-        //   values:
-        //     An object containing values for the placeholders. For each placeholder, this
-        //     method looks for a corresponding property of field in this object.
-        //
-        //   throwOnMissingValue:
-        //     Indicates whether or not to throw an exception if a value is missing for a placeholder.
-        //     If this parameter is false and no value is found, the placeholder is left as
-        //     is in the formatted string.
-        //
-        //   formatProvider:
-        //     An object that supplies culture-specific formatting information.
-        //
-        // 返回结果:
-        //     The formatted string
-        //
-        // 异常:
-        //   T:System.Collections.Generic.KeyNotFoundException:
-        //     throwOnMissingValue is true and no value was found in the dictionary for a placeholder
         public static string Format(string template, object values, bool throwOnMissingValue = true, IFormatProvider formatProvider = null)
         {
             return GetTemplate(template).Format(values, throwOnMissingValue, formatProvider);

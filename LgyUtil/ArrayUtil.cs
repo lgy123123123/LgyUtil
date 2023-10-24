@@ -169,5 +169,49 @@ namespace LgyUtil
         {
             return array is null || array.Count() == 0;
         }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，升序
+        /// </summary>
+        /// <param name="array">字符串数组</param>
+        /// <returns></returns>
+        public static IEnumerable<string> SortByWindowsFileName(this IEnumerable<string> array)
+        {
+            return FileUtil.SortByWindowsFileName(array);
+        }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，升序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array">要排序的对象数组</param>
+        /// <param name="orderField">选择排序的字符串字段</param>
+        /// <returns></returns>
+        public static IEnumerable<T> SortByWindowsFileName<T>(this IEnumerable<T> array, Func<T, string> orderField) where T : class
+        {
+            return FileUtil.SortByWindowsFileName(array,orderField);
+        }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，降序
+        /// </summary>
+        /// <param name="array">字符串数组</param>
+        /// <returns></returns>
+        public static IEnumerable<string> SortByWindowsFileNameDesc(this IEnumerable<string> array)
+        {
+            return FileUtil.SortByWindowsFileNameDesc(array);
+        }
+
+        /// <summary>
+        /// 按照windows系统文件名排序规则排序，降序
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array">要排序的对象数组</param>
+        /// <param name="orderField">选择排序的字符串字段</param>
+        /// <returns></returns>
+        public static IEnumerable<T> SortByWindowsFileNameDesc<T>(this IEnumerable<T> array, Func<T, string> orderField) where T : class
+        {
+            return FileUtil.SortByWindowsFileNameDesc(array, orderField);
+        }
     }
 }

@@ -102,5 +102,40 @@ namespace LgyUtil
         {
             JobInfo.GetJob(jobName)?.StopJob();
         }
+
+        /// <summary>
+        /// 延迟执行1次，类似js中的setTimeout
+        /// </summary>
+        /// <param name="delay">等待时长</param>
+        /// <param name="action">等待时长结束后，执行的方法</param>
+        public static void SetTimeout(TimeSpan delay, Action action)
+        {
+            TimerUtil.AddCustomJob("timeout:" + Guid.NewGuid().ToString("N"), delay, info =>
+            {
+                action?.Invoke();
+            }, new JobOption { EndTime = DateTime.Now.Add(delay) });
+        }
+
+        /// <summary>
+        /// 延迟执行1次，类似js中的setTimeout
+        /// </summary>
+        /// <param name="second">等待秒数</param>
+        /// <param name="action">等待时长结束后，执行的方法</param>
+        /// <returns></returns>
+        public static void SetTimeoutSecond(int second, Action action)
+        {
+            SetTimeout(TimeSpan.FromSeconds(second), action);
+        }
+
+        /// <summary>
+        /// 延迟执行1次，类似js中的setTimeout
+        /// </summary>
+        /// <param name="minute">等待分钟数</param>
+        /// <param name="action">等待时长结束后，执行的方法</param>
+        /// <returns></returns>
+        public static void SetTimeoutMinute(int minute, Action action)
+        {
+            SetTimeout(TimeSpan.FromMinutes(minute), action);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,11 +19,30 @@ namespace LgyUtil
         /// System.ComponentModel.DataAnnotations中的验证
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
+        /// <param name="model">验证的模型</param>
         /// <returns></returns>
         public static ValidResult CheckModelResult<T>(T model) where T : class, new()
         {
             ValidResult result = new ValidResult();
+            CheckModelDetail(model, result);
+            return result;
+        }
+
+        /// <summary>
+        /// 需要验证模型的参数
+        /// key:Type.FullName  value:需要验证的参数
+        /// </summary>
+        private static ConcurrentDictionary<string, NeedCheckProp> dicIsCheckType = new ConcurrentDictionary<string, NeedCheckProp>();
+
+        /// <summary>
+        /// 具体验证的方法
+        /// </summary>
+        /// <param name="model">模型</param>
+        /// <param name="result">结果</param>
+        private static void CheckModelDetail(object model, ValidResult result)
+        {
+            if (model is null)
+                return;
             try
             {
                 var validationContext = new ValidationContext(model);
@@ -41,23 +61,92 @@ namespace LgyUtil
                         });
                     }
                 }
+
+                //深度验证，查找属性是类、泛型的
+                var modelType = model.GetType();
+                if (modelType.GetCustomAttribute<DeepCheckAttribute>() != null)
+                {
+                    //查询需要验证的属性
+                    if (!dicIsCheckType.TryGetValue(modelType.FullName, out var checkInfo))
+                    {
+                        checkInfo = new NeedCheckProp();
+                        var props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                        foreach (var p in props)
+                        {
+                            var pType = p.PropertyType;
+                            if (pType == typeof(string))
+                                continue;
+
+                            if (pType.IsClass)
+                            {
+                                //数组、泛型数组
+                                if (pType.GetInterface(typeof(IEnumerable).FullName) != null)
+                                {
+                                    //不支持dictionary
+                                    if (pType.GetInterface(typeof(IDictionary).FullName) != null)
+                                        continue;
+
+                                    //数组对象类型
+                                    Type eleType = null;
+                                    if (pType.IsArray)
+                                        eleType = pType.GetElementType();
+                                    //泛型数组
+                                    else
+                                        eleType = pType.GenericTypeArguments[0];
+
+                                    //要类和非字符串
+                                    if (eleType.IsClass && eleType != typeof(string))
+                                        checkInfo.ArrayProp.Add(p);
+                                }
+                                //普通类
+                                else
+                                {
+                                    //系统类，不验证
+                                    if (pType.FullName.StartsWith("System."))
+                                        continue;
+                                    checkInfo.ClassProp.Add(p);
+                                }
+                            }
+                        }
+                        dicIsCheckType.TryAdd(modelType.FullName, checkInfo);
+                    }
+                    //数组类型深度验证
+                    checkInfo.ArrayProp.ForEach(p =>
+                    {
+                        var arr = p.GetValue(model) as IEnumerable;
+                        if (arr == null)
+                            return;
+                        foreach (var item in arr)
+                        {
+                            CheckModelDetail(item, result);
+                        }
+                    });
+                    //普通类的深度验证
+                    checkInfo.ClassProp.ForEach(p =>
+                    {
+                        var val = p.GetValue(model);
+                        if (val == null)
+                            return;
+                        CheckModelDetail(val, result);
+                    });
+                }
             }
             catch (Exception ex)
             {
                 result.IsVaild = false;
                 result.ErrorMembers.Add(new ErrorMember() { ErrorMessage = ex.Message, ErrorMemberName = "" });
             }
-
-            return result;
         }
+
         /// <summary>
         /// 验证模型，返回是否通过
         /// System.ComponentModel.DataAnnotations中的验证
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="model"></param>
+        /// <param name="model">验证的模型</param>
+        /// <param name="deepCheck">深度验证(当属性是类、数组，对其也进行验证)</param>
         /// <returns></returns>
-        public static bool CheckModel<T>(T model) where T : class, new()
+        public static bool CheckModel<T>(T model, bool deepCheck = false) where T : class, new()
         {
             return CheckModelResult(model).IsVaild;
         }
@@ -89,7 +178,7 @@ namespace LgyUtil
                 else
                     dicParamInfo.TryAdd(modelName, methodInfo.GetParameters());
             }
-            return CheckMethodParamsResult(model,dicParamInfo[modelName], paramsObjs);
+            return CheckMethodParamsResult(model, dicParamInfo[modelName], paramsObjs);
         }
 
         /// <summary>
@@ -163,7 +252,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static bool CheckMethodParams<T>(T model, ParameterInfo[] paramInfos, params object[] paramsObjs) where T : class, new()
         {
-            return CheckMethodParamsResult(model,paramInfos, paramsObjs).IsVaild;
+            return CheckMethodParamsResult(model, paramInfos, paramsObjs).IsVaild;
         }
         /// <summary>
         /// 验证方法参数(静态方法不可用)
@@ -177,7 +266,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static bool CheckMethodParams<T>(T model, string methodName, params object[] paramsObjs) where T : class, new()
         {
-            return CheckMethodParamsResult(model,methodName, paramsObjs).IsVaild;
+            return CheckMethodParamsResult(model, methodName, paramsObjs).IsVaild;
         }
     }
 
@@ -208,5 +297,29 @@ namespace LgyUtil
         /// 发生错误的变量名
         /// </summary>
         public string ErrorMemberName { get; set; }
+    }
+
+    /// <summary>
+    /// 模型中，需要检测的属性
+    /// </summary>
+    internal class NeedCheckProp
+    {
+        /// <summary>
+        /// 数组属性
+        /// </summary>
+        public List<PropertyInfo> ArrayProp { get; set; } = new List<PropertyInfo>(0);
+        /// <summary>
+        /// 类属性
+        /// </summary>
+        public List<PropertyInfo> ClassProp { get; set; } = new List<PropertyInfo>(0);
+    }
+
+    /// <summary>
+    /// 是否对类中的所有属性进行深度验证(仅支持普通类、一维数组、一维泛型数组)
+    /// 只对使用ModelCheckUtil中的验证方法，才有效
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public class DeepCheckAttribute : Attribute
+    {
     }
 }
