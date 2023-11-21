@@ -46,6 +46,8 @@
             string[] str={"a","b","c","d"};  str.IsNullOrEmpty()---->false
             string[] str={};                 str.IsNullOrEmpty()---->true
             string[] str=null;               str.IsNullOrEmpty()---->true
+7. TryFind()，查找并out出找到的第一个结果，类似Dictionary的TryGetValue
+8. TryFindAll(),查找并out出所有找到的结果
 ## 二、TimerUtil，简易定时帮助类，依靠Timer对象(LgyUtil)
 1. 添加定时任务
 

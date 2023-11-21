@@ -19,6 +19,7 @@ namespace LgyUtil
         {
             Array.ForEach(arr, action);
         }
+
         /// <summary>
         /// 数组存在某个条件的对象，就是调用了Array.Exists
         /// </summary>
@@ -30,6 +31,7 @@ namespace LgyUtil
         {
             return Array.Exists(array, match);
         }
+
         /// <summary>
         /// 找到一地个匹配的结果，就是调用了Array.Find
         /// </summary>
@@ -41,6 +43,34 @@ namespace LgyUtil
         {
             return Array.Find(array, match);
         }
+
+        /// <summary>
+        /// 尝试找到第一个匹配的结果
+        /// </summary>
+        /// <param name="array">数组</param>
+        /// <param name="findValue">找到的第一个结果</param>
+        /// <param name="match">查询条件</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>是否找到匹配项</returns>
+        public static bool TryFind<T>(this IEnumerable<T> array, out T findValue, Func<T, bool> match)
+        {
+            if (array.IsNullOrEmpty())
+            {
+                findValue = default(T);
+                return false;
+            }
+
+            var findObj = array.Where(match).FirstOrDefault();
+            if (findObj != null)
+            {
+                findValue = findObj;
+                return true;
+            }
+
+            findValue = default(T);
+            return false;
+        }
+
         /// <summary>
         /// 找到所有匹配的结果，就是调用了Array.FindAll
         /// </summary>
@@ -52,6 +82,34 @@ namespace LgyUtil
         {
             return Array.FindAll(array, match);
         }
+
+        /// <summary>
+        /// 尝试找到所有匹配的结果
+        /// </summary>
+        /// <param name="array">数组</param>
+        /// <param name="findValues">找到的所有匹配项</param>
+        /// <param name="match">匹配条件</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>是否找到匹配结果</returns>
+        public static bool TryFindAll<T>(this IEnumerable<T> array, out IEnumerable<T> findValues, Func<T, bool> match)
+        {
+            if (array.IsNullOrEmpty())
+            {
+                findValues = null;
+                return false;
+            }
+
+            var findObjs = array.Where(match);
+            if (findObjs.HaveContent())
+            {
+                findValues = findObjs;
+                return true;
+            }
+
+            findValues = null;
+            return false;
+        }
+
         /// <summary>
         /// 找到匹配结果的索引，就是调用了Array.FindIndex
         /// </summary>
@@ -63,6 +121,7 @@ namespace LgyUtil
         {
             return Array.FindIndex(array, match);
         }
+
         /// <summary>
         /// 排序，就是调用了Array.Sort
         /// </summary>
@@ -73,6 +132,7 @@ namespace LgyUtil
         {
             Array.Sort(array, comparison);
         }
+
         /// <summary>
         /// 强制转换数组内容
         /// </summary>
@@ -149,6 +209,7 @@ namespace LgyUtil
         {
             return array.Skip(start).Take(end - start + 1);
         }
+
         /// <summary>
         /// 判断数组不为空，并且有值(对于any方法的扩展)
         /// </summary>
@@ -159,6 +220,7 @@ namespace LgyUtil
         {
             return array != null && array.Any();
         }
+
         /// <summary>
         /// 数组是否为空，数组为null，不报错
         /// </summary>
@@ -167,7 +229,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> array)
         {
-            return array is null || array.Count() == 0;
+            return array is null || !array.Any();
         }
 
         /// <summary>
@@ -189,7 +251,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static IEnumerable<T> SortByWindowsFileName<T>(this IEnumerable<T> array, Func<T, string> orderField) where T : class
         {
-            return FileUtil.SortByWindowsFileName(array,orderField);
+            return FileUtil.SortByWindowsFileName(array, orderField);
         }
 
         /// <summary>
