@@ -201,7 +201,7 @@
         t.SerializeNewtonJson();
         //输出为{"a":"2023-02-17 16:31:19","b":"x"}
 
-7.MappingTo()，映射对象，比AutoFac简单，上手快。
+7. MappingTo()，映射对象，比AutoFac简单，上手快。
 
         //2个基础类
         public class A { 
@@ -226,6 +226,7 @@
             //null值不映射
             setter.IgnoreNullValues(true);
         });
+8. MappingToList,MappingToArray，扩展了数组的映射，泛型里直接写目的类就行，不用再写List
 ## 十、RandomUtil，随机数帮助类(LgyUtil)
 可以生成7种随机类型码：只有数字、只有大写字母、只有小写字母、大小写字母、小写字母和数字、大写字母和数字、大小写字母和数字。
 

@@ -191,7 +191,7 @@ namespace LgyUtil
         /// <param name="source">源对象</param>
         /// <param name="dest">目的对象，会覆盖这个对象的属性，可以传null</param>
         /// <returns>返回传入的目的对象</returns>
-        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class, new()
+        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class
         {
             return source.Adapt<TSource, TDestination>(dest);
         }
@@ -210,7 +210,7 @@ namespace LgyUtil
         /// <param name="key1">不用传</param>
         /// <param name="key2">不用传</param>
         /// <returns>返回传入的目的对象</returns>
-        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TSource, TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class, new() where TDestination : class, new()
+        public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TSource, TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class where TDestination : class
         {
             var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
@@ -227,7 +227,7 @@ namespace LgyUtil
         /// <typeparam name="TDestination">目标类型</typeparam>
         /// <param name="source"></param>
         /// <returns>返回映射目的对象</returns>
-        public static TDestination MappingTo<TDestination>(this object source) where TDestination : class, new()
+        public static TDestination MappingTo<TDestination>(this object source) where TDestination : class
         {
             return source.Adapt<TDestination>();
         }
@@ -243,7 +243,7 @@ namespace LgyUtil
         /// <param name="key1">不用传</param>
         /// <param name="key2">不用传</param>
         /// <returns>返回映射目的对象</returns>
-        public static TDestination MappingTo<TDestination>(this object source, Action<TypeAdapterSetter<TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TDestination : class, new()
+        public static TDestination MappingTo<TDestination>(this object source, Action<TypeAdapterSetter<TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TDestination : class
         {
             var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
@@ -261,9 +261,31 @@ namespace LgyUtil
         /// <param name="source"></param>
         /// <param name="destination">目的类型(注意，不是对象，是类型)</param>
         /// <returns>返回一个new目的类型 需要自己进行as 转换</returns>
-        public static object MappingTo<TSource>(this TSource source, Type destination) where TSource : class, new()
+        public static object MappingTo<TSource>(this TSource source, Type destination) where TSource : class
         {
             return source.Adapt(typeof(TSource), destination);
+        }
+
+        /// <summary>
+        /// 数组，映射为List泛型数组
+        /// </summary>
+        /// <param name="source">数组对象</param>
+        /// <typeparam name="TDestination">目的类型</typeparam>
+        /// <returns></returns>
+        public static List<TDestination> MappingToList<TDestination>(this IList source) where TDestination : class
+        {
+            return source.MappingTo<List<TDestination>>();
+        }
+
+        /// <summary>
+        /// 数组，映射为
+        /// </summary>
+        /// <param name="source">数组对象</param>
+        /// <typeparam name="TDestination">目的类型</typeparam>
+        /// <returns></returns>
+        public static TDestination[] MappingToArray<TDestination>(this IList source) where TDestination : class
+        {
+            return source.MappingTo<TDestination[]>();
         }
         #endregion
     }
