@@ -1,14 +1,13 @@
-﻿using Mapster;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Xml.Serialization;
+using Mapster;
+using Newtonsoft.Json;
 
 namespace LgyUtil
 {
@@ -38,7 +37,7 @@ namespace LgyUtil
         {
             if (!typeof(T).IsSerializable)
             {
-                throw new ArgumentException("The type must be serializable.", "source");
+                throw new LgyUtilException("The type must be serializable.");
             }
 
             if (ReferenceEquals(source, null))

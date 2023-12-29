@@ -70,41 +70,51 @@ namespace LgyUtil
                     if (!dicIsCheckType.TryGetValue(modelType.FullName, out var checkInfo))
                     {
                         checkInfo = new NeedCheckProp();
-                        var props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-                        foreach (var p in props)
+                        var props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance).Select(p => p as MemberInfo);
+                        var fields = modelType.GetFields(BindingFlags.Public | BindingFlags.Instance).Select(p => p as MemberInfo);
+                        List<MemberInfo> members = new List<MemberInfo>();
+                        members.AddRange(props);
+                        members.AddRange(fields);
+                        foreach (var mem in members)
                         {
-                            var pType = p.PropertyType;
-                            if (pType == typeof(string))
+
+                            Type mType;
+                            if (mem.MemberType == MemberTypes.Field)
+                                mType = (mem as FieldInfo).FieldType;
+                            else
+                                mType = (mem as PropertyInfo).PropertyType;
+
+                            if (mType == typeof(string))
                                 continue;
 
-                            if (pType.IsClass)
+                            if (mType.IsClass)
                             {
                                 //数组、泛型数组
-                                if (pType.GetInterface(typeof(IEnumerable).FullName) != null)
+                                if (mType.GetInterface(typeof(IEnumerable).FullName) != null)
                                 {
                                     //不支持dictionary
-                                    if (pType.GetInterface(typeof(IDictionary).FullName) != null)
+                                    if (mType.GetInterface(typeof(IDictionary).FullName) != null)
                                         continue;
 
                                     //数组对象类型
                                     Type eleType = null;
-                                    if (pType.IsArray)
-                                        eleType = pType.GetElementType();
+                                    if (mType.IsArray)
+                                        eleType = mType.GetElementType();
                                     //泛型数组
                                     else
-                                        eleType = pType.GenericTypeArguments[0];
+                                        eleType = mType.GenericTypeArguments[0];
 
                                     //要类和非字符串
                                     if (eleType.IsClass && eleType != typeof(string))
-                                        checkInfo.ArrayProp.Add(p);
+                                        checkInfo.ArrayProp.Add(mem);
                                 }
                                 //普通类
                                 else
                                 {
                                     //系统类，不验证
-                                    if (pType.FullName.StartsWith("System."))
+                                    if (mType.FullName.StartsWith("System."))
                                         continue;
-                                    checkInfo.ClassProp.Add(p);
+                                    checkInfo.ClassProp.Add(mem);
                                 }
                             }
                         }
@@ -113,7 +123,13 @@ namespace LgyUtil
                     //数组类型深度验证
                     checkInfo.ArrayProp.ForEach(p =>
                     {
-                        var arr = p.GetValue(model) as IEnumerable;
+                        object val;
+                        if (p.MemberType == MemberTypes.Field)
+                            val = (p as FieldInfo).GetValue(model);
+                        else
+                            val = (p as PropertyInfo).GetValue(model);
+
+                        var arr = val as IEnumerable;
                         if (arr == null)
                             return;
                         foreach (var item in arr)
@@ -124,7 +140,12 @@ namespace LgyUtil
                     //普通类的深度验证
                     checkInfo.ClassProp.ForEach(p =>
                     {
-                        var val = p.GetValue(model);
+                        object val;
+                        if (p.MemberType == MemberTypes.Field)
+                            val = (p as FieldInfo).GetValue(model);
+                        else
+                            val = (p as PropertyInfo).GetValue(model);
+
                         if (val == null)
                             return;
                         CheckModelDetail(val, result);
@@ -307,11 +328,11 @@ namespace LgyUtil
         /// <summary>
         /// 数组属性
         /// </summary>
-        public List<PropertyInfo> ArrayProp { get; set; } = new List<PropertyInfo>(0);
+        public List<MemberInfo> ArrayProp { get; set; } = new List<MemberInfo>(0);
         /// <summary>
         /// 类属性
         /// </summary>
-        public List<PropertyInfo> ClassProp { get; set; } = new List<PropertyInfo>(0);
+        public List<MemberInfo> ClassProp { get; set; } = new List<MemberInfo>(0);
     }
 
     /// <summary>

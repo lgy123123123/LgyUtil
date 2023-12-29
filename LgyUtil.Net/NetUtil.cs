@@ -369,7 +369,8 @@ namespace LgyUtil
         {
             //浏览器规定返回类型
             response.ContentType = "text/event-stream";
-            string writeString = $"retry:{retry.Milliseconds}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
+            //TotalMilliseconds.ToInt()必须是整数，要不前端接收会有问题
+            string writeString = $"retry:{retry.TotalMilliseconds.ToInt()}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
             var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
             response.Body.Write(writeBytes, 0, writeBytes.Length);
             response.Body.Flush();
@@ -388,7 +389,8 @@ namespace LgyUtil
         {
             //浏览器规定返回类型
             response.ContentType = "text/event-stream";
-            string writeString = $"retry:{retry.Milliseconds}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
+            //TotalMilliseconds.ToInt()必须是整数，要不前端接收会有问题
+            string writeString = $"retry:{retry.TotalMilliseconds.ToInt()}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
             var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
             await response.Body.WriteAsync(writeBytes, 0, writeBytes.Length);
             await response.Body.FlushAsync();

@@ -275,5 +275,33 @@ namespace LgyUtil
         {
             return FileUtil.SortByWindowsFileNameDesc(array, orderField);
         }
+
+        /// <summary>
+        /// 随机抽取数组中的项目，返回新的数组，且不改变原数组顺序
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="randomCount">随机抽取的个数</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T[] GetRandomArr<T>(this IEnumerable<T> array, int randomCount)
+        {
+            //随机取的数量，不能超过总数
+            if (array.Count() < randomCount)
+                randomCount = array.Count();
+            Random ram = new Random();
+            //最终返回的数组
+            T[] retArr = new T[randomCount];
+            //复制一份，用于排序
+            var copyArr = array.Select(l => l).ToArray();
+            for (int i = 0; i < randomCount; i++)
+            {
+                var index = ram.Next(0, copyArr.Length - i);
+                retArr[i] = copyArr[index];
+                copyArr[index] = copyArr[copyArr.Length - i - 1];
+                copyArr[copyArr.Length - i - 1] = retArr[i];
+            }
+
+            return retArr;
+        }
     }
 }

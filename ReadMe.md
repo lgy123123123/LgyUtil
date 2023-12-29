@@ -48,6 +48,7 @@
             string[] str=null;               str.IsNullOrEmpty()---->true
 7. TryFind()，查找并out出找到的第一个结果，类似Dictionary的TryGetValue
 8. TryFindAll(),查找并out出所有找到的结果
+9. GetRandomArr(),随机抽取数组中的项目，返回新的数组，且不改变原数组顺序
 ## 二、TimerUtil，简易定时帮助类，依靠Timer对象(LgyUtil)
 1. 添加定时任务
 
