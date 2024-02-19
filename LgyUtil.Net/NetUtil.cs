@@ -357,45 +357,71 @@ namespace LgyUtil
         #endregion
         #endregion
 
+        #region sse相关
+
         /// <summary>
         /// 发送Server-Send-Events，前端使用EventSource接收
         /// </summary>
         /// <param name="response">当前请求的Response对象</param>
-        /// <param name="id">当前事件id，用于前端断开重连时使用</param>
+        /// <param name="id">当前事件id</param>
         /// <param name="data">发送的数据</param>
-        /// <param name="eventName">前端接收的事件名称</param>
-        /// <param name="retry">多长时间前端再次发送消息</param>
-        public static void SendSseMessage(HttpResponse response, string id, string data, string eventName, TimeSpan retry)
+        /// <param name="eventName">前端接收的事件名称，空或null，则消息为message</param>
+        /// <param name="retry">多长时间前端再次发送消息，不填写则是3秒</param>
+        public static void SendSseMessage(HttpResponse response, string id, string data, string eventName, TimeSpan? retry)
         {
             //浏览器规定返回类型
-            response.ContentType = "text/event-stream";
-            //TotalMilliseconds.ToInt()必须是整数，要不前端接收会有问题
-            string writeString = $"retry:{retry.TotalMilliseconds.ToInt()}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
+            if(response.ContentType != "text/event-stream")
+                response.ContentType = "text/event-stream";
+            string writeString = $"retry:{retry?.TotalMilliseconds.ToInt()}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
             var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
             response.Body.Write(writeBytes, 0, writeBytes.Length);
             response.Body.Flush();
         }
+        
+        /// <summary>
+        /// 发送Server-Send-Events，前端使用EventSource接收，使用默认message消息
+        /// </summary>
+        /// <param name="response">当前请求的Response对象</param>
+        /// <param name="data">发送的数据</param>
+        /// <param name="retry">多长时间前端再次发送消息，不填写则是3秒</param>
+        public static void SendSseMessage(HttpResponse response, string data, TimeSpan? retry=null)
+        {
+            SendSseMessage(response,null,data,null,retry);
+        }
 
         /// <summary>
         /// 发送Server-Send-Events，前端使用EventSource接收
         /// </summary>
         /// <param name="response">当前请求的Response对象</param>
-        /// <param name="id">当前事件id，用于前端断开重连时使用</param>
+        /// <param name="id">当前事件id</param>
         /// <param name="data">发送的数据</param>
-        /// <param name="eventName">前端接收的事件名称</param>
-        /// <param name="retry">多长时间前端再次发送消息</param>
+        /// <param name="eventName">前端接收的事件名称，空或null，则消息为message</param>
+        /// <param name="retry">多长时间前端再次发送消息，不填写则是3秒</param>
         /// <returns></returns>
-        public static async Task SendSseMessageAsync(HttpResponse response, string id, string data, string eventName, TimeSpan retry)
+        public static async Task SendSseMessageAsync(HttpResponse response, string id, string data, string eventName, TimeSpan? retry)
         {
             //浏览器规定返回类型
-            response.ContentType = "text/event-stream";
-            //TotalMilliseconds.ToInt()必须是整数，要不前端接收会有问题
-            string writeString = $"retry:{retry.TotalMilliseconds.ToInt()}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
-            var writeBytes = writeString.ToByteArr(Encoding.UTF8);//必须用utf8格式的内容
-            await response.Body.WriteAsync(writeBytes, 0, writeBytes.Length);
+            if(response.ContentType != "text/event-stream")
+                response.ContentType = "text/event-stream";
+            string writeString = $"retry:{retry?.TotalMilliseconds.ToInt()}\nevent:{eventName}\nid:{id}\ndata:{data}\n\n";
+            await response.WriteAsync(writeString);
             await response.Body.FlushAsync();
         }
 
+        /// <summary>
+        /// 发送Server-Send-Events，前端使用EventSource接收，使用默认message消息
+        /// </summary>
+        /// <param name="response">当前请求的Response对象</param>
+        /// <param name="data">发送的数据</param>
+        /// <param name="retry">多长时间前端再次发送消息，不填写则是3秒</param>
+        /// <returns></returns>
+        public static async Task SendSseMessageAsync(HttpResponse response, string data, TimeSpan? retry=null)
+        {
+            await SendSseMessageAsync(response,null,data,null,retry);
+        }
+
+        #endregion
+        
         /// <summary>
         /// 检查服务器端口是否占用
         /// </summary>

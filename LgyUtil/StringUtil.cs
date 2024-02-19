@@ -242,9 +242,9 @@ namespace LgyUtil
             return s.Split(new string[] { separator }, includeEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries);
         }
         /// <summary>
-        /// 字符串模板，格式化内容(使用的NString)
+        /// 字符串模板，格式化内容(使用的NString)，模板中若有{}，使用{{ }}，否则会被识别为模板而报错
         /// </summary>
-        /// <param name="template">模板，参数用{name}表格</param>
+        /// <param name="template">模板，参数用{name}表示，若有{}，使用{{ }}，否则会被识别为模板而报错</param>
         /// <param name="obj">模板内的对象，键值对</param>
         /// <param name="throwOnMissingValue">缺少对象时报错，默认true</param>
         /// <returns></returns>

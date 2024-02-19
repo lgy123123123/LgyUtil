@@ -404,6 +404,23 @@
 
             Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
             Stream Get_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+6. 向前端发送SSE消息，方法中的参数，通过百度，自行查找原理
+   - NetUtil.SendSseMessage
+   - NetUtil.SendSseMessageAsync
+
+            // c#代码
+            [HttpGet]         
+            public async Task SseTest()
+            {
+               await NetUtil.SendSseMessageAsync(Response,"第一条消息");
+               await NetUtil.SendSseMessageAsync(Response,"第二条消息");
+            }
+   
+            // js代码
+            let sse=new EventSource(url)
+            sse.onmessage=(event)=>{
+               console.log(event.data)
+            }
 ## 十六、AppSettingUtil，配置项帮助类，仅支持json文件(LgyUtil)
 1. AppSettingUtil.Init\<T>()，初始化并返回配置项实例，支持配置文件热重载
 1. AppSettingUtil.InitStatic\<T>()，初始化静态类，支持配置文件热重载
