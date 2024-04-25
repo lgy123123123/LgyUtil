@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace LgyUtil
+﻿namespace LgyUtil
 {
     /// <summary>
     /// 正则表达式帮助类

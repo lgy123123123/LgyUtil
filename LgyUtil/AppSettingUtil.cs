@@ -42,7 +42,7 @@ namespace LgyUtil
             var jsonObj = GetJobject(jsonPath);
             //自动解析配置项
             Type settingType = typeof(T);
-            PropertyInfo[] props = typeof(T).GetProperties(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            PropertyInfo[] props = typeof(T).GetProperties(BindingFlags.Static | BindingFlags.Public);
             props.ForEach(p =>
             {
                 if (jsonObj.ContainsKey(p.Name))

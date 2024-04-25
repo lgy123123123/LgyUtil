@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using LgyUtil.TimerUtilModel;
 
 namespace LgyUtil
@@ -110,7 +107,7 @@ namespace LgyUtil
         /// <param name="action">等待时长结束后，执行的方法</param>
         public static void SetTimeout(TimeSpan delay, Action action)
         {
-            TimerUtil.AddCustomJob("timeout:" + Guid.NewGuid().ToString("N"), delay, info =>
+            AddCustomJob("timeout:" + Guid.NewGuid().ToString("N"), delay, info =>
             {
                 action?.Invoke();
             }, new JobOption { EndTime = DateTime.Now.Add(delay) });

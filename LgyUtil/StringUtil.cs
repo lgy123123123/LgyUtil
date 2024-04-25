@@ -23,6 +23,7 @@ namespace LgyUtil
         {
             return string.IsNullOrEmpty(s);
         }
+
         /// <summary>
         /// 字符串trim后是否为空
         /// </summary>
@@ -32,6 +33,7 @@ namespace LgyUtil
         {
             return s == null || string.IsNullOrEmpty(s.Trim());
         }
+
         /// <summary>
         /// 字符串是否为不为空
         /// </summary>
@@ -41,6 +43,7 @@ namespace LgyUtil
         {
             return !string.IsNullOrEmpty(s);
         }
+
         /// <summary>
         /// 转换成base64的字符串
         /// </summary>
@@ -53,6 +56,7 @@ namespace LgyUtil
                 encoding = Encoding.UTF8;
             return Convert.ToBase64String(encoding.GetBytes(s));
         }
+
         /// <summary>
         /// 将base64字符串转成普通字符串
         /// </summary>
@@ -65,6 +69,7 @@ namespace LgyUtil
                 encoding = Encoding.UTF8;
             return encoding.GetString(Convert.FromBase64String(base64str));
         }
+
         /// <summary>
         /// string.Format格式化字符串
         /// </summary>
@@ -73,8 +78,9 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Format(this string s, params object[] args)
         {
-            return string.Format((IFormatProvider)CultureInfo.InvariantCulture, s, args);
+            return string.Format(CultureInfo.InvariantCulture, s, args);
         }
+
         /// <summary>
         /// 反序列化NewtonJson序列化的对象
         /// </summary>
@@ -85,6 +91,7 @@ namespace LgyUtil
         {
             return JsonConvert.DeserializeObject<T>(s);
         }
+
         /// <summary>
         /// 反序列化NewtonJson序列化的对象
         /// </summary>
@@ -96,6 +103,7 @@ namespace LgyUtil
         {
             return JsonConvert.DeserializeObject<T>(s, settings);
         }
+
         /// <summary>
         /// 字符串转日期，支持季度格式，Q代表季度，只解析第一个Q
         /// </summary>
@@ -107,7 +115,7 @@ namespace LgyUtil
             if (format.IsNullOrEmpty())
                 return DateTime.Parse(s);
             //季度
-            else if (format.Contains("Q"))
+            if (format.Contains("Q"))
             {
                 int quarterStrIndex = format.IndexOf("Q");
                 //获取季度数字
@@ -120,9 +128,9 @@ namespace LgyUtil
                 //添加季度
                 return dtTemp.AddQuarter(quarterNum - 1);
             }
+
             //其它正常格式
-            else
-                return DateTime.ParseExact(s, format, CultureInfo.CurrentCulture);
+            return DateTime.ParseExact(s, format, CultureInfo.CurrentCulture);
         }
 
         /// <summary>
@@ -137,6 +145,7 @@ namespace LgyUtil
                 encoding = Encoding.UTF8;
             return encoding.GetBytes(s);
         }
+
         /// <summary>
         /// byte数组转字符串
         /// </summary>
@@ -149,6 +158,7 @@ namespace LgyUtil
                 encoding = Encoding.UTF8;
             return encoding.GetString(b);
         }
+
         /// <summary>
         /// 字符串转枚举
         /// </summary>
@@ -158,8 +168,9 @@ namespace LgyUtil
         /// <returns></returns>
         public static TEnum ToEnum<TEnum>(this string s, bool ignoreCase = false) where TEnum : Enum
         {
-            return (TEnum)Enum.Parse(typeof(TEnum), s, ignoreCase);
+            return (TEnum) Enum.Parse(typeof(TEnum), s, ignoreCase);
         }
+
         /// <summary>
         /// 删除微信昵称里的Emoji图片
         /// </summary>
@@ -175,8 +186,8 @@ namespace LgyUtil
                 {
                     str = str.Replace(a.ToString(), "");
                 }
-
             }
+
             return str;
         }
 
@@ -191,6 +202,7 @@ namespace LgyUtil
         {
             return Regex.IsMatch(s, pattern, options);
         }
+
         /// <summary>
         /// 指定索引位置，替换成其它字符串(手机号掩码时使用)
         /// </summary>
@@ -205,8 +217,9 @@ namespace LgyUtil
                 return s;
             if (s.Length < startIndex + length)
                 length = s.Length - startIndex;
-            return s.Remove(startIndex,length).Insert(startIndex, replaceContent);
+            return s.Remove(startIndex, length).Insert(startIndex, replaceContent);
         }
+
         /// <summary>
         /// 正则表达式替换字符串
         /// </summary>
@@ -219,6 +232,7 @@ namespace LgyUtil
         {
             return Regex.Replace(s, pattern, replacement, option);
         }
+
         /// <summary>
         /// 根据正则表达式获取内容
         /// </summary>
@@ -230,6 +244,7 @@ namespace LgyUtil
         {
             return Regex.Match(s, pattern, options).Value;
         }
+
         /// <summary>
         /// 分隔字符串，返回数组
         /// </summary>
@@ -239,8 +254,9 @@ namespace LgyUtil
         /// <returns></returns>
         public static string[] Split(this string s, string separator, bool includeEmpty = true)
         {
-            return s.Split(new string[] { separator }, includeEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries);
+            return s.Split(new string[] {separator}, includeEmpty ? StringSplitOptions.None : StringSplitOptions.RemoveEmptyEntries);
         }
+
         /// <summary>
         /// 字符串模板，格式化内容(使用的NString)，模板中若有{}，使用{{ }}，否则会被识别为模板而报错
         /// </summary>
@@ -252,6 +268,7 @@ namespace LgyUtil
         {
             return StringTemplate.Format(template, obj, throwOnMissingValue);
         }
+
         /// <summary>
         /// 字符串模板，格式化内容(使用的NString)
         /// </summary>
@@ -265,6 +282,7 @@ namespace LgyUtil
         }
 
         #region Trim扩展
+
         /// <summary>
         /// Trim扩展，可直接填写字符串，若替换一次后，开头或结尾还有要trim的内容，不再进行替换
         /// </summary>
@@ -280,6 +298,7 @@ namespace LgyUtil
                 return s;
             return s.ReplaceRegex(trimRegex, "", RegexOptions.Compiled);
         }
+
         /// <summary>
         /// TrimStart扩展，可直接填写字符串，若替换一次后，开头还有要trim的内容，不再进行替换
         /// </summary>
@@ -295,6 +314,7 @@ namespace LgyUtil
                 return s;
             return s.ReplaceRegex(trimRegex, "", RegexOptions.Compiled);
         }
+
         /// <summary>
         /// TrimEnd扩展，可直接填写字符串，若替换一次后，结尾还有要trim的内容，不再进行替换
         /// </summary>
@@ -310,10 +330,12 @@ namespace LgyUtil
                 return s;
             return s.ReplaceRegex(trimRegex, "", RegexOptions.Compiled);
         }
+
         private static string GetTrimRegex(string[] trimStrings, Func<string, string> replaceFunc)
         {
             return trimStrings.Where(ts => ts.IsNotNullOrEmpty()).JoinToString(replaceFunc, "|");
         }
+
         #endregion
 
         /// <summary>
@@ -327,6 +349,7 @@ namespace LgyUtil
             if (value.Length == 0) return false;
             return value.Any(s.EndsWith);
         }
+
         /// <summary>
         /// StartsWith扩展，可以匹配多个
         /// </summary>

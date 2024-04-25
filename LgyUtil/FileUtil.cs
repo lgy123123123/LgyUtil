@@ -1,13 +1,12 @@
-﻿using LgyUtil.OtherSource;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using LgyUtil.OtherSource;
 
 namespace LgyUtil
 {
@@ -66,10 +65,10 @@ namespace LgyUtil
             FileSystemWatcher watch = new FileSystemWatcher(DirectoryPath, Filter);
             watch.BeginInit();
             watch.EnableRaisingEvents = true;
-            watch.Created += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
-            watch.Changed += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
-            watch.Deleted += new FileSystemEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
-            watch.Renamed += new RenamedEventHandler((sender, e) => { FileChangeEvent(e, ChangeAction); });
+            watch.Created += (sender, e) => { FileChangeEvent(e, ChangeAction); };
+            watch.Changed += (sender, e) => { FileChangeEvent(e, ChangeAction); };
+            watch.Deleted += (sender, e) => { FileChangeEvent(e, ChangeAction); };
+            watch.Renamed += (sender, e) => { FileChangeEvent(e, ChangeAction); };
             watch.NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastAccess
                                   | NotifyFilters.LastWrite | NotifyFilters.Security | NotifyFilters.Size;
             watch.IncludeSubdirectories = true;
@@ -250,7 +249,7 @@ namespace LgyUtil
         /// </summary>
         /// <param name="FILE_NAME">文件路径</param>
         /// <returns>文件的编码类型</returns>
-        public static System.Text.Encoding GetType(string FILE_NAME)
+        public static Encoding GetType(string FILE_NAME)
         {
             FileStream fs = new FileStream(FILE_NAME, FileMode.Open, FileAccess.Read);
             Encoding r = GetType(fs);
@@ -263,11 +262,11 @@ namespace LgyUtil
         /// </summary>
         /// <param name="fs">文件流</param>
         /// <returns>文件的编码类型</returns>
-        public static System.Text.Encoding GetType(FileStream fs)
+        public static Encoding GetType(FileStream fs)
         {
             Encoding reVal = Encoding.Default;
 
-            BinaryReader r = new BinaryReader(fs, System.Text.Encoding.Default);
+            BinaryReader r = new BinaryReader(fs, Encoding.Default);
             int.TryParse(fs.Length.ToString(), out var i);
             byte[] ss = r.ReadBytes(i);
             if (IsUTF8Bytes(ss) || (ss[0] == 0xEF && ss[1] == 0xBB && ss[2] == 0xBF))

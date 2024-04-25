@@ -213,6 +213,9 @@ namespace LgyUtil
         {
             if (LogPath.IsNullOrEmpty() || File.Exists(LogPath))
                 throw new LgyUtilException("日志路径不正确");
+
+            DelLog(LogPath);
+
             void DelLog(string path)
             {
                 if (Directory.Exists(path))
@@ -240,8 +243,6 @@ namespace LgyUtil
                     }
                 }
             }//删除日志的方法
-
-            DelLog(LogPath);
         }
         /// <summary>
         /// 获取日志文件全路径

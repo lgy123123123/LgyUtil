@@ -2,7 +2,7 @@
 1. 工具的每个部分，都发布了独立的包，可以按需引入(LgyUtil、LgyUtil.Cache、LgyUtil.Compress、LgyUtil.ModelCheck、LgyUtil.Net、LgyUtil.SSH)
 2. 下面每个说明最后括号内标记的内容，为工具所在的包，如 (LgyUtil),说明在LgyUtil包下
 3. 每个方法若写为EncryptUtil.EncryptDES，则是通过帮助类，静态调用。若只有方法名ContainsAny，则为对象直接点出方法来使用(new List<string>().      ContainsAny("1"))。
-1. 如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
+4. 如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
 ## 一、ArrayUtil，数组扩展类(LgyUtil)
 1. ForEach()，Exists()，Find()，FindAll()，FindIndex()，Sort()，ConvertAll()，普通数组[]增加扩展功能，都是List存在的功能
 
@@ -94,11 +94,11 @@
     - ErrorContinue：发生错误时，是否继续执行，默认false，发生错误，停止job
     - ErrorDoing：发生错误时，执行的方法
     - AfterStopDoing：任务停止之后执行的方法rStopDoing:任务停止之后执行的方法
-2. 获取未来5次触发时间，GetNext5TriggerTimes(string jobName)
-3. 停止并删除任务，StopJob(string jobName)
-1. 延迟执行1次，自定义时间，TimerUtil.SetTimeout(TimeSpan delay, Action action)
-1. 延迟执行1次，根据秒，TimerUtil.SetTimeoutSecond(int second, Action action)
-1. 延迟执行1次，根据分钟，TimerUtil.SetTimeoutMinute(int minute, Action action)
+3. 获取未来5次触发时间，GetNext5TriggerTimes(string jobName)
+4. 停止并删除任务，StopJob(string jobName)
+5. 延迟执行1次，自定义时间，TimerUtil.SetTimeout(TimeSpan delay, Action action)
+6. 延迟执行1次，根据秒，TimerUtil.SetTimeoutSecond(int second, Action action)
+7. 延迟执行1次，根据分钟，TimerUtil.SetTimeoutMinute(int minute, Action action)
 ## 三、DataTable扩展，效率不高，程序中避免使用DataTable(LgyUtil)
 1. ToList\<T>()，将表转成数组
 2. ToDictionary<string,T>()，将表转成字典
@@ -126,7 +126,7 @@
 19. GetHourEnd()，获取传入日期 59分59秒
 20. GetMinuteStart()，获取传入日期 0秒
 21. GetMinuteEnd()，获取传入日期 59秒
- 1. ToStringExt(),格式化日期扩展，Q代表季度，也解决了linux下字符(/)会被转成(-)的问题
+22. ToStringExt(),格式化日期扩展，Q代表季度，也解决了linux下字符(/)会被转成(-)的问题
         
         new DateTime(2010,5,3).ToStringExt("yyyy/Q")
 ## 五、EncryptUtil，加密算法帮助类(LgyUtil)
@@ -178,8 +178,8 @@
 5. FileUtil.ReadFileShare()，以非独占的方式，读取文件。解决windows下，用程序读取文件时，文件不能被文本编辑器打开。
 6. FileUtil.GetAllFiles()，获取文件夹下所有文件（返回文件名数组）
 7. FileUtil.GetAllFilesDeep()，深度查找文件或文件夹
-1. FileUtil.SortByWindowsFileName(),按照windows文件名排序规则，排序字符串
-1. FileUtil.SortByWindowsFileNameDesc()，按照windows文件名排序规则，倒序排序字符串
+8. FileUtil.SortByWindowsFileName(),按照windows文件名排序规则，排序字符串
+9. FileUtil.SortByWindowsFileNameDesc()，按照windows文件名排序规则，倒序排序字符串
 ## 八、ObjectConvertUtil，类型转换方法(LgyUtil)
 1. ToInt()，ToDouble()，ToLong()，ToDecimal()，ToFloat()，任何对象都可以调用，原理是Convert.ToXXX，支持转为科学计数法
 2. ToBool()，字符串"true"(不区分大小写),"1"，数值1，都会返回true，其余返回false
@@ -229,17 +229,37 @@
         });
 8. MappingToList,MappingToArray，扩展了数组的映射，泛型里直接写目的类就行，不用再写List
 ## 十、RandomUtil，随机数帮助类(LgyUtil)
-可以生成14种随机类型码：只有数字、只有大写字母、只有小写字母、大小写字母、小写字母和数字、大写字母和数字、大小写字母和数字,数字和字符,字母和字符,小写字母和字符,大写字母和字符,数字和小写字母和字符,数字和大写字母和字符,字母和字符和数字。
+- 可以生成14种随机类型码
+1. 只有数字
+2. 只有大写字母
+3. 只有小写字母
+4. 大小写字母
+5. 小写字母和数字
+6. 大写字母和数字
+7. 大小写字母和数字
+8. 数字和字符
+9. 字母和字符
+10. 小写字母和字符
+11. 大写字母和字符
+12. 数字和小写字母和字符
+13. 数字和大写字母和字符
+14. 字母和字符和数字。
 
-也可以根据模板生成。随机数内容，用一对大括号包括。 n:数字 x:小写字母 X:大写字母。大括号里的内容，只能包含nXx三种字母，若出现{axnX}，此为错误模板，不会解析。
+
+      //输出7位只有数字的随机数
+      RandomUtil.Init(7,Enum_RandomFormat.OnlyNumber).GetRandom();
+
+- 也可以根据模板生成  
+
+1. 模板内容，用一对大括号包括 {nXxs}
+2. n:数字 x:小写字母 X:大写字母 s:特殊字符(~,!,@,#,$,%,^,&,*,(,),-,+,=,[,],{,},|,/,?,;)
+3. 大括号里的内容，只能包含nXxs四种字母，若出现{axnXs}，此为错误模板，不会解析。
 
 使用方法：链式调用
 
-    //输出7位只有数字的随机数
-    RandomUtil.Init(7,Enum_RandomFormat.OnlyNumber).GetRandom();
     //根据模板，生成随机数。注意：{anXx}为错误模板，不解析
-    RandomUtil.Init("1234-{nnXXxx}-{anXx}-567-{xxnnXX}").GetRandom();
-    //输出内容1234-62DGxg-{anXx}-567-td67IN
+    RandomUtil.Init("1234-{nnXXxxs}-{anXx}-567-{xxnnXX}").GetRandom();
+    //输出内容1234-62DGxg*-{anXx}-567-td67IN
 链式调用的所有方法：
 
 - GetRandom()，生成一个随机数
@@ -278,19 +298,19 @@
         //季度转日期
         "2010/2".ToDateTime("yyyy/Q")
 
-8. ToByteArr()，转为二进制数组
-9. ByteToString()，二进制数组转为字符串
-10. ToEnum\<Enum>()，字符串转枚举
-11. RegexIsMatch()，匹配正则表达式
-12. ReplaceByIndex()，根据下标索引，替换字符串
+7. ToByteArr()，转为二进制数组
+8. ByteToString()，二进制数组转为字符串
+9. ToEnum\<Enum>()，字符串转枚举
+10. RegexIsMatch()，匹配正则表达式
+11. ReplaceByIndex()，根据下标索引，替换字符串
 
         //替换手机号 177****7777
         "17777777777".ReplaceByIndex(3,4,"*");
 
-13. ReplaceRegex()，根据正则表达式替换
-14. GetStringByRegex()，根据正则表达式，返回匹配的第一组内容
-15. Split()，将字符串拆分成数组，返回string[]
-16. FormatTemplate(),根据模板格式化字符串，可以使用Dictionary<string, object>、匿名类、普通类
+12. ReplaceRegex()，根据正则表达式替换
+13. GetStringByRegex()，根据正则表达式，返回匹配的第一组内容
+14. Split()，将字符串拆分成数组，返回string[]
+15. FormatTemplate(),根据模板格式化字符串，可以使用Dictionary<string, object>、匿名类、普通类
     - Dictionary<string, object>
           
           string str="{a},{b}";
@@ -313,12 +333,12 @@
           }
           str.FormatTemplate(new Temp{a="1",b=2});
           //输出1,2
-17. Trim(),可以接填填写字符串，若替换一次后，开头或结尾还有要trim的内容，不再进行替换
- 1. TrimStart(),可直接填写字符串，若替换一次后，开头还有要trim的内容，不再进行替换
- 1. TrimEnd(),可直接填写字符串，若替换一次后，结尾还有要trim的内容，不再进行替换
- 1. EndsWith(),可以匹配多个字符串
- 1. StartsWith(),可以匹配多个字符串
- 1. ContainsAny(),字符串包含任意一个匹配项，就返回true
+16. Trim(),可以接填填写字符串，若替换一次后，开头或结尾还有要trim的内容，不再进行替换
+17. TrimStart(),可直接填写字符串，若替换一次后，开头还有要trim的内容，不再进行替换
+18. TrimEnd(),可直接填写字符串，若替换一次后，结尾还有要trim的内容，不再进行替换
+19. EndsWith(),可以匹配多个字符串
+20. StartsWith(),可以匹配多个字符串
+21. ContainsAny(),字符串包含任意一个匹配项，就返回true
 ## 十三、TaskUtil，多线程帮助类(LgyUtil)
 1. TaskUtil.GetTaskMaxUtil，执行多线程时，控制并行线程个数
 
@@ -339,8 +359,8 @@
                 Console.WriteLine("所有线程执行完成");
         }
 2. TaskUtil.SetTimeout(TimeSpan delay, Func\<Task> action)，延迟执行，类似js中的setTimeout
-1. TaskUtil.SetTimeoutSecond(int second, Func<Task> action)，延迟执行，类似js中的setTimeout
-1. TaskUtil.SetTimeoutMinute(int minute, Func<Task> action)，延迟执行，类似js中的setTimeout
+3. TaskUtil.SetTimeoutSecond(int second, Func<Task> action)，延迟执行，类似js中的setTimeout
+4. TaskUtil.SetTimeoutMinute(int minute, Func<Task> action)，延迟执行，类似js中的setTimeout
 ## 十四、ICache，缓存帮助类(<font color="red">LgyUtil.Cache</font>)
 - 缓存分为本地缓存(MemoryCache)、Redis缓存(RedisCache)。两个使用方法一样，构造一个静态变量，全局使用
 
@@ -424,7 +444,7 @@
             }
 ## 十六、AppSettingUtil，配置项帮助类，仅支持json文件(LgyUtil)
 1. AppSettingUtil.Init\<T>()，初始化并返回配置项实例，支持配置文件热重载
-1. AppSettingUtil.InitStatic\<T>()，初始化静态类，支持配置文件热重载
+2. AppSettingUtil.InitStatic\<T>()，初始化静态类，支持配置文件热重载
 
     ~~~ c#
         T Init<T>(string jsonPath, bool hotReload = false, Action<T> afterInitOrReload = null)
@@ -491,8 +511,8 @@
 ## 十八、ReflectionUtil，反射帮助类(LgyUtil)
 1. GetAssembly(string dll)，加载程序集，一般用于加载外部的dll
 2. ExecDll，执行dll的方法中，某个类的方法
-1. ExecAssembly，执行程序集中，某个类的方法
-1. GetInstance，获取类的实例
-1. SetModelPropertyValue，设置实例的某个属性的值，使用表达式树，比反射快(有缓存)
-1. GetModelPropertyValue，获取实例的某个属性的值，使用表达式树，比反射快(有缓存)
-1. ExecMethod，执行实例中的方法，使用表达式树，比反射快(有缓存)
+3. ExecAssembly，执行程序集中，某个类的方法
+4. GetInstance，获取类的实例
+5. SetModelPropertyValue，设置实例的某个属性的值，使用表达式树，比反射快(有缓存)
+6. GetModelPropertyValue，获取实例的某个属性的值，使用表达式树，比反射快(有缓存)
+7. ExecMethod，执行实例中的方法，使用表达式树，比反射快(有缓存)

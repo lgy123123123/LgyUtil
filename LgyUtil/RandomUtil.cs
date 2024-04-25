@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,12 +44,12 @@ namespace LgyUtil
         /// <summary>
         /// 生成的一个随机码中，没有重复的数字或字母
         /// </summary>
-        private bool NotSame { get; set; } = false;
+        private bool NotSame { get; set; }
 
         /// <summary>
         /// 生成的多个随机码，没有重复的
         /// </summary>
-        private bool NotSameList { get; set; } = false;
+        private bool NotSameList { get; set; }
 
         /// <summary>
         /// 系统随机实例
@@ -94,15 +93,15 @@ namespace LgyUtil
         /// 内部特殊字符
         /// </summary>
         /// <returns></returns>
-        private char[] specialCharacters = new char[]
+        private char[] specialCharacters =
         {
-             '#', '*', '?', '>','^'
+            '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '[', ']', '{', '}', '|', '/', '?', ';'
         };
 
         /// <summary>
         /// 排除的LO字符数组
         /// </summary>
-        private readonly char[] excludeSymbolLO = new char[] { 'l', 'O', 'o', '1', '0' };
+        private readonly char[] excludeSymbolLO = {'l', 'O', 'o', '1', '0'};
 
         /// <summary>
         /// 排除的字符
@@ -192,7 +191,7 @@ namespace LgyUtil
         /// <returns></returns>
         public string GetRandom()
         {
-            CheckNotSame(false);
+            CheckNotSame();
             return GetRandomDetail();
         }
 
@@ -206,14 +205,10 @@ namespace LgyUtil
         {
             CheckNotSame();
             string[] randoms = new string[numCount];
-            int tryTimes = 1; //尝试重复的次数
             for (int i = 0; i < numCount; i++)
             {
-                if (NotSameList) //设置不重复，最多尝试100次
-                    tryTimes = 100;
-                else
-                    tryTimes = 1; //初始尝试1次
-
+                //尝试重复的次数，初始尝试1次，设置不重复，最多尝试100次
+                var tryTimes = NotSameList ? 100 : 1;
                 while (tryTimes > 0)
                 {
                     var randomOne = GetRandomDetail();
@@ -322,7 +317,7 @@ namespace LgyUtil
         /// </summary>
         private void AnalysisTemplate()
         {
-            var matches = Regex.Matches(this.RandomFormatTemplate, @"\{[nxX]+}", RegexOptions.Compiled);
+            var matches = Regex.Matches(this.RandomFormatTemplate, @"\{[nxXs]+}", RegexOptions.Compiled);
             TemplateArr = new string[matches.Count];
             for (int i = matches.Count - 1; i >= 0; i--)
             {
@@ -363,6 +358,9 @@ namespace LgyUtil
                                 break;
                             case 'X':
                                 randomOne.Append(GetRandomOne(Enum_RandomOneType.UpperLetter, ref tryTimes));
+                                break;
+                            case 's':
+                                randomOne.Append(GetRandomOne(Enum_RandomOneType.SpecialCharacter, ref tryTimes));
                                 break;
                         }
                     }
@@ -491,7 +489,6 @@ namespace LgyUtil
                                 oneType = randomInstance.Next(0, 4).ToEnum<Enum_RandomOneType>(); // 0到3
                             }
 
-                            ;
                             RandomStr += GetRandomOne(oneType, ref tryTimes);
                         }
 
@@ -507,7 +504,6 @@ namespace LgyUtil
                                 oneType = randomInstance.Next(0, 4).ToEnum<Enum_RandomOneType>(); // 0到3
                             }
 
-                            ;
                             RandomStr += GetRandomOne(oneType, ref tryTimes);
                         }
 
@@ -576,13 +572,12 @@ namespace LgyUtil
         /// <summary>
         /// 验证不重复生成时，设置的随机码长度
         /// </summary>
-        /// <param name="isBatch">是否批量生成</param>
         /// <exception cref="LgyUtilException"></exception>
-        private void CheckNotSame(bool isBatch = true)
+        private void CheckNotSame()
         {
             //按模板生成时，不重复配置无效
-            if (this.IsRandomTemplate)
-                this.NotSame = false;
+            if (IsRandomTemplate)
+                NotSame = false;
 
             //排除多少个数字
             int excludeNumbers = 0;
@@ -591,15 +586,15 @@ namespace LgyUtil
             //排除多少个小写字母
             int excludeSmallLettersNum = 0;
             //是否设置排除字符
-            bool isExcludeSymbol = this.ExcludeSymbol.HaveContent();
+            bool isExcludeSymbol = ExcludeSymbol.HaveContent();
             if (isExcludeSymbol)
             {
-                excludeNumbers = this.ExcludeSymbol.Count(s => (int)s >= 48 && (int)s <= 57);
-                excludeBigLettersNum = this.ExcludeSymbol.Count(s => (int)s >= 65 && (int)s <= 90);
-                excludeSmallLettersNum = this.ExcludeSymbol.Count(s => (int)s >= 97 && (int)s <= 122);
+                excludeNumbers = ExcludeSymbol.Count(s => s >= 48 && s <= 57);
+                excludeBigLettersNum = ExcludeSymbol.Count(s => s >= 65 && s <= 90);
+                excludeSmallLettersNum = ExcludeSymbol.Count(s => s >= 97 && s <= 122);
             }
 
-            if (this.NotSame)
+            if (NotSame)
             {
                 string excludeContent = isExcludeSymbol ? "和排除字符" : "";
                 if (RandomFormat == Enum_RandomFormat.OnlyLetter &&

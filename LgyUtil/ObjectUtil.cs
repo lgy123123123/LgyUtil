@@ -192,7 +192,7 @@ namespace LgyUtil
         /// <returns>返回传入的目的对象</returns>
         public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class
         {
-            return source.Adapt<TSource, TDestination>(dest);
+            return source.Adapt(dest);
         }
 
         /// <summary>

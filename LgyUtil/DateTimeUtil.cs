@@ -60,7 +60,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static DateTime GetDateTimeByTimestamp(string timestamp)
         {
-            DateTime dtTimestamp = TimeZoneInfo.ConvertTimeFromUtc(new System.DateTime(1970, 1, 1), TimeZoneInfo.Local);
+            DateTime dtTimestamp = TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1970, 1, 1), TimeZoneInfo.Local);
             return dtTimestamp.AddMilliseconds(timestamp.ToLong());
         }
         /// <summary>
@@ -118,8 +118,7 @@ namespace LgyUtil
         {
             if (formatTime)
                 return new DateTime(dt.Year, 12, 31, 0, 0, 0);
-            else
-                return new DateTime(dt.Year, 12, 31, dt.Hour, dt.Minute, dt.Second); ;
+            return new DateTime(dt.Year, 12, 31, dt.Hour, dt.Minute, dt.Second);
         }
         /// <summary>
         /// 获取当前季度第一天 1日 00:00:00
@@ -230,15 +229,16 @@ namespace LgyUtil
         /// <returns></returns>
         public static string ToStringExt(this DateTime dt, string format)
         {
-            DateTimeFormatInfo dtFormat = new DateTimeFormatInfo();
-            dtFormat.ShortDatePattern = format;
+            DateTimeFormatInfo dtFormat = new DateTimeFormatInfo
+            {
+                ShortDatePattern = format
+            };
             if (format.Contains("Q"))
             {
                 int quarterNum = dt.GetQuarter();
                 return dt.ToString("d",dtFormat).Replace("Q",quarterNum.ToString());
             }
-            else
-                return dt.ToString("d", dtFormat);
+            return dt.ToString("d", dtFormat);
         }
     }
 }
