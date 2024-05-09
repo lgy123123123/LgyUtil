@@ -192,6 +192,7 @@ namespace LgyUtil
         /// <returns>返回传入的目的对象</returns>
         public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.Adapt(dest);
         }
 
@@ -211,6 +212,7 @@ namespace LgyUtil
         /// <returns>返回传入的目的对象</returns>
         public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TSource, TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class where TDestination : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
                 var setter = conf.ForType<TSource, TDestination>();
@@ -228,6 +230,7 @@ namespace LgyUtil
         /// <returns>返回映射目的对象</returns>
         public static TDestination MappingTo<TDestination>(this object source) where TDestination : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.Adapt<TDestination>();
         }
         /// <summary>
@@ -244,6 +247,7 @@ namespace LgyUtil
         /// <returns>返回映射目的对象</returns>
         public static TDestination MappingTo<TDestination>(this object source, Action<TypeAdapterSetter<TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TDestination : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
                 var setter = conf.ForDestinationType<TDestination>();
@@ -262,6 +266,7 @@ namespace LgyUtil
         /// <returns>返回一个new目的类型 需要自己进行as 转换</returns>
         public static object MappingTo<TSource>(this TSource source, Type destination) where TSource : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.Adapt(typeof(TSource), destination);
         }
 
@@ -273,6 +278,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static List<TDestination> MappingToList<TDestination>(this IList source) where TDestination : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.MappingTo<List<TDestination>>();
         }
 
@@ -284,6 +290,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static TDestination[] MappingToArray<TDestination>(this IList source) where TDestination : class
         {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.MappingTo<TDestination[]>();
         }
         #endregion

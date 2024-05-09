@@ -27,7 +27,7 @@
 		如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
 	</Description>
     <Authors>lgy</Authors>
-    <Version>1.7.0</Version>
+    <Version>1.7.1</Version>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -41,6 +41,7 @@
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" />
     <PackageReference Include="Mapster" Version="7.3.0" />
+    <PackageReference Include="Mapster.JsonNet" Version="1.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
