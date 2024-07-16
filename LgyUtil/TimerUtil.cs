@@ -82,14 +82,25 @@ namespace LgyUtil
         }
 
         /// <summary>
-        /// 获取未来5次触发时间(任务名称错误时，返回null)
+        /// 获取已添加的任务未来5次触发时间(任务名称错误时，返回null)
         /// </summary>
-        /// <param name="jobName">任务名称</param>
+        /// <param name="jobName">已添加任务名称</param>
         /// <returns></returns>
-        public static IList<DateTime> GetNext5TriggerTimes(string jobName)
+        public static IList<DateTime> GetJobNext5TriggerTimes(string jobName)
         {
             return JobInfo.GetJob(jobName)?.Trigger.ComputedNext5Times();
         }
+        
+        /// <summary>
+        /// 获取未来5次触发时间(任务名称错误时，返回null)
+        /// </summary>
+        /// <param name="cron">cron表达式</param>
+        /// <returns></returns>
+        public static IList<DateTime> GetNext5TriggerTimes(string cron)
+        {
+            TriggerCron tc = new TriggerCron(cron);
+            return tc.ComputedNext5Times();
+        } 
 
         /// <summary>
         /// 停止并移除job
