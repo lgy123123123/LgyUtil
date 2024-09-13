@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace LgyUtil.TimerUtilModel
 {
-    internal class JobInfo
+    public class JobInfo
     {
         /// <summary>
         /// 所有定时调度集合
         /// </summary>
-        private static ConcurrentDictionary<string, JobInfo> AllJobDic = new ConcurrentDictionary<string, JobInfo>();
+        internal static ConcurrentDictionary<string, JobInfo> AllJobDic = new ConcurrentDictionary<string, JobInfo>();
 
         /// <summary>
         /// 添加job
@@ -20,7 +21,7 @@ namespace LgyUtil.TimerUtilModel
         /// <param name="doing">执行方法</param>
         /// <param name="options">参数</param>
         /// <exception cref="LgyUtilException"></exception>
-        public static void AddJob(string jobName, ITrigger trigger, Action<JobExecInfo> doing, JobOption options)
+        internal static void AddJob(string jobName, ITrigger trigger, Action<JobExecInfo> doing, JobOption options)
         {
             JobInfo job = new JobInfo()
             {
@@ -41,7 +42,7 @@ namespace LgyUtil.TimerUtilModel
         /// <param name="jobName"></param>
         /// <returns></returns>
         /// <exception cref="LgyUtilException"></exception>
-        public static JobInfo GetJob(string jobName)
+        internal static JobInfo GetJob(string jobName)
         {
             if (AllJobDic.TryGetValue(jobName, out JobInfo job))
                 return job;
@@ -57,12 +58,12 @@ namespace LgyUtil.TimerUtilModel
         /// <summary>
         /// 触发器
         /// </summary>
-        public ITrigger Trigger { get; set; }
+        internal ITrigger Trigger { get; set; }
 
         /// <summary>
         /// 执行的任务
         /// </summary>
-        public Action<JobExecInfo> Doing { get; set; }
+        private Action<JobExecInfo> Doing { get; set; }
 
         /// <summary>
         /// 任务选项
@@ -72,7 +73,7 @@ namespace LgyUtil.TimerUtilModel
         /// <summary>
         /// job最终调度
         /// </summary>
-        public Timer JobTimer { get; set; }
+        private Timer JobTimer { get; set; }
 
         private int _ExecCount;
 
@@ -95,7 +96,7 @@ namespace LgyUtil.TimerUtilModel
         /// 验证job信息
         /// </summary>
         /// <exception cref="LgyUtilException"></exception>
-        public void CheckJobInfo()
+        internal void CheckJobInfo()
         {
             if (AllJobDic.ContainsKey(JobName))
                 throw new LgyUtilException("job名称已存在：" + JobName);
@@ -104,6 +105,15 @@ namespace LgyUtil.TimerUtilModel
             Trigger.IsValid();
         }
 
+        /// <summary>
+        /// 获取已添加的任务未来5次触发时间(
+        /// </summary>
+        /// <returns></returns>
+        public IList<DateTime> GetJobNext5TriggerTimes()
+        {
+            return Trigger.ComputedNext5Times();
+        }
+        
         /// <summary>
         /// 停止job
         /// </summary>

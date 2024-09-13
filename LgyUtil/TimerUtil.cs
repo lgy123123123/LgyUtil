@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using LgyUtil.TimerUtilModel;
 
 namespace LgyUtil
@@ -81,6 +82,27 @@ namespace LgyUtil
             JobInfo.AddJob(jobName, new TriggerCommon(customTimeSpan), doing, options);
         }
 
+        /// <summary>
+        /// 获取所有正在运行的任务
+        /// </summary>
+        /// <returns></returns>
+        public static List<JobInfo> GetAllJobInfo()
+        {
+            return JobInfo.AllJobDic.Values.ToList();
+        }
+        
+        /// <summary>
+        /// 获取所有正在运行的任务
+        /// </summary>
+        /// <param name="jobName">任务名称，必须完全一致</param>
+        /// <returns></returns>
+        public static JobInfo GetJobInfo(string jobName)
+        {
+            if (JobInfo.AllJobDic.TryGetValue(jobName, out var info))
+                return info;
+            return null;
+        }
+        
         /// <summary>
         /// 获取已添加的任务未来5次触发时间(任务名称错误时，返回null)
         /// </summary>

@@ -1,4 +1,7 @@
-﻿namespace LgyUtil
+﻿using System;
+using System.Text.RegularExpressions;
+
+namespace LgyUtil
 {
     /// <summary>
     /// 正则表达式帮助类
@@ -127,5 +130,33 @@
         /// <returns></returns>
         public static bool IsPwd_NumberLetterBigSmallSymbols(string password) => password.RegexIsMatch(Pwd_NumberLetterBigSmallSymbols);
         #endregion
+
+        /// <summary>
+        /// 身份证号，闰年的正则
+        /// </summary>
+        public const string IdCardRegexLeapYear="^[1-9]\\d{5}(19|20)\\d{2}((01|03|05|07|08|10|12)(0[1-9]|[1-2]\\d|3[0-1])|(04|06|09|11)(0[1-9]|[1-2]\\d|30)|02(0[1-9]|[1-2]\\d))\\d{3}[\\dXx]$";
+
+        /// <summary>
+        /// 身份证号，非闰年的正则
+        /// </summary>
+        public const string IdCardRegexNotLeapYear = "^[1-9]\\d{5}(19|20)\\d{2}((01|03|05|07|08|10|12)(0[1-9]|[1-2]\\d|3[0-1])|(04|06|09|11)(0[1-9]|[1-2]\\d|30)|02(0[1-9]|1\\d|2[0-8]))\\d{3}[\\dXx]$";
+        
+        /// <summary>
+        /// 是否是正确的18位身份证号
+        /// </summary>
+        /// <param name="cardNum"></param>
+        /// <returns></returns>
+        public static bool IsIdCardNumber(string cardNum)
+        {
+            if (cardNum.IsNullOrEmpty())
+                return false;
+            var year = cardNum.Substring(6, 4).ToInt();
+            string regex="";
+            if ((year % 400 == 0) || (year % 100 != 0 && (year % 4 == 0)))//闰年
+                regex = IdCardRegexLeapYear;
+            else//平年
+                regex = IdCardRegexNotLeapYear;
+            return Regex.IsMatch(cardNum, regex);
+        }
     }
 }

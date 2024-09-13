@@ -33,6 +33,7 @@ namespace LgyUtil
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
+        [Obsolete(".net9.0不再支持BinaryFormatter，请使用CloneNewtonJson方法替代",true)]
         public static T CloneBinary<T>(this T source)
         {
             if (!typeof(T).IsSerializable)
