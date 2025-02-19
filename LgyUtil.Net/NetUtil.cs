@@ -55,19 +55,20 @@ namespace LgyUtil
         /// 获取请求的request对象
         /// </summary>
         /// <param name="url"></param>
-        /// <param name="postData"></param>
+        /// <param name="content"></param>
         /// <param name="isPost"></param>
         /// <param name="dicHeader"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private static HttpRequestMessage BuildRequest(string url, string postData, bool isPost, Dictionary<string, string> dicHeader)
+        private static HttpRequestMessage BuildRequest(string url, HttpContent? content, bool isPost, Dictionary<string, string> dicHeader)
         {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, new Uri(url))
+            HttpRequestMessage request = new HttpRequestMessage()
             {
-                Content = new StringContent(postData),
+                RequestUri = new Uri(url),
+                Content = content,
                 Method = isPost ? HttpMethod.Post : HttpMethod.Get,
             };
-            if (dicHeader != null)
+            if (dicHeader.HaveContent())
             {
                 foreach (var kvHeader in dicHeader)
                 {
@@ -88,11 +89,11 @@ namespace LgyUtil
                     }
                 }
             }
-            if (dicHeader == null || !dicHeader.ContainsKey("ContentType"))
+            if (dicHeader.IsNullOrEmpty() || !dicHeader.ContainsKey("ContentType"))
             {
-                if(isPost)
+                if(isPost && request.Content is StringContent)
                     request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                else
+                else if(!isPost)
                     request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
             }
                 
@@ -101,7 +102,23 @@ namespace LgyUtil
 
         #region Post请求
         /// <summary>
-        /// post请求
+        /// post异步请求
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static async Task<HttpResponseMessage> PostBase(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            HttpClient client = GetHttpClient(url);
+            if (timeout != null)
+                client.Timeout = timeout.Value;
+            var request = BuildRequest(url, content, true, dicHeader);
+            return await client.SendAsync(request);
+        }
+        /// <summary>
+        /// post异步请求
         /// </summary>
         /// <param name="url">请求路径</param>
         /// <param name="postData">请求体body,json字符串</param>
@@ -110,13 +127,12 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<HttpResponseMessage> PostBase(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            HttpClient client = GetHttpClient(url);
-            if (timeout != null)
-                client.Timeout = timeout.Value;
-            var request = BuildRequest(url, postData, true, dicHeader);
-            return await client.SendAsync(request);
+            return await PostBase(url, new StringContent(postData), dicHeader, timeout);
         }
         #region 同步Post
+
+        #region json请求
+
         /// <summary>
         /// post请求
         /// </summary>
@@ -129,6 +145,7 @@ namespace LgyUtil
         {
             return PostBase(url,postData,dicHeader,timeout).Result;
         }
+        
         /// <summary>
         /// post请求，返回请求结果字符串
         /// </summary>
@@ -172,8 +189,75 @@ namespace LgyUtil
                 throw new Exception(response.Content.ReadAsStringAsync().Result);
             return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
         }
+
+        #endregion
+
+        #region 自定义content
+
+        /// <summary>
+        /// post请求
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static HttpResponseMessage Post(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            return PostBase(url,content,dicHeader,timeout).Result;
+        }
+        
+        /// <summary>
+        /// post请求，返回请求结果字符串
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static string Post_ReturnString(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            var response = PostBase(url, content, dicHeader, timeout).Result;
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(response.Content.ReadAsStringAsync().Result);
+            return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+        }
+        
+        /// <summary>
+        /// post请求，返回模型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static T Post_ReturnModel<T>(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
+        {
+            return (Post_ReturnString(url, content, dicHeader, timeout)).DeserializeNewtonJson<T>();
+        }
+        /// <summary>
+        /// post请求，返回请求结果流
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static Stream Post_ReturnStream(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            var response = PostBase(url, content, dicHeader, timeout).Result;
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(response.Content.ReadAsStringAsync().Result);
+            return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+        }
+
+        #endregion
         #endregion
         #region 异步Post
+
+        #region json请求
+
         /// <summary>
         /// post请求
         /// </summary>
@@ -231,6 +315,71 @@ namespace LgyUtil
                 throw new Exception(await response.Content.ReadAsStringAsync());
             return await response.Content.ReadAsStreamAsync();
         }
+
+        #endregion
+
+        #region 自定义content
+
+        /// <summary>
+        /// post请求
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
+        /// <returns></returns>
+        public static async Task<HttpResponseMessage> PostAsync(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+        {
+            return await PostBase(url,content,dicHeader,timeout);
+        }
+        /// <summary>
+        /// post请求，返回请求结果字符串
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static async Task<string> PostAsync_ReturnString(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
+        {
+            var response = await PostAsync(url, content, dicHeader, timeout);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await response.Content.ReadAsStringAsync());
+            return await response.Content.ReadAsStringAsync();
+        }
+        /// <summary>
+        /// post请求，返回模型
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <returns></returns>
+        public static async Task<T> PostAsync_ReturnModel<T>(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null) where T : class, new()
+        {
+            return (await PostAsync_ReturnString(url, content, dicHeader, timeout)).DeserializeNewtonJson<T>();
+        }
+        /// <summary>
+        /// post请求，返回请求结果流
+        /// </summary>
+        /// <param name="url">请求路径</param>
+        /// <param name="content">请求体</param>
+        /// <param name="dicHeader">请求头</param>
+        /// <param name="timeout">超时时间，若是同一个域名地址，设置完，会覆盖上次设置的超时时间</param>
+        /// <param name="completionOption">完成选项，默认全部读取完毕再返回</param>
+        /// <returns></returns>
+        public static async Task<Stream> PostAsync_ReturnStream(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+        {
+            var response = await PostAsync(url, content, dicHeader, timeout, completionOption);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await response.Content.ReadAsStringAsync());
+            return await response.Content.ReadAsStreamAsync();
+        }
+
+        #endregion
+        
         #endregion
         #endregion
 
@@ -247,7 +396,7 @@ namespace LgyUtil
             HttpClient client = GetHttpClient(url);
             if (timeout != null)
                 client.Timeout = timeout.Value;
-            HttpRequestMessage request = BuildRequest(url, "", false, dicHeader);
+            HttpRequestMessage request = BuildRequest(url, null, false, dicHeader);
             return await client.SendAsync(request);
         }
         #region 同步Get
