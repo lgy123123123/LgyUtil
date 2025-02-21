@@ -183,8 +183,17 @@ namespace LgyUtil
         #endregion
 
         #region 对象映射相关
+
         /// <summary>
-        /// 普通类映射
+        /// 设置MappingTo支持映射NewtonJson对象，全局只需要执行一次即可
+        /// </summary>
+        public static void SetMappingToEnableNewtonJson()
+        {
+            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
+        }
+        
+        /// <summary>
+        /// 普通类映射，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
         /// <typeparam name="TDestination"></typeparam>
@@ -193,12 +202,11 @@ namespace LgyUtil
         /// <returns>返回传入的目的对象</returns>
         public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest) where TSource : class, new() where TDestination : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.Adapt(dest);
         }
 
         /// <summary>
-        /// 自定义映射
+        /// 自定义映射，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// 将类的属性，映射到另一个类，只能映射普通的类对象
         /// 自定义配置，查询文档(官方英文文档)https://github.com/MapsterMapper/Mapster
         /// (热心网友中文翻译文档)https://www.cnblogs.com/staneee/p/14912794.html
@@ -213,7 +221,6 @@ namespace LgyUtil
         /// <returns>返回传入的目的对象</returns>
         public static TDestination MappingTo<TSource, TDestination>(this TSource source, TDestination dest, Action<TypeAdapterSetter<TSource, TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TSource : class where TDestination : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
                 var setter = conf.ForType<TSource, TDestination>();
@@ -223,7 +230,7 @@ namespace LgyUtil
             return source.Adapt<TSource, TDestination>(dest, config);
         }
         /// <summary>
-        /// 普通类映射
+        /// 普通类映射，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// 将类的属性，映射成另一个新的类
         /// </summary>
         /// <typeparam name="TDestination">目标类型</typeparam>
@@ -231,11 +238,10 @@ namespace LgyUtil
         /// <returns>返回映射目的对象</returns>
         public static TDestination MappingTo<TDestination>(this object source) where TDestination : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.Adapt<TDestination>();
         }
         /// <summary>
-        /// 自定义映射
+        /// 自定义映射，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// 将类的属性，映射到另一个类，只能映射普通的类对象
         /// 自定义配置，查询文档(官方英文文档)https://github.com/MapsterMapper/Mapster
         /// (热心网友中文翻译文档)https://www.cnblogs.com/staneee/p/14912794.html
@@ -248,7 +254,6 @@ namespace LgyUtil
         /// <returns>返回映射目的对象</returns>
         public static TDestination MappingTo<TDestination>(this object source, Action<TypeAdapterSetter<TDestination>> customConfig, [CallerFilePath] string key1 = "", [CallerLineNumber] int key2 = 0) where TDestination : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             var config = TypeAdapterConfig.GlobalSettings.Fork((conf) =>
             {
                 var setter = conf.ForDestinationType<TDestination>();
@@ -258,7 +263,7 @@ namespace LgyUtil
             return source.Adapt<TDestination>(config);
         }
         /// <summary>
-        /// 普通类映射
+        /// 普通类映射，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// 将类的属性，映射到另一个新的类
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
@@ -267,31 +272,28 @@ namespace LgyUtil
         /// <returns>返回一个new目的类型 需要自己进行as 转换</returns>
         public static object MappingTo<TSource>(this TSource source, Type destination) where TSource : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.Adapt(typeof(TSource), destination);
         }
 
         /// <summary>
-        /// 数组，映射为List泛型数组
+        /// 数组，映射为List泛型数组，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// </summary>
         /// <param name="source">数组对象</param>
         /// <typeparam name="TDestination">目的类型</typeparam>
         /// <returns></returns>
         public static List<TDestination> MappingToList<TDestination>(this IList source) where TDestination : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.MappingTo<List<TDestination>>();
         }
 
         /// <summary>
-        /// 数组，映射为
+        /// 数组，映射为，若要映射newtonjson对象，请执行ObjectUtil.SetMappingToEnableNewtonJson()
         /// </summary>
         /// <param name="source">数组对象</param>
         /// <typeparam name="TDestination">目的类型</typeparam>
         /// <returns></returns>
         public static TDestination[] MappingToArray<TDestination>(this IList source) where TDestination : class
         {
-            TypeAdapterConfig.GlobalSettings.EnableJsonMapping();
             return source.MappingTo<TDestination[]>();
         }
         #endregion

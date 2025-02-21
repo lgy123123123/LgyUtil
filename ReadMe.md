@@ -202,7 +202,7 @@
         t.SerializeNewtonJson();
         //输出为{"a":"2023-02-17 16:31:19","b":"x"}
 
-7. MappingTo()，映射对象，比AutoFac简单，上手快。
+7. MappingTo()，映射对象，比AutoFac简单，上手快。！！注意:若支持newtonjson映射，请在全局执行一次ObjectUtil.SetMappingToEnableNewtonJson()
 
         //2个基础类
         public class A { 
