@@ -84,11 +84,11 @@ namespace LgyUtil
         /// 添加日志，保存为 Log_Info_日期
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddLog(string strContent, string strPerfixName, Exception e = null)
+        public static void AddLog(string strContent, string strPrefixName, Exception e = null)
         {
-            AddLog(strContent, strPerfixName, "", e);
+            AddLog(strContent, strPrefixName, "", e);
         }
 
         /// <summary>
@@ -96,12 +96,12 @@ namespace LgyUtil
         /// 在Log下，还可以继续创建文件夹
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="strDirName">文件夹名称，多级目录格式为:name1/name2/name3</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddLog(string strContent, string strPerfixName, string strDirName, Exception e = null)
+        public static void AddLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPerfixName, strDirName, LogLevel.Info, e);
+            AddLog(strContent, strPrefixName, strDirName, LogLevel.Info, e);
         }
 
         #endregion
@@ -122,11 +122,11 @@ namespace LgyUtil
         /// 添加日志，保存为 Log_Debug_日期
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddDebugLog(string strContent, string strPerfixName, Exception e = null)
+        public static void AddDebugLog(string strContent, string strPrefixName, Exception e = null)
         {
-            AddDebugLog(strContent, strPerfixName, "", e);
+            AddDebugLog(strContent, strPrefixName, "", e);
         }
 
         /// <summary>
@@ -134,12 +134,12 @@ namespace LgyUtil
         /// 在Log下，还可以继续创建文件夹
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="strDirName">文件夹名称，多级目录格式为:name1/name2/name3</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddDebugLog(string strContent, string strPerfixName, string strDirName, Exception e = null)
+        public static void AddDebugLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPerfixName, strDirName, LogLevel.Debug, e);
+            AddLog(strContent, strPrefixName, strDirName, LogLevel.Debug, e);
         }
 
         #endregion
@@ -160,11 +160,11 @@ namespace LgyUtil
         /// 添加日志，保存为 Log_Error_日期
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddErrorLog(string strContent, string strPerfixName, Exception e = null)
+        public static void AddErrorLog(string strContent, string strPrefixName, Exception e = null)
         {
-            AddErrorLog(strContent, strPerfixName, "", e);
+            AddErrorLog(strContent, strPrefixName.IsNullOrEmpty() ? "Error" : strPrefixName, "", e);
         }
 
         /// <summary>
@@ -172,12 +172,12 @@ namespace LgyUtil
         /// 在Log下，还可以继续创建文件夹
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="strDirName">文件夹名称，多级目录格式为:name1/name2/name3</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddErrorLog(string strContent, string strPerfixName, string strDirName, Exception e = null)
+        public static void AddErrorLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPerfixName, strDirName, LogLevel.Error, e);
+            AddLog(strContent, strPrefixName, strDirName, LogLevel.Error, e);
         }
 
         #endregion
@@ -198,11 +198,11 @@ namespace LgyUtil
         /// 添加日志，保存为 Log_Warning_日期
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddWarningLog(string strContent, string strPerfixName, Exception e = null)
+        public static void AddWarningLog(string strContent, string strPrefixName, Exception e = null)
         {
-            AddWarningLog(strContent, strPerfixName, "", e);
+            AddWarningLog(strContent, strPrefixName, "", e);
         }
 
         /// <summary>
@@ -210,12 +210,12 @@ namespace LgyUtil
         /// 在Log下，还可以继续创建文件夹
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strPerfixName">日志文件名前缀,默认Log</param>
+        /// <param name="strPrefixName">日志文件名前缀,默认Log</param>
         /// <param name="strDirName">文件夹名称，多级目录格式为:name1/name2/name3</param>
         /// <param name="e">异常类传入则记录堆栈信息</param>
-        public static void AddWarningLog(string strContent, string strPerfixName, string strDirName, Exception e = null)
+        public static void AddWarningLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPerfixName, strDirName, LogLevel.Warning, e);
+            AddLog(strContent, strPrefixName, strDirName, LogLevel.Warning, e);
         }
 
         #endregion
@@ -244,43 +244,48 @@ namespace LgyUtil
         /// <summary>
         /// 删除日志
         /// </summary>
-        /// <param name="LogPath">日志路径</param>
+        /// <param name="logPath">日志路径</param>
         /// <param name="dtDelBefore">删除这个时间之前的所有日志(不包括这个时间)</param>
-        public static void DelLog(string LogPath, DateTime dtDelBefore)
+        public static void DelLog(string logPath, DateTime dtDelBefore)
         {
-            if (LogPath.IsNullOrEmpty() || File.Exists(LogPath))
+            if (logPath.IsNullOrEmpty() || File.Exists(logPath))
                 throw new LgyUtilException("日志路径不正确");
 
-            DelLog(LogPath);
+            DelLogLocal(logPath, in dtDelBefore);
+        }
 
-            void DelLog(string path)
+        /// <summary>
+        /// 删除日志的具体方法
+        /// </summary>
+        /// <param name="path">日志路径</param>
+        /// <param name="dtDelBefore">删除这个时间之前的所有日志(不包括这个时间)</param>
+        private static void DelLogLocal(string path, in DateTime dtDelBefore)
+        {
+            if (Directory.Exists(path))
             {
-                if (Directory.Exists(path))
+                foreach (var dir in Directory.GetDirectories(path))
                 {
-                    foreach (var dir in Directory.GetDirectories(path))
-                    {
-                        DelLog(dir);
-                    }
+                    DelLogLocal(dir, in dtDelBefore);
+                }
 
-                    foreach (var fPath in Directory.GetFiles(path))
-                    {
-                        DelLog(fPath);
-                    }
-                }
-                else if (File.Exists(path))
+                foreach (var fPath in Directory.GetFiles(path))
                 {
-                    //日期字符串
-                    string strDate = Path.GetFileNameWithoutExtension(path);
-                    strDate = strDate.Substring(strDate.LastIndexOf("_") + 1);
-                    DateTime dtFile = strDate.ToDateTime("yyyyMMdd");
-                    //删除设定天数之前的日志
-                    if (dtFile < dtDelBefore)
-                    {
-                        File.Delete(path);
-                        AddLog($"删除日志：{path}");
-                    }
+                    DelLogLocal(fPath, in dtDelBefore);
                 }
-            } //删除日志的方法
+            }
+            else if (File.Exists(path))
+            {
+                //日期字符串
+                string strDate = Path.GetFileNameWithoutExtension(path);
+                strDate = strDate.Substring(strDate.LastIndexOf("_") + 1);
+                DateTime dtFile = strDate.ToDateTime("yyyyMMdd");
+                //删除设定天数之前的日志
+                if (dtFile < dtDelBefore)
+                {
+                    File.Delete(path);
+                    AddLog($"删除日志：{path}");
+                }
+            }
         }
 
         /// <summary>
@@ -288,12 +293,12 @@ namespace LgyUtil
         /// </summary>
         /// <param name="level">日志等级，不填写是所有等级</param>
         /// <param name="logDir">日志所在文件夹，不填写是所有文件夹</param>
-        /// <param name="logPerfix">日志文件前缀，不填写是所有文件</param>
+        /// <param name="logPrefix">日志文件前缀，不填写是所有文件</param>
         /// <returns></returns>
-        public static List<string> GetAllLogFileName(LogLevel? level = null, string logDir = null, string logPerfix = null)
+        public static List<string> GetAllLogFileName(LogLevel? level = null, string logDir = null, string logPrefix = null)
         {
             var allFile = FileUtil.GetAllFiles(AppDomain.CurrentDomain.BaseDirectory + "Log");
-            if (level == null && logDir.IsNullOrEmptyTrim() && logPerfix.IsNullOrEmptyTrim())
+            if (level == null && logDir.IsNullOrEmptyTrim() && logPrefix.IsNullOrEmptyTrim())
                 return allFile;
             List<string> listRet = new List<string>(allFile.Count);
             foreach (string f in allFile)
@@ -303,7 +308,7 @@ namespace LgyUtil
 
                 if (logDir.IsNotNullOrEmpty() && !f.Contains($"/{logDir}/"))
                     continue;
-                if (logPerfix.IsNotNullOrEmpty() && !f.StartsWith(logPerfix))
+                if (logPrefix.IsNotNullOrEmpty() && !f.StartsWith(logPrefix))
                     continue;
                 listRet.Add(f);
             }
@@ -377,7 +382,10 @@ namespace LgyUtil
                 strContent = $"错误信息：{strContent}\r\n堆栈信息：{e.Message}\r\n{e.StackTrace}";
             }
 
-            strFileName = strFileName.IsNullOrEmpty() ? "Log" : strFileName + "_" + level.ToString();
+            if (strFileName.IsNullOrEmpty())
+                strFileName = "Log";
+
+            strFileName += "_" + level.ToString();
             if (NeedPrint(level))
                 Console.WriteLine(strContent);
             if (NeedWriteFile(level))
@@ -463,7 +471,7 @@ namespace LgyUtil
             /// <summary>
             /// 日志线程，是否启动 1:启动中  0:停止
             /// </summary>
-            int IsRun;
+            private int IsRun;
 
             /// <summary>
             /// 添加到日志队列
