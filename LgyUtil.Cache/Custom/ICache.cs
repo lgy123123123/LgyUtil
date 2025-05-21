@@ -20,10 +20,10 @@ namespace LgyUtil.Cache.Custom
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <param name="expiresSliding">滑动过期时间(一段内不访问，则清空缓存，访问后，按滑动时间重新计算)，null则不设置</param>
-        /// <param name="expiressAbsoulte">绝对过期时间，null则不设置</param>
+        /// <param name="expiresAbsolute">绝对过期时间，null则不设置</param>
         /// <returns></returns>
         void Set<T>(string key, T value, TimeSpan? expiresSliding = null,
-            DateTime? expiressAbsoulte = null);
+            DateTime? expiresAbsolute = null);
 
         /// <summary>
         /// 获取缓存

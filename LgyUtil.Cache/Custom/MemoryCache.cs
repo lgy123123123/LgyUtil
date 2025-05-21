@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace LgyUtil.Cache.Custom
 {
@@ -46,16 +44,16 @@ namespace LgyUtil.Cache.Custom
             return dicCache.ContainsKey(key);
         }
         /// <inheritdoc/>
-        public void Set<T>(string key, T value, TimeSpan? expiresSliding = null, DateTime? expiressAbsoulte = null)
+        public void Set<T>(string key, T value, TimeSpan? expiresSliding = null, DateTime? expiresAbsolute = null)
         {
-            if (expiressAbsoulte != null && expiressAbsoulte.Value < DateTime.Now)
+            if (expiresAbsolute != null && expiresAbsolute.Value < DateTime.Now)
                 throw new Exception("绝对过期时间，不能小于当前时间");
             var cache = new MemoryCacheModel
             {
                 Key = key,
                 Value = value,
                 ExpiresSliding = expiresSliding,
-                ExpiressAbsoulte = expiressAbsoulte
+                ExpiressAbsoulte = expiresAbsolute
             };
             if (expiresSliding != null)
                 cache.SlidingAbsoluteDate = DateTime.Now.Add(expiresSliding.Value);

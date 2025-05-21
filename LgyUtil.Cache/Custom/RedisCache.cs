@@ -1,6 +1,6 @@
-﻿using CSRedis;
+﻿using System;
+using CSRedis;
 using Newtonsoft.Json;
-using System;
 
 namespace LgyUtil.Cache.Custom
 {
@@ -12,19 +12,16 @@ namespace LgyUtil.Cache.Custom
         private CSRedisClient Client { get; set; }
 
         /// <summary>
-        /// 设置序列化配置
+        /// 设置序列化配置，默认空值和默认值忽略
         /// </summary>
-        private void SetSerializeSetting() 
+        /// <param name="setting">自定义序列化</param>
+        public void SetSerializeSetting(JsonSerializerSettings setting = null)
         {
-            Client.CurrentSerialize = (obj) =>
+            Client.CurrentSerialize = (obj) => JsonConvert.SerializeObject(obj, setting ?? new JsonSerializerSettings
             {
-                //默认值和null,不进行序列化，节省了空间
-                return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
-                });
-            };
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            });
         }
 
         /// <summary>
@@ -45,8 +42,8 @@ namespace LgyUtil.Cache.Custom
                 connectString += $",password={password}";
             Client = new CSRedisClient(connectString);
             SetSerializeSetting();
-            RedisHelper.Initialization(Client);
         }
+
         /// <summary>
         /// 构造Redis缓存对象，哨兵模式
         /// </summary>
@@ -56,8 +53,8 @@ namespace LgyUtil.Cache.Custom
         {
             Client = new CSRedisClient(master, connectString.Split(';'));
             SetSerializeSetting();
-            RedisHelper.Initialization(Client);
         }
+
         /// <summary>
         /// 构造Redis缓存对象，只通过连接字符串
         /// </summary>
@@ -66,60 +63,87 @@ namespace LgyUtil.Cache.Custom
         {
             Client = new CSRedisClient(connectString);
             SetSerializeSetting();
-            RedisHelper.Initialization(Client);
         }
+
         /// <inheritdoc/>
         public bool Exists(string key)
         {
             return Client.Exists(key);
         }
+
+        /// <summary>
+        /// 滑动过期的key
+        /// </summary>
+        private const string ExpSlidingKey = "ExpiresSliding";
+
+        /// <summary>
+        /// 绝对过期key
+        /// </summary>
+        private const string ExpAbsoluteKey = "ExpiresAbsolute";
+
+        /// <summary>
+        /// 数据key
+        /// </summary>
+        private const string DataKey = "Data";
+
         /// <inheritdoc/>
-        public void Set<T>(string key, T value, TimeSpan? expiresSliding = null, DateTime? expiressAbsoulte = null)
+        public void Set<T>(string key, T value, TimeSpan? expiresSliding = null, DateTime? expiresAbsolute = null)
         {
-            if (expiressAbsoulte != null && expiressAbsoulte.Value <= DateTime.Now)
+            if (expiresAbsolute != null && expiresAbsolute.Value <= DateTime.Now)
                 throw new Exception("绝对过期时间，必须大于当前时间");
-            var cache = new RedisCacheModel<T>
-            {
-                Value = value,
-                ExpiresSliding = expiresSliding,
-                ExpiressAbsoulte = expiressAbsoulte
-            };
-            if (expiresSliding != null)
-                cache.SlidingAbsoluteDate = DateTime.Now.Add(expiresSliding.Value);
-            Client.Set(key, cache);
-            SetCacheExpiress(key, cache);
+
+            var expiresSlidingTicks = expiresSliding?.Ticks ?? 0;
+            var expiresAbsoluteTicks = expiresAbsolute?.Ticks ?? 0;
+            Client.HMSet(key, DataKey, value, ExpSlidingKey, expiresSlidingTicks, ExpAbsoluteKey, expiresAbsoluteTicks);
+            SetCacheExpires(key, expiresSlidingTicks, expiresAbsoluteTicks);
         }
+
         /// <summary>
         /// 设置过期时间
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="cache"></param>
-        private void SetCacheExpiress<T>(string key, RedisCacheModel<T> cache)
+        private void SetCacheExpires(string key, long expiresSlidingTicks = -1, long expiresAbsoluteTicks = -1)
         {
-            var expiress = GetMinExpiressTime(cache.ExpiresSliding, cache.ExpiressAbsoulte);
-            if (expiress != null)
-                Client.Expire(key, expiress.Value);
+            //都为0时，重新获取缓存过期时间
+            if (expiresSlidingTicks == -1 && expiresAbsoluteTicks == -1)
+            {
+                var expTimes = Client.HMGet<long>(key, ExpSlidingKey, ExpAbsoluteKey);
+                expiresSlidingTicks = expTimes[0];
+                expiresAbsoluteTicks = expTimes[1];
+            }
+
+            TimeSpan? expiresSliding = null;
+            if (expiresSlidingTicks > 0)
+                expiresSliding = new TimeSpan(expiresSlidingTicks);
+            DateTime? expiresAbsolute = null;
+            if (expiresAbsoluteTicks > 0)
+                expiresAbsolute = new DateTime(expiresAbsoluteTicks);
+
+            var expires = GetMinExpiresTime(expiresSliding, expiresAbsolute);
+            if (expires != null)
+                Client.Expire(key, expires.Value);
         }
+
         /// <summary>
         /// 获取最小的过期时间间隔
         /// </summary>
         /// <param name="expiresSliding"></param>
-        /// <param name="expiressAbsoulte"></param>
+        /// <param name="expiresAbsolute"></param>
         /// <returns></returns>
-        private TimeSpan? GetMinExpiressTime(TimeSpan? expiresSliding = null, DateTime? expiressAbsoulte = null)
+        private TimeSpan? GetMinExpiresTime(TimeSpan? expiresSliding = null, DateTime? expiresAbsolute = null)
         {
-            if (expiresSliding != null && expiressAbsoulte != null)
+            if (expiresSliding != null && expiresAbsolute != null)
             {
                 //取时间间隔短的，做为过期时间
-                if (DateTime.Now.Add(expiresSliding.Value) > expiressAbsoulte)
-                    return expiressAbsoulte - DateTime.Now;
+                if (DateTime.Now.Add(expiresSliding.Value) > expiresAbsolute)
+                    return expiresAbsolute - DateTime.Now;
                 else
                     return expiresSliding;
             }
             else if (expiresSliding != null)
                 return expiresSliding;
-            else if (expiressAbsoulte != null)
-                return expiressAbsoulte - DateTime.Now;
+            else if (expiresAbsolute != null)
+                return expiresAbsolute - DateTime.Now;
+
             return null;
         }
 
@@ -128,29 +152,33 @@ namespace LgyUtil.Cache.Custom
         {
             if (Exists(key))
             {
-                var cache = Client.Get<RedisCacheModel<T>>(key);
-                SetCacheExpiress(key, cache);
-
-                return cache.Value;
+                var data = Client.HGet<T>(key, DataKey);
+                SetCacheExpires(key);
+                return data;
             }
+
             return default;
         }
+
         /// <inheritdoc/>
         public string GetString(string key)
         {
             if (Exists(key))
             {
-                var cache = Client.Get<RedisCacheModel<string>>(key);
-                SetCacheExpiress(key, cache);
-                return cache.Value;
+                var data = Client.HGet<string>(key, DataKey);
+                SetCacheExpires(key);
+                return data;
             }
+
             return null;
         }
+
         /// <inheritdoc/>
         public void Remove(string key)
         {
             Client.Del(key);
         }
+
         /// <inheritdoc/>
         public void RemoveAll(params string[] keys)
         {
@@ -159,12 +187,14 @@ namespace LgyUtil.Cache.Custom
             else
                 Client.NodesServerManager.FlushDb();
         }
+
         /// <inheritdoc/>
         public void RemoveAllPrefix(string prefix)
         {
             var keys = GetKeysByPrefix(prefix);
             RemoveAll(keys);
         }
+
         /// <inheritdoc/>
         public string[] GetKeysByPrefix(string prefix) => Client.Keys(prefix + "*");
 
