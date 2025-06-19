@@ -80,7 +80,46 @@ namespace LgyUtil
             }
             return dicDesc;
         }
+        
+        /// <summary>
+        /// 获取枚举的所有详细信息
+        /// </summary>
+        /// <param name="enumType">枚举类型</param>
+        /// <returns></returns>
+        public static List<EnumUtilETypeDetail> GetEnumDetailList(Type enumType)
+        {
+            List<EnumUtilETypeDetail> listDetail = new List<EnumUtilETypeDetail>();
+            foreach (int eCode in Enum.GetValues(enumType))
+            {
+                var detail = new EnumUtilETypeDetail
+                {
+                    EnumName = Enum.GetName(enumType, eCode),
+                    EnumNumber = eCode,
+                    EnumDescription = GetEnumDescription(enumType.GetField(Enum.GetName(enumType, eCode)))
+                };
+                listDetail.Add(detail);
+            }
+            return listDetail;
+        }
+    }
 
+    /// <summary>
+    /// 枚举详细信息
+    /// </summary>
+    public class EnumUtilETypeDetail
+    {
+        /// <summary>
+        /// 枚举名称
+        /// </summary>
+        public string EnumName { get; set; }
+        /// <summary>
+        /// 枚举数值
+        /// </summary>
+        public int EnumNumber { get; set; }
+        /// <summary>
+        /// 枚举Description中的描述
+        /// </summary>
+        public string EnumDescription { get; set; }
     }
     /// <summary>
     /// 枚举的第二个属性，方便使用，有需要的话，再增加第三个
