@@ -543,7 +543,7 @@ namespace LgyUtil
                                     {
                                         while (qList.TryDequeue(out var log))
                                         {
-                                            string oneLine = log.WriteInOneLine ? "\t" + log.LogContent.Replace("\n", "\t") : "\r\n" + log.LogContent;
+                                            string oneLine = log.WriteInOneLine ? "\t" + log.LogContent : "\r\n" + log.LogContent;
                                             sw.Write($"---{log.HappenTime:yyyy-MM-dd HH:mm:ss:fffff}---{oneLine}\r\n");
                                         }
                                     }
@@ -573,7 +573,7 @@ namespace LgyUtil
                 public DateTime HappenTime { get; set; }
                 
                 /// <summary>
-                /// 是否输出为1行，默认是false，根据字符串格式输出，true:移除所有换行符
+                /// 是否输出为1行，默认是false
                 /// </summary>
                 public bool WriteInOneLine { get; set; }
             }
@@ -640,7 +640,7 @@ namespace LgyUtil
         public string PrefixName { get; set; }
 
         /// <summary>
-        /// 是否输出为1行，默认是false，根据字符串格式输出，true:移除所有换行符
+        /// 是否输出为1行，默认是false
         /// </summary>
         public bool WriteInOneLine { get; set; }
 
