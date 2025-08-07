@@ -12,12 +12,12 @@
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>1.2.3</Version>
+    <Version>1.2.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Caching.CSRedis" Version="3.8.2" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
+	<PackageReference Include="Caching.CSRedis" Version="3.8.800" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
   </ItemGroup>
 
 </Project>

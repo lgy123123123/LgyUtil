@@ -66,7 +66,7 @@ namespace LgyUtil
         public SftpFile Get(string path)
         {
             Connect();
-            return client.Get(path);
+            return client.Get(path) as SftpFile;
         }
         /// <summary>
         /// 获取远程文件夹列表
@@ -76,7 +76,8 @@ namespace LgyUtil
         /// <returns></returns>
         public List<SftpFile> GetDirList(string path,Action<int> callback=null)
         {
-            return client.ListDirectory(path, callback).ToList();
+            Connect();
+            return client.ListDirectory(path, callback).Cast<SftpFile>().ToList();
         }
         /// <summary>
         /// 上传文件

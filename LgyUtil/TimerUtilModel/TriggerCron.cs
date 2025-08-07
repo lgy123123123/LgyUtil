@@ -26,18 +26,19 @@ namespace LgyUtil.TimerUtilModel
         public List<DateTime> ComputedNext5Times()
         {
             List<DateTime> result = new List<DateTime>();
-            var dtNext = NextTime;
+            var dtNext = DateTime.Now;
             for (int i = 0; i < 5; i++)
             {
                 dtNext = Expression.GetTimeAfter(dtNext).LocalDateTime;
                 result.Add(dtNext);
             }
+
             return result;
         }
 
-        public DateTime GetNextTime()
+        public DateTime GetNextTime(DateTime? nowTime = null)
         {
-            return Expression.GetTimeAfter(NextTime).LocalDateTime;
+            return Expression.GetTimeAfter(nowTime ?? NextTime).LocalDateTime;
         }
 
         public void IsValid()

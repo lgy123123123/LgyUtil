@@ -33,6 +33,8 @@ namespace LgyUtil.TimerUtilModel
             job.CheckJobInfo();
             if (!AllJobDic.TryAdd(job.JobName, job))
                 throw new LgyUtilException("job添加失败，job名称已存在：" + job.JobName);
+            if (options?.EndTime < DateTime.Now)
+                throw new LgyUtilException("job添加失败，结束时间不能小于当前时间：" + job.JobName);
             job.StartJob();
         }
 
@@ -113,7 +115,7 @@ namespace LgyUtil.TimerUtilModel
         {
             return Trigger.ComputedNext5Times();
         }
-        
+
         /// <summary>
         /// 停止job
         /// </summary>
@@ -122,7 +124,7 @@ namespace LgyUtil.TimerUtilModel
             if (IsDelete)
                 return;
 
-            IsDelete = true;//标记删除
+            IsDelete = true; //标记删除
 
             JobTimer?.Dispose();
             AllJobDic.TryRemove(JobName, out _);
@@ -142,8 +144,8 @@ namespace LgyUtil.TimerUtilModel
             JobTimer = new Timer((obj) =>
             {
                 //下次执行时间
-                DateTime nextExecDate = Trigger.GetNextTime();
-                if (ExecCount == 0 && Options.RunNow)//立即执行，不修改下次执行时间
+                DateTime nextExecDate = Trigger.GetNextTime(DateTime.Now);//防止服务器时间错误，用当前执行时间来计算下次触发时间
+                if (ExecCount == 0 && Options.RunNow) //立即执行，不修改下次执行时间
                     nextExecDate = Trigger.NextTime;
 
                 //本次是否执行
@@ -151,11 +153,11 @@ namespace LgyUtil.TimerUtilModel
                 if (!Options.ContinueNotFinish)
                     isExec = IsFinish;
 
+                //设置下次执行时间
+                JobTimer.Change(nextExecDate - DateTime.Now, TimeSpan.FromMilliseconds(-1));
+                
                 //返给用户的信息
                 JobExecInfo execInfo = new JobExecInfo(JobName, ExecCount, nextExecDate, DateTime.Now);
-
-                //修改time下次执行时间
-                JobTimer.Change(nextExecDate - DateTime.Now, TimeSpan.FromMilliseconds(-1));
 
                 //标记未完成
                 IsFinish = false;
@@ -175,7 +177,6 @@ namespace LgyUtil.TimerUtilModel
                         if (!Options.ErrorContinue)
                         {
                             StopJob();
-                            return;
                         }
                     }
                 });
@@ -196,15 +197,16 @@ namespace LgyUtil.TimerUtilModel
         /// <returns></returns>
         private TimeSpan GetFirstExecSpan()
         {
+            TimeSpan firstSpan;
             //立即执行
             if (Options.RunNow)
             {
                 //既有立即执行，又有开始时间
                 if (Options.StartTime.HasValue && Options.StartTime.Value > DateTime.Now)
                 {
-                    if (Trigger.Type == EnumTriggerType.Common)//普通类型，开始时间即为下次触发时间
+                    if (Trigger.Type == EnumTriggerType.Common) //普通类型，开始时间即为下次触发时间
                         Trigger.NextTime = Options.StartTime.Value;
-                    else//cron类型，需要以开始时间减1秒，再判断下次执行时间，有可能开始时间就是触发时间
+                    else //cron类型，需要以开始时间减1秒，再判断下次执行时间，有可能开始时间就是触发时间
                     {
                         Trigger.NextTime = Options.StartTime.Value.AddSeconds(-1);
                         Trigger.NextTime = Trigger.GetNextTime();
@@ -214,7 +216,7 @@ namespace LgyUtil.TimerUtilModel
                 else
                     Trigger.NextTime = Trigger.GetNextTime();
 
-                return TimeSpan.Zero;//返回立即执行
+                firstSpan = TimeSpan.Zero; //返回立即执行
             }
             //只有开始时间
             else if (Options.StartTime.HasValue && Options.StartTime.Value >= DateTime.Now)
@@ -223,22 +225,24 @@ namespace LgyUtil.TimerUtilModel
                 if (Options.StartTime == DateTime.Now)
                 {
                     Trigger.NextTime = Trigger.GetNextTime();
-                    return TimeSpan.Zero;
+                    firstSpan = TimeSpan.Zero;
                 }
                 //计算开始时间
                 else
                 {
                     Trigger.NextTime = Options.StartTime.Value;
                     Trigger.NextTime = Trigger.GetNextTime();
-                    return Trigger.NextTime - DateTime.Now;//等待到达开始时间
+                    firstSpan = Trigger.NextTime - DateTime.Now; //等待到达开始时间
                 }
             }
             //其它，根据时间间隔，计算下次执行时间
             else
             {
                 Trigger.NextTime = Trigger.GetNextTime();
-                return Trigger.NextTime - DateTime.Now;
+                firstSpan = Trigger.NextTime - DateTime.Now;
             }
+
+            return firstSpan;
         }
     }
 }

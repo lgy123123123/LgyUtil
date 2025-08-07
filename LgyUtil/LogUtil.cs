@@ -72,7 +72,7 @@ namespace LgyUtil
         /// <param name="options">参数</param>
         public static void AddLog(string strContent, LogUtilOptions options)
         {
-            AddLog(strContent, options.PrefixName ?? "Log", options.DirName, LogLevel.Info, options.Exception, options.WriteInOneLine);
+            AddLog(strContent, LogLevel.Info, options);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace LgyUtil
         /// <param name="e">异常类传入则记录堆栈信息</param>
         public static void AddLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPrefixName, strDirName, LogLevel.Info, e, false);
+            AddLog(strContent, LogLevel.Info, new LogUtilOptions() { PrefixName = strPrefixName, DirName = strDirName, Exception = e });
         }
 
         #endregion
@@ -120,9 +120,9 @@ namespace LgyUtil
         /// <param name="options">参数</param>
         public static void AddDebugLog(string strContent, LogUtilOptions options)
         {
-            AddLog(strContent, options.PrefixName ?? "Log", options.DirName, LogLevel.Debug, options.Exception, options.WriteInOneLine);
+            AddLog(strContent, LogLevel.Debug, options);
         }
-        
+
         /// <summary>
         /// 添加日志，保存为 Log_Debug_日期
         /// </summary>
@@ -154,7 +154,7 @@ namespace LgyUtil
         /// <param name="e">异常类传入则记录堆栈信息</param>
         public static void AddDebugLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPrefixName, strDirName, LogLevel.Debug, e,false);
+            AddLog(strContent, LogLevel.Debug, new LogUtilOptions() { PrefixName = strPrefixName, DirName = strDirName, Exception = e });
         }
 
         #endregion
@@ -168,9 +168,9 @@ namespace LgyUtil
         /// <param name="options">参数</param>
         public static void AddErrorLog(string strContent, LogUtilOptions options)
         {
-            AddLog(strContent, options.PrefixName ?? "Log", options.DirName, LogLevel.Error, options.Exception, options.WriteInOneLine);
+            AddLog(strContent, LogLevel.Error, options);
         }
-        
+
         /// <summary>
         /// 添加日志，保存为 Log_Error_日期
         /// </summary>
@@ -202,7 +202,7 @@ namespace LgyUtil
         /// <param name="e">异常类传入则记录堆栈信息</param>
         public static void AddErrorLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPrefixName, strDirName, LogLevel.Error, e,false);
+            AddLog(strContent, LogLevel.Error,new LogUtilOptions(){PrefixName = strPrefixName, DirName = strDirName, Exception = e});
         }
 
         #endregion
@@ -216,9 +216,9 @@ namespace LgyUtil
         /// <param name="options">参数</param>
         public static void AddWarningLog(string strContent, LogUtilOptions options)
         {
-            AddLog(strContent, options.PrefixName ?? "Log", options.DirName, LogLevel.Warning, options.Exception, options.WriteInOneLine);
+            AddLog(strContent, LogLevel.Warning, options);
         }
-        
+
         /// <summary>
         /// 添加日志，保存为 Log_Warning_日期
         /// </summary>
@@ -250,7 +250,7 @@ namespace LgyUtil
         /// <param name="e">异常类传入则记录堆栈信息</param>
         public static void AddWarningLog(string strContent, string strPrefixName, string strDirName, Exception e = null)
         {
-            AddLog(strContent, strPrefixName, strDirName, LogLevel.Warning, e,false);
+            AddLog(strContent, LogLevel.Warning, new LogUtilOptions() { PrefixName = strPrefixName, DirName = strDirName, Exception = e });
         }
 
         #endregion
@@ -406,28 +406,28 @@ namespace LgyUtil
         /// 添加日志根方法
         /// </summary>
         /// <param name="strContent">日志内容</param>
-        /// <param name="strFileName">文件名</param>
-        /// <param name="strDirName">文件夹名</param>
         /// <param name="level">日志等级</param>
-        /// <param name="e">异常信息</param>
-        /// <param name="WriteInOneLine">是否输出到一行，默认是false</param>
-        private static void AddLog(string strContent, string strFileName, string strDirName, LogLevel level, Exception e, bool WriteInOneLine)
+        /// <param name="options">配置参数</param>
+        private static void AddLog(string strContent, LogLevel level, LogUtilOptions options)
         {
-            if (e != null)
-            {
-                strContent = $"错误信息：{strContent}\r\n堆栈信息：{e.Message}\r\n{e.StackTrace}";
-            }
+            //添加异常信息
+            if (options.Exception != null)
+                strContent = $"错误信息：{strContent}\r\n堆栈信息：{options.Exception.Message}\r\n{options.Exception.StackTrace}";
 
+            var strFileName = options.PrefixName;
+            //添加文件前缀，默认是Log
             if (strFileName.IsNullOrEmpty())
                 strFileName = "Log";
 
-            strFileName += "_" + level.ToString();
-            if (NeedPrint(level))
+            strFileName += "_" + level;
+            //输出到控制台
+            if (options.WriteToConsole ?? NeedPrint(level))
                 Console.WriteLine(strContent);
-            if (NeedWriteFile(level))
+            //输出到文件
+            if (options.WriteToFile ?? NeedWriteFile(level))
             {
-                var detail = dicLogMission.GetOrAdd(strDirName + strFileName, (key) => new LogDetail(strFileName, strDirName, level));
-                detail.AddLogQueue(strContent,WriteInOneLine);
+                var detail = dicLogMission.GetOrAdd(options.DirName + strFileName, (key) => new LogDetail(strFileName, options.DirName, level));
+                detail.AddLogQueue(strContent, options.WriteInOneLine);
             }
         }
 
@@ -514,7 +514,7 @@ namespace LgyUtil
             /// </summary>
             /// <param name="strContent"></param>
             /// <param name="writeInOneLine">是否输出到一行</param>
-            public void AddLogQueue(string strContent,bool writeInOneLine)
+            public void AddLogQueue(string strContent, bool writeInOneLine)
             {
                 qList.Enqueue(new LogModel { LogContent = strContent, HappenTime = DateTime.Now, WriteInOneLine = writeInOneLine });
                 //每次添加完，都进行日志输出
@@ -571,7 +571,7 @@ namespace LgyUtil
                 /// 消息发生时间
                 /// </summary>
                 public DateTime HappenTime { get; set; }
-                
+
                 /// <summary>
                 /// 是否输出为1行，默认是false
                 /// </summary>
@@ -640,7 +640,7 @@ namespace LgyUtil
         public string PrefixName { get; set; }
 
         /// <summary>
-        /// 是否输出为1行，默认是false
+        /// 文件日志中，是否输出为1行，默认是false
         /// </summary>
         public bool WriteInOneLine { get; set; }
 
@@ -648,5 +648,15 @@ namespace LgyUtil
         /// 异常信息
         /// </summary>
         public Exception Exception { get; set; }
+
+        /// <summary>
+        /// 是否输出到控制台，默认使用全局配置，全局默认是false(LogUtil.PrintDebug等)
+        /// </summary>
+        public bool? WriteToConsole { get; set; }
+
+        /// <summary>
+        /// 是否输出到文件，默认使用全局配置，全局默认是true(LogUtil.WriteDebug等)
+        /// </summary>
+        public bool? WriteToFile { get; set; }
     }
 }

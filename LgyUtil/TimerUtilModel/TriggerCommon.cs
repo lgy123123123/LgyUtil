@@ -34,9 +34,9 @@ namespace LgyUtil.TimerUtilModel
             return listDt;
         }
 
-        public DateTime GetNextTime()
+        public DateTime GetNextTime(DateTime? nowTime = null)
         {
-            return NextTime.Add(Interval);
+            return (nowTime??NextTime).Add(Interval);
         }
 
         public void IsValid()

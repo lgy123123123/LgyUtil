@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0;net7.0;netcoreapp3.0;netcoreapp3.1;net8.0</TargetFrameworks>
+    <TargetFrameworks>net5.0;net6.0;net7.0;net8.0</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>
 		源码：https://github.com/lgy123123123/LgyUtil
@@ -13,12 +13,12 @@
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>2.5.4</Version>
+    <Version>2.5.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LgyUtil" Version="1.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="UAParser" Version="3.1.47" />
   </ItemGroup>
 

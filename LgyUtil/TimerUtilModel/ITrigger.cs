@@ -27,8 +27,9 @@ namespace LgyUtil.TimerUtilModel
         /// <summary>
         /// 下次触发时间
         /// </summary>
+        /// <param name="nowTime">当前执行时间，不传则使用上次执行时间来计算</param>
         /// <returns></returns>
-        DateTime GetNextTime();
+        DateTime GetNextTime(DateTime? nowTime=null);
 
         /// <summary>
         /// 验证触发器是否合法
