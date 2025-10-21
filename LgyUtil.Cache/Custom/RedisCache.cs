@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using CSRedis;
 using Newtonsoft.Json;
 
@@ -10,6 +11,11 @@ namespace LgyUtil.Cache.Custom
     public sealed class RedisCache : ICache
     {
         private CSRedisClient Client { get; set; }
+
+        /// <summary>
+        /// 全局前缀
+        /// </summary>
+        private string GlobalPrefix { get; set; }
 
         /// <summary>
         /// 设置序列化配置，默认空值和默认值忽略
@@ -52,6 +58,7 @@ namespace LgyUtil.Cache.Custom
         public RedisCache(string master, string connectString)
         {
             Client = new CSRedisClient(master, connectString.Split(';'));
+            GlobalPrefix = connectString.Split(';').FirstOrDefault().Split(',').Where(c => c.StartsWith("prefix=")).Select(c => c.Replace("prefix=", "")).FirstOrDefault();
             SetSerializeSetting();
         }
 
@@ -62,6 +69,7 @@ namespace LgyUtil.Cache.Custom
         public RedisCache(string connectString)
         {
             Client = new CSRedisClient(connectString);
+            GlobalPrefix = connectString.Split(',').Where(c => c.StartsWith("prefix=")).Select(c => c.Replace("prefix=", "")).FirstOrDefault();
             SetSerializeSetting();
         }
 
@@ -94,23 +102,21 @@ namespace LgyUtil.Cache.Custom
 
             var expiresSlidingTicks = expiresSliding?.Ticks ?? 0;
             var expiresAbsoluteTicks = expiresAbsolute?.Ticks ?? 0;
-            Client.HMSet(key, DataKey, value, ExpSlidingKey, expiresSlidingTicks, ExpAbsoluteKey, expiresAbsoluteTicks);
-            SetCacheExpires(key, expiresSlidingTicks, expiresAbsoluteTicks);
+
+            var pipe = Client
+                .StartPipe()
+                .HMSet(key, DataKey, value, ExpSlidingKey, expiresSlidingTicks, ExpAbsoluteKey, expiresAbsoluteTicks);
+            var expiredTime = GetCacheExpiresTime(expiresSlidingTicks, expiresAbsoluteTicks);
+            if (expiredTime != null)
+                pipe = pipe.Expire(key, expiredTime.Value);
+            pipe.EndPipe();
         }
 
         /// <summary>
-        /// 设置过期时间
+        /// 获取缓存的过期时间
         /// </summary>
-        private void SetCacheExpires(string key, long expiresSlidingTicks = -1, long expiresAbsoluteTicks = -1)
+        private TimeSpan? GetCacheExpiresTime(long expiresSlidingTicks, long expiresAbsoluteTicks)
         {
-            //都为0时，重新获取缓存过期时间
-            if (expiresSlidingTicks == -1 && expiresAbsoluteTicks == -1)
-            {
-                var expTimes = Client.HMGet<long>(key, ExpSlidingKey, ExpAbsoluteKey);
-                expiresSlidingTicks = expTimes[0];
-                expiresAbsoluteTicks = expTimes[1];
-            }
-
             TimeSpan? expiresSliding = null;
             if (expiresSlidingTicks > 0)
                 expiresSliding = new TimeSpan(expiresSlidingTicks);
@@ -118,59 +124,42 @@ namespace LgyUtil.Cache.Custom
             if (expiresAbsoluteTicks > 0)
                 expiresAbsolute = new DateTime(expiresAbsoluteTicks);
 
-            var expires = GetMinExpiresTime(expiresSliding, expiresAbsolute);
-            if (expires != null)
-                Client.Expire(key, expires.Value);
-        }
-
-        /// <summary>
-        /// 获取最小的过期时间间隔
-        /// </summary>
-        /// <param name="expiresSliding"></param>
-        /// <param name="expiresAbsolute"></param>
-        /// <returns></returns>
-        private TimeSpan? GetMinExpiresTime(TimeSpan? expiresSliding = null, DateTime? expiresAbsolute = null)
-        {
             if (expiresSliding != null && expiresAbsolute != null)
             {
                 //取时间间隔短的，做为过期时间
                 if (DateTime.Now.Add(expiresSliding.Value) > expiresAbsolute)
                     return expiresAbsolute - DateTime.Now;
-                else
-                    return expiresSliding;
-            }
-            else if (expiresSliding != null)
                 return expiresSliding;
-            else if (expiresAbsolute != null)
-                return expiresAbsolute - DateTime.Now;
+            }
 
+            if (expiresSliding != null)
+                return expiresSliding;
+            if (expiresAbsolute != null)
+                return expiresAbsolute - DateTime.Now;
             return null;
         }
 
         /// <inheritdoc/>
         public T Get<T>(string key)
         {
-            if (Exists(key))
-            {
-                var data = Client.HGet<T>(key, DataKey);
-                SetCacheExpires(key);
-                return data;
-            }
-
-            return default;
+            var pipe = Client.StartPipe();
+            pipe.Exists(key);
+            pipe.HGet<T>(key, DataKey);
+            pipe.HGet<long>(key, ExpSlidingKey);
+            pipe.HGet<long>(key, ExpAbsoluteKey);
+            var result = pipe.EndPipe();
+            if (!(bool) result[0])
+                return default;
+            var expiresTime = GetCacheExpiresTime((long) result[2], (long) result[3]);
+            if (expiresTime != null)
+                Client.Expire(key, expiresTime.Value);
+            return (T) result[1];
         }
 
         /// <inheritdoc/>
         public string GetString(string key)
         {
-            if (Exists(key))
-            {
-                var data = Client.HGet<string>(key, DataKey);
-                SetCacheExpires(key);
-                return data;
-            }
-
-            return null;
+            return Get<string>(key);
         }
 
         /// <inheritdoc/>
@@ -191,12 +180,22 @@ namespace LgyUtil.Cache.Custom
         /// <inheritdoc/>
         public void RemoveAllPrefix(string prefix)
         {
-            var keys = GetKeysByPrefix(prefix);
-            RemoveAll(keys);
+            // Scan 方式更安全
+            var pattern = GlobalPrefix + prefix + "*";
+            var cursor = 0L;
+            do
+            {
+                var scanResult = Client.Scan(cursor, pattern, 1000);
+                cursor = scanResult.Cursor;
+                if (scanResult.Items.Length > 0)
+                {
+                    Client.Del(scanResult.Items.Select(k => k.Replace(GlobalPrefix, "")).ToArray());
+                }
+            } while (cursor != 0);
         }
 
         /// <inheritdoc/>
-        public string[] GetKeysByPrefix(string prefix) => Client.Keys(prefix + "*");
+        public string[] GetKeysByPrefix(string prefix) => Client.Keys(GlobalPrefix + prefix + "*");
 
         /// <inheritdoc/>
         public string[] GetAllKeys() => Client.Keys("*");

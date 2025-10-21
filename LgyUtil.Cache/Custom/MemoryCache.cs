@@ -33,14 +33,14 @@ namespace LgyUtil.Cache.Custom
                     Thread.Sleep(clearExpirationTime.Value);
                     foreach (var val in dicCache.Values.Where(c => c.ExpiresSliding != null || c.ExpiressAbsoulte != null))
                     {
-                        CheckDataExpiress(val.Key);
+                        CheckDataExpires(val.Key);
                     }
                 });
         }
         /// <inheritdoc/>
         public bool Exists(string key)
         {
-            CheckDataExpiress(key);
+            CheckDataExpires(key);
             return dicCache.ContainsKey(key);
         }
         /// <inheritdoc/>
@@ -64,51 +64,45 @@ namespace LgyUtil.Cache.Custom
         /// </summary>
         /// <param name="key"></param>
         /// <param name="isGet">是否是get方法检查，此时需要增加滑动过期时间</param>
-        private void CheckDataExpiress(string key, bool isGet = false)
+        private void CheckDataExpires(string key, bool isGet = false)
         {
-            if (dicCache.ContainsKey(key))
+            if (!dicCache.TryGetValue(key, out var cache)) return;
+            lock (cache)
             {
-                var cache = dicCache[key];
-                lock (cache)
+                //先检查绝对过期时间
+                if (cache.ExpiressAbsoulte != null && cache.ExpiressAbsoulte.Value <= DateTime.Now)
                 {
-                    //先检查绝对过期时间
-                    if (cache.ExpiressAbsoulte != null && cache.ExpiressAbsoulte.Value <= DateTime.Now)
-                    {
-                        Remove(key);
-                        return;
-                    }
-                    //再检查滑动过期时间
-                    if (cache.ExpiresSliding != null)
-                    {
-                        //过期删除
-                        if (cache.SlidingAbsoluteDate.Value <= DateTime.Now)
-                        {
-                            Remove(key);
-                            return;
-                        }
-                        //未过期，如果是get获取，增加滑动过期时间
-                        else if (isGet)
-                        {
-                            cache.SlidingAbsoluteDate = DateTime.Now.Add(cache.ExpiresSliding.Value);
-                        }
-                    }
+                    Remove(key);
+                    return;
+                }
+                if (cache.ExpiresSliding == null) return;
+                //检查滑动过期时间
+                //过期删除
+                if (cache.SlidingAbsoluteDate.Value <= DateTime.Now)
+                {
+                    Remove(key);
+                }
+                //未过期，如果是get获取，增加滑动过期时间
+                else if (isGet)
+                {
+                    cache.SlidingAbsoluteDate = DateTime.Now.Add(cache.ExpiresSliding.Value);
                 }
             }
         }
         /// <inheritdoc/>
         public T Get<T>(string key)
         {
-            CheckDataExpiress(key, true);
-            if (dicCache.ContainsKey(key))
-                return (T)dicCache[key].Value;
+            CheckDataExpires(key, true);
+            if (dicCache.TryGetValue(key, out var cache))
+                return (T)cache.Value;
             return default;
         }
         /// <inheritdoc/>
         public string GetString(string key)
         {
-            CheckDataExpiress(key, true);
-            if (dicCache.ContainsKey(key))
-                return dicCache[key].Value as string;
+            CheckDataExpires(key, true);
+            if (dicCache.TryGetValue(key, out var cache))
+                return cache.Value as string;
             return null;
         }
         /// <inheritdoc/>
@@ -139,7 +133,11 @@ namespace LgyUtil.Cache.Custom
         /// <inheritdoc/>
         public string[] GetKeysByPrefix(string prefix) => dicCache.Keys.Where(k => k.StartsWith(prefix)).ToArray();
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 获取Key中包含的字符串
+        /// </summary>
+        /// <param name="contains"></param>
+        /// <returns></returns>
         public string[] GetKeysByContains(string contains) => dicCache.Keys.Where(k => k.Contains(contains)).ToArray();
         /// <inheritdoc/>
         public string[] GetAllKeys() => dicCache.Keys.ToArray();
