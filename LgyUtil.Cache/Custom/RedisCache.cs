@@ -10,12 +10,15 @@ namespace LgyUtil.Cache.Custom
     /// </summary>
     public sealed class RedisCache : ICache
     {
-        private CSRedisClient Client { get; set; }
+        /// <summary>
+        /// Redis客户端
+        /// </summary>
+        public CSRedisClient Client { get;}
 
         /// <summary>
-        /// 全局前缀
+        /// 全局key前缀
         /// </summary>
-        private string GlobalPrefix { get; set; }
+        public string GlobalPrefix { get;}
 
         /// <summary>
         /// 设置序列化配置，默认空值和默认值忽略
