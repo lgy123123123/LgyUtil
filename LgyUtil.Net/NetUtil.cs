@@ -63,7 +63,7 @@ namespace LgyUtil
         /// <param name="dicHeader"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private static HttpRequestMessage BuildRequest(string url, HttpContent? content, bool isPost, Dictionary<string, string> dicHeader)
+        private static HttpRequestMessage BuildRequest(string url, HttpContent content, bool isPost, Dictionary<string, string> dicHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage()
             {
@@ -117,8 +117,6 @@ namespace LgyUtil
         public static async Task<HttpResponseMessage> PostBase(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
             var client = GetHttpClient(url);
-            if (timeout != null)
-                client.Timeout = timeout.Value;
             var request = BuildRequest(url, content, true, dicHeader);
             return await client.SendAsync(request, new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(100)).Token);
         }
@@ -422,8 +420,6 @@ namespace LgyUtil
         private static async Task<HttpResponseMessage> GetBase(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
             HttpClient client = GetHttpClient(url);
-            if (timeout != null)
-                client.Timeout = timeout.Value;
             HttpRequestMessage request = BuildRequest(url, null, false, dicHeader);
             return await client.SendAsync(request, new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(100)).Token);
         }
