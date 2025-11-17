@@ -13,7 +13,7 @@
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>2.6.2</Version>
+    <Version>2.6.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

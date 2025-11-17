@@ -97,8 +97,6 @@ namespace LgyUtil
             {
                 if (isPost && request.Content is StringContent)
                     request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                else if (!isPost)
-                    request.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
             }
 
             return request;
