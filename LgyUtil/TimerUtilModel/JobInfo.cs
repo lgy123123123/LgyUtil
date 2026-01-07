@@ -11,7 +11,17 @@ namespace LgyUtil.TimerUtilModel
         /// <summary>
         /// 所有定时调度集合
         /// </summary>
-        internal static ConcurrentDictionary<string, JobInfo> AllJobDic = new ConcurrentDictionary<string, JobInfo>();
+        internal static readonly ConcurrentDictionary<string, JobInfo> AllJobDic = new ConcurrentDictionary<string, JobInfo>();
+
+        /// <summary>
+        /// 日志文件名
+        /// </summary>
+        private const string LogFileName = "Log";
+
+        /// <summary>
+        /// job运行记录日志的文件夹名
+        /// </summary>
+        private const string LogDirName = "TimerUtil";
 
         /// <summary>
         /// 添加job
@@ -23,7 +33,7 @@ namespace LgyUtil.TimerUtilModel
         /// <exception cref="LgyUtilException"></exception>
         internal static void AddJob(string jobName, ITrigger trigger, Action<JobExecInfo> doing, JobOption options)
         {
-            JobInfo job = new JobInfo()
+            var job = new JobInfo()
             {
                 JobName = jobName,
                 Doing = doing,
@@ -46,10 +56,7 @@ namespace LgyUtil.TimerUtilModel
         /// <exception cref="LgyUtilException"></exception>
         internal static JobInfo GetJob(string jobName)
         {
-            if (AllJobDic.TryGetValue(jobName, out JobInfo job))
-                return job;
-            else
-                return null;
+            return AllJobDic.TryGetValue(jobName, out var job) ? job : null;
         }
 
         /// <summary>
@@ -143,51 +150,83 @@ namespace LgyUtil.TimerUtilModel
             var firstSpan = GetFirstExecSpan();
             JobTimer = new Timer((obj) =>
             {
-                //下次执行时间
-                DateTime nextExecDate = Trigger.GetNextTime(DateTime.Now);//防止服务器时间错误，用当前执行时间来计算下次触发时间
-                if (ExecCount == 0 && Options.RunNow) //立即执行，不修改下次执行时间
-                    nextExecDate = Trigger.NextTime;
-
-                //本次是否执行
-                bool isExec = true;
-                if (!Options.ContinueNotFinish)
-                    isExec = IsFinish;
-
-                //设置下次执行时间
-                JobTimer.Change(nextExecDate - DateTime.Now, TimeSpan.FromMilliseconds(-1));
-                
-                //返给用户的信息
-                JobExecInfo execInfo = new JobExecInfo(JobName, ExecCount, nextExecDate, DateTime.Now);
-
-                //标记未完成
-                IsFinish = false;
-
-                Task.Run(() =>
+                try
                 {
-                    try
+                    //超过结束时间，停止任务
+                    if (Options.EndTime != null && Options.EndTime.Value <= DateTime.Now)
                     {
-                        if (isExec)
-                            Doing(execInfo);
-                        IsFinish = true;
+                        StopJob();
+                        return;
                     }
-                    catch (Exception e)
+                    
+                    //下次执行时间
+                    DateTime nextExecDate = Trigger.GetNextTime(DateTime.Now); //防止服务器时间错误，用当前执行时间来计算下次触发时间
+                    if (ExecCount == 0 && Options.RunNow) //立即执行，不修改下次执行时间
+                        nextExecDate = Trigger.NextTime;
+
+                    //本次是否执行
+                    bool isExec = true;
+                    if (!Options.ContinueNotFinish)
+                        isExec = IsFinish;
+
+                    var nextDueTime = nextExecDate - DateTime.Now; //下次执行时间间隔
+                    var findTimes = 1; //查找次数
+                    //防止触发时间间隔小于0，重新计算,20次后停止
+                    while (nextDueTime.Milliseconds < 0)
                     {
-                        Options.ErrorDoing?.Invoke(e, execInfo);
-                        //遇到错误，停止job
-                        if (!Options.ErrorContinue)
+                        if (findTimes > 20)
                         {
+                            LogUtil.AddErrorLog($"\"{JobName}\"计算下次触发时间失败，已停止任务", LogFileName, LogDirName);
                             StopJob();
+                            return;
                         }
+                        LogUtil.AddErrorLog($"\"{JobName}\"执行异常：计算下次触发时间异常，200毫秒后，重新计算下次触发时间，当前次数{findTimes}，失败20次后，停止任务", LogFileName, LogDirName);
+                        Thread.Sleep(200);
+                        nextExecDate = Trigger.GetNextTime(DateTime.Now);
+                        nextDueTime = nextExecDate - DateTime.Now;
+                        findTimes++;
                     }
-                });
-                //执行总次数+1
-                if (isExec)
-                    Interlocked.Increment(ref _ExecCount);
-                Trigger.NextTime = nextExecDate;
-                //到结束时间，停止job，或者到最大次数，结束job
-                if ((Options.EndTime != null && Options.EndTime.Value <= DateTime.Now)
-                    || (Options.MaxExecTimes > 0 && ExecCount >= Options.MaxExecTimes))
-                    StopJob();
+
+                    //设置下次执行时间
+                    JobTimer.Change(nextDueTime, TimeSpan.FromMilliseconds(-1));
+
+                    //返给用户的信息
+                    JobExecInfo execInfo = new JobExecInfo(JobName, ExecCount, nextExecDate, DateTime.Now);
+
+                    //标记未完成
+                    IsFinish = false;
+
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            if (isExec)
+                                Doing(execInfo);
+                            IsFinish = true;
+                        }
+                        catch (Exception e)
+                        {
+                            Options.ErrorDoing?.Invoke(e, execInfo);
+                            //遇到错误，停止job
+                            if (!Options.ErrorContinue)
+                            {
+                                StopJob();
+                            }
+                        }
+                    });
+                    //执行总次数+1
+                    if (isExec)
+                        Interlocked.Increment(ref _ExecCount);
+                    Trigger.NextTime = nextExecDate;
+                    //到结束时间，停止job，或者到最大次数，结束job
+                    if ((Options.EndTime != null && Options.EndTime.Value <= DateTime.Now)
+                        || (Options.MaxExecTimes > 0 && ExecCount >= Options.MaxExecTimes))
+                        StopJob();
+                }
+                catch (Exception e)
+                {
+                    LogUtil.AddErrorLog($"\"{JobName}\"执行异常，任务已停止：{e.Message}", LogFileName, LogDirName);
+                }
             }, null, firstSpan, TimeSpan.FromMilliseconds(-1));
         }
 
@@ -198,11 +237,12 @@ namespace LgyUtil.TimerUtilModel
         private TimeSpan GetFirstExecSpan()
         {
             TimeSpan firstSpan;
+            var nowDate = DateTime.Now;
             //立即执行
             if (Options.RunNow)
             {
                 //既有立即执行，又有开始时间
-                if (Options.StartTime.HasValue && Options.StartTime.Value > DateTime.Now)
+                if (Options.StartTime.HasValue && Options.StartTime.Value > nowDate)
                 {
                     if (Trigger.Type == EnumTriggerType.Common) //普通类型，开始时间即为下次触发时间
                         Trigger.NextTime = Options.StartTime.Value;
@@ -219,10 +259,10 @@ namespace LgyUtil.TimerUtilModel
                 firstSpan = TimeSpan.Zero; //返回立即执行
             }
             //只有开始时间
-            else if (Options.StartTime.HasValue && Options.StartTime.Value >= DateTime.Now)
+            else if (Options.StartTime.HasValue && Options.StartTime.Value >= nowDate)
             {
                 //立即执行
-                if (Options.StartTime == DateTime.Now)
+                if (Options.StartTime == nowDate)
                 {
                     Trigger.NextTime = Trigger.GetNextTime();
                     firstSpan = TimeSpan.Zero;
@@ -232,14 +272,14 @@ namespace LgyUtil.TimerUtilModel
                 {
                     Trigger.NextTime = Options.StartTime.Value;
                     Trigger.NextTime = Trigger.GetNextTime();
-                    firstSpan = Trigger.NextTime - DateTime.Now; //等待到达开始时间
+                    firstSpan = Trigger.NextTime - nowDate; //等待到达开始时间
                 }
             }
             //其它，根据时间间隔，计算下次执行时间
             else
             {
                 Trigger.NextTime = Trigger.GetNextTime();
-                firstSpan = Trigger.NextTime - DateTime.Now;
+                firstSpan = Trigger.NextTime - nowDate;
             }
 
             return firstSpan;
