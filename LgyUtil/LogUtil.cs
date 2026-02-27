@@ -412,7 +412,7 @@ namespace LgyUtil
         {
             //添加异常信息
             if (options.Exception != null)
-                strContent = $"错误信息：{strContent}\r\n堆栈信息：{options.Exception.Message}\r\n{options.Exception.StackTrace}";
+                strContent = $"错误信息：{strContent}\r\n堆栈信息：{options.Exception.ToString()}";
 
             var strFileName = options.PrefixName;
             //添加文件前缀，默认是Log
