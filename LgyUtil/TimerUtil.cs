@@ -67,7 +67,7 @@ namespace LgyUtil
         /// <param name="options">选项</param>
         public static void AddDayJob(string jobName, double day, Action<JobExecInfo> doing, JobOption options = null)
         {
-            JobInfo.AddJob(jobName, new TriggerCommon(TimeSpan.FromHours(day)), doing, options);
+            JobInfo.AddJob(jobName, new TriggerCommon(TimeSpan.FromDays(day)), doing, options);
         }
 
         /// <summary>

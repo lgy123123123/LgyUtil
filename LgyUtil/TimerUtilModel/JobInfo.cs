@@ -43,7 +43,7 @@ namespace LgyUtil.TimerUtilModel
             job.CheckJobInfo();
             if (!AllJobDic.TryAdd(job.JobName, job))
                 throw new LgyUtilException("job添加失败，job名称已存在：" + job.JobName);
-            if (options?.EndTime < DateTime.Now)
+            if (options?.EndTime.HasValue==true && options.EndTime.Value < DateTime.Now)
                 throw new LgyUtilException("job添加失败，结束时间不能小于当前时间：" + job.JobName);
             job.StartJob();
         }
@@ -172,7 +172,7 @@ namespace LgyUtil.TimerUtilModel
                     var nextDueTime = nextExecDate - DateTime.Now; //下次执行时间间隔
                     var findTimes = 1; //查找次数
                     //防止触发时间间隔小于0，重新计算,20次后停止
-                    while (nextDueTime.Milliseconds < 0)
+                    while (nextDueTime.TotalMilliseconds < 0)
                     {
                         if (findTimes > 20)
                         {

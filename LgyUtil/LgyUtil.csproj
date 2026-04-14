@@ -27,15 +27,17 @@
 		如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
 	</Description>
     <Authors>lgy</Authors>
-    <Version>1.8.10</Version>
+    <Version>1.8.11</Version>
     <Company>lgy</Company>
     <Product>LgyUtil</Product>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
 	  <None Include="..\ReadMe.md" Pack="true" PackagePath="\" />
+	  <None Include="..\LICENSE" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

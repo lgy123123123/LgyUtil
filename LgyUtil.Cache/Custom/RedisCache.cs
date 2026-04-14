@@ -18,7 +18,7 @@ namespace LgyUtil.Cache.Custom
         /// <summary>
         /// 全局key前缀
         /// </summary>
-        public string GlobalPrefix { get;}
+        public string GlobalPrefix { get;}= string.Empty;
 
         /// <summary>
         /// 设置序列化配置，默认空值和默认值忽略
@@ -40,15 +40,20 @@ namespace LgyUtil.Cache.Custom
         /// <param name="port">端口号</param>
         /// <param name="database">使用数据库编号</param>
         /// <param name="password">密码</param>
-        public RedisCache(string ip = "127.0.0.1", int port = 6379, int database = 0, string password = null)
+        public RedisCache(string ip = "127.0.0.1", int port = 6379, int database = 0, string password = null, string globalPrefix = null)
         {
             if (string.IsNullOrEmpty(ip))
                 ip = "127.0.0.1";
             if (port == 0)
                 port = 6379;
             string connectString = $"{ip}:{port},defaultDatabase={database}";
-            if (string.IsNullOrEmpty(password))
+            if (!string.IsNullOrEmpty(password))
                 connectString += $",password={password}";
+            if(!string.IsNullOrEmpty(globalPrefix))
+            {
+                GlobalPrefix =globalPrefix??string.Empty;
+                connectString += $",prefix={GlobalPrefix}";
+            }
             Client = new CSRedisClient(connectString);
             SetSerializeSetting();
         }
@@ -192,7 +197,7 @@ namespace LgyUtil.Cache.Custom
                 cursor = scanResult.Cursor;
                 if (scanResult.Items.Length > 0)
                 {
-                    Client.Del(scanResult.Items.Select(k => k.Replace(GlobalPrefix, "")).ToArray());
+                    Client.Del(scanResult.Items);
                 }
             } while (cursor != 0);
         }

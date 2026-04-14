@@ -1,25 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net5.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>
-		源码：https://github.com/lgy123123123/LgyUtil
-		post get请求帮助类(NetUtil)
-		2.0以后，仅支持net5、6、7
-		如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
-	</Description>
-    <Authors>lgy</Authors>
-    <Company>lgy</Company>
-    <Product>LgyUtil</Product>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>2.6.3</Version>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFrameworks>net5.0;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <Description>
+            源码：https://github.com/lgy123123123/LgyUtil
+            post get请求帮助类(NetUtil)
+            2.0以后，仅支持net5、6、7
+            如遇到bug，请将问题发送至邮箱565493752@qq.com，我会第一时间回复并解决
+        </Description>
+        <Authors>lgy</Authors>
+        <Company>lgy</Company>
+        <Product>LgyUtil</Product>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <Version>2.6.4</Version>
+        <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="LgyUtil" Version="1.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="UAParser" Version="3.1.47" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
+        <None Include="..\ReadMe.md" Pack="true" PackagePath="\"/>
+        <PackageReference Include="LgyUtil" Version="1.4.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0"/>
+        <PackageReference Include="UAParser" Version="3.1.47"/>
+    </ItemGroup>
 
 </Project>

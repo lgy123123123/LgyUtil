@@ -76,7 +76,7 @@ namespace LgyUtil
                 foreach (var kvHeader in dicHeader)
                 {
                     //添加失败，查看其他的添加内容
-                    if (!request.Content.Headers.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value))
+                    if (request.Content?.Headers.TryAddWithoutValidation(kvHeader.Key, kvHeader.Value)==false)
                     {
                         if (kvHeader.Key.Equals("Authorization", StringComparison.CurrentCultureIgnoreCase))
                         {
@@ -116,7 +116,16 @@ namespace LgyUtil
         {
             var client = GetHttpClient(url);
             var request = BuildRequest(url, content, true, dicHeader);
-            return await client.SendAsync(request, new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(100)).Token);
+            try
+            {
+                using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(100));
+                return await client.SendAsync(request, cts.Token);
+            }
+            catch (Exception ex)
+            {
+                request.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
@@ -129,7 +138,16 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<HttpResponseMessage> PostBase(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            return await PostBase(url, new StringContent(postData), dicHeader, timeout);
+            var content = new StringContent(postData??"", Encoding.UTF8);
+            try
+            {
+                return await PostBase(url,content , dicHeader, timeout);
+            }
+            catch
+            {
+                content.Dispose();
+                throw;
+            }
         }
 
         #region 同步Post
@@ -146,7 +164,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static HttpResponseMessage Post(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            return PostBase(url, postData, dicHeader, timeout).Result;
+            return PostBase(url, postData, dicHeader, timeout).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -159,11 +177,12 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Post_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = PostBase(url, postData, dicHeader, timeout).Result;
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(response.Content.ReadAsStringAsync().Result);
-            using (response)
+            using (var response = PostBase(url, postData, dicHeader, timeout).GetAwaiter().GetResult())
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
                 return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
         }
 
         /// <summary>
@@ -190,11 +209,15 @@ namespace LgyUtil
         /// <returns></returns>
         public static Stream Post_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = PostBase(url, postData, dicHeader, timeout).Result;
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(response.Content.ReadAsStringAsync().Result);
-            using (response)
-                return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+            using (var response = PostBase(url, postData, dicHeader, timeout).GetAwaiter().GetResult())
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                var stream = new MemoryStream();
+                response.Content.CopyToAsync(stream).GetAwaiter().GetResult();
+                stream.Position = 0;
+                return stream;
+            }
         }
 
         #endregion
@@ -211,7 +234,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static HttpResponseMessage Post(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            return PostBase(url, content, dicHeader, timeout).Result;
+            return PostBase(url, content, dicHeader, timeout).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -224,11 +247,12 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Post_ReturnString(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = PostBase(url, content, dicHeader, timeout).Result;
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(response.Content.ReadAsStringAsync().Result);
-            using (response)
+            using (var response = PostBase(url, content, dicHeader, timeout).GetAwaiter().GetResult())
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
                 return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
         }
 
         /// <summary>
@@ -255,11 +279,15 @@ namespace LgyUtil
         /// <returns></returns>
         public static Stream Post_ReturnStream(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = PostBase(url, content, dicHeader, timeout).Result;
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(response.Content.ReadAsStringAsync().Result);
-            using (response)
-                return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+            using (var response = PostBase(url, content, dicHeader, timeout).GetAwaiter().GetResult())
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                var stream = new MemoryStream();
+                response.Content.CopyToAsync(stream).GetAwaiter().GetResult();
+                stream.Position = 0;
+                return stream;
+            }
         }
 
         #endregion
@@ -294,11 +322,12 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<string> PostAsync_ReturnString(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await PostAsync(url, postData, dicHeader, timeout);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            using (response)
+            using (var response = await PostAsync(url, postData, dicHeader, timeout))
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(await response.Content.ReadAsStringAsync());
                 return await response.Content.ReadAsStringAsync();
+            }
         }
 
         /// <summary>
@@ -326,11 +355,15 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<Stream> PostAsync_ReturnStream(string url, string postData = "", Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await PostAsync(url, postData, dicHeader, timeout, completionOption);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            using (response)
-                return await response.Content.ReadAsStreamAsync();
+            using (var response = await PostAsync(url, postData, dicHeader, timeout, completionOption))
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(await response.Content.ReadAsStringAsync());
+                var stream = new MemoryStream();
+                (await response.Content.ReadAsStreamAsync()).CopyTo(stream);
+                stream.Position = 0;
+                return stream;
+            }
         }
 
         #endregion
@@ -361,11 +394,12 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<string> PostAsync_ReturnString(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await PostAsync(url, content, dicHeader, timeout);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            using (response)
+            using (var response = await PostAsync(url, content, dicHeader, timeout))
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(await response.Content.ReadAsStringAsync());
                 return await response.Content.ReadAsStringAsync();
+            }
         }
 
         /// <summary>
@@ -393,11 +427,15 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<Stream> PostAsync_ReturnStream(string url, HttpContent content, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await PostAsync(url, content, dicHeader, timeout, completionOption);
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(await response.Content.ReadAsStringAsync());
-            using (response)
-                return await response.Content.ReadAsStreamAsync();
+            using (var response = await PostAsync(url, content, dicHeader, timeout, completionOption))
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(await response.Content.ReadAsStringAsync());
+                var stream = new MemoryStream();
+                (await response.Content.ReadAsStreamAsync()).CopyTo(stream);
+                stream.Position = 0;
+                return stream;
+            }
         }
 
         #endregion
@@ -417,9 +455,18 @@ namespace LgyUtil
         /// <returns></returns>
         private static async Task<HttpResponseMessage> GetBase(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            HttpClient client = GetHttpClient(url);
-            HttpRequestMessage request = BuildRequest(url, null, false, dicHeader);
-            return await client.SendAsync(request, new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(100)).Token);
+            var client = GetHttpClient(url);
+            var request = BuildRequest(url, null, false, dicHeader);
+            try
+            {
+                using var cts = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(100));
+                return await client.SendAsync(request, cts.Token);
+            }
+            catch (Exception e)
+            {
+                request.Dispose();
+                throw;
+            }
         }
 
         #region 同步Get
@@ -433,7 +480,7 @@ namespace LgyUtil
         /// <returns></returns>
         public static HttpResponseMessage Get(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            return GetBase(url, dicHeader, timeout).Result;
+            return GetBase(url, dicHeader, timeout).GetAwaiter().GetResult();
         }
 
         /// <summary>
@@ -445,11 +492,12 @@ namespace LgyUtil
         /// <returns></returns>
         public static string Get_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = GetBase(url, dicHeader, timeout).Result;
-            if (!response.IsSuccessStatusCode)
-                throw new Exception(response.Content.ReadAsStringAsync().Result);
-            using (response)
+            using (var response = GetBase(url, dicHeader, timeout).GetAwaiter().GetResult())
+            {
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(response.Content.ReadAsStringAsync().GetAwaiter().GetResult());
                 return response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            }
         }
 
         /// <summary>
@@ -474,10 +522,14 @@ namespace LgyUtil
         /// <returns></returns>
         public static Stream Get_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = Get(url, dicHeader, timeout);
-            response.EnsureSuccessStatusCode();
-            using (response)
-                return response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+            using(var response = Get(url, dicHeader, timeout))
+            {
+                response.EnsureSuccessStatusCode();
+                var stream = new MemoryStream();
+                response.Content.CopyToAsync(stream).GetAwaiter().GetResult();
+                stream.Position = 0;
+                return stream;
+            }
         }
 
         #endregion
@@ -506,10 +558,11 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<string> GetAsync_ReturnString(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null)
         {
-            var response = await GetAsync(url, dicHeader, timeout);
-            response.EnsureSuccessStatusCode();
-            using (response)
+            using (var response = await GetAsync(url, dicHeader, timeout))
+            {
+                response.EnsureSuccessStatusCode();
                 return await response.Content.ReadAsStringAsync();
+            }
         }
 
         /// <summary>
@@ -535,10 +588,14 @@ namespace LgyUtil
         /// <returns></returns>
         public static async Task<Stream> GetAsync_ReturnStream(string url, Dictionary<string, string> dicHeader = null, TimeSpan? timeout = null, HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var response = await GetAsync(url, dicHeader, timeout, completionOption);
-            response.EnsureSuccessStatusCode();
-            using (response)
-                return await response.Content.ReadAsStreamAsync();
+            using (var response = await GetAsync(url, dicHeader, timeout, completionOption))
+            {
+                response.EnsureSuccessStatusCode();
+                var stream = new MemoryStream();
+                (await response.Content.ReadAsStreamAsync()).CopyTo(stream);
+                stream.Position = 0;
+                return stream;
+            }
         }
 
         #endregion
